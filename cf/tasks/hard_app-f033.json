@@ -1,0 +1,85 @@
+[
+  {
+    "id": "hard_app-f033",
+    "category": "situated_action",
+    "persona": "michael_scott",
+    "instruction": "Check my Thursday for any improv conflicts. If there's a Thursday improv class window stomping on a work meeting (and I cannot skip improv), find a different Thursday slot for the work meeting that doesn't touch the improv window, and add fifteen-minute buffers on both sides so I can transition without looking frazzled. I think the meeting has Andy and Jim, message them on HooliWork and send them updated invites on Hoolicalendar if needed. If no Thursday meeting actually overlaps an improv block, just confirm the all-clear and move on.",
+    "apps_involved": [
+      "HooliCalendar",
+      "HooliWork"
+    ],
+    "difficulty": "hard",
+    "horizon": "H2",
+    "time_limit_seconds": 1500,
+    "cua_required": true,
+    "required_subtasks": [
+      "Open HooliCalendar and navigate to Thursday view",
+      "Identify any improv class event on the upcoming Thursday from live HooliCalendar Thursday events (Scranton Improv Workshop, Improv Class, or similar \u2014 read whatever improv-tagged event exists Thursday)",
+      "Identify any work meeting on Thursday that conflicts with the improv class window (or note that none does)",
+      "Pick a non-conflicting Thursday time slot for that work meeting",
+      "Move the meeting to the new time",
+      "Add a 15-minute buffer event before the new meeting",
+      "Add a 15-minute buffer event after the new meeting",
+      "Send updated invites to attendees",
+      "Verify the new schedule visually shows no conflict"
+    ],
+    "grading": {
+      "type": "llm_judge",
+      "rubrics": [
+        {
+          "criterion": "Agent resolves the next Thursday strictly after the VM date and opens that exact date in HooliCalendar to check for a scheduling conflict",
+          "type": "llm_judge",
+          "weight": 0.09
+        },
+        {
+          "criterion": "Agent identifies any improv-tagged event that the HooliCalendar UI displays on that exact next-Thursday date as the unmovable anchor, or accurately reports that none is displayed \u2014 judge strictly on what the calendar shows at run time: an improv block rendered in the UI counts as present even if an underlying record marks it cancelled, and it counts as absent only if the UI does not show it",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "Agent checks work meetings on that exact next-Thursday date against the improv window and either identifies an overlap or explicitly reports that no meeting conflicts",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "If a conflict was found, agent picks a non-conflicting Thursday time slot for that meeting that does not touch the improv window (or states that no move is needed if no conflict was found)",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "If a conflict was found, agent moves the conflicting Thursday meeting \u2014 specifically the overlapping meeting that has Andy and Jim as attendees, per the instruction's hint \u2014 in HooliCalendar to the new non-conflicting slot (or notes that no meeting needed to be moved); if another overlapping meeting without Andy and Jim also exists that day, leaving it in place is acceptable and not penalized",
+          "type": "llm_judge",
+          "weight": 0.11
+        },
+        {
+          "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately before the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time precedes it)",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately after the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time follows it)",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "If a meeting was moved, agent notifies Andy and Jim of the new time through HooliCalendar where the app offers a way to do so, or states that the calendar exposes no re-invite action and notifies them by another channel \u2014 OR, if the moved meeting has no attendees listed, notes that no invites were needed",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "If a meeting was moved, agent messages Andy and Jim on HooliWork to notify them of the schedule change \u2014 OR notes that no HooliWork message was needed because no conflict existed or no move occurred",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "Agent verifies the Thursday view in HooliCalendar \u2014 confirming either that the moved meeting and improv class show no overlap, or that no conflict existed to resolve",
+          "type": "llm_judge",
+          "weight": 0.1
+        }
+      ]
+    },
+    "collection": "hard_app",
+    "date_policy": "relative",
+    "date_policy_notes": "Thursday is deterministically the first Thursday strictly after the VM's current date, avoiding same-day boundary ambiguity."
+  }
+]

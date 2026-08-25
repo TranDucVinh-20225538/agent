@@ -94,9 +94,19 @@ python3 agent-harness/judge_results.py --result_dir results/base-retrieval-f001
 python3 agent-harness/judge_results.py --result_dir results/cf-retrieval-f001
 ```
 
-`tasks/one_retrieval_f001` is a one-task directory in the shape of
-`tasks/smoke_one`: copy the `retrieval-f001` entry out of
-`tasks/final/all_tasks_with_grading.json` into its own file.
+Single-task files are already prepared in `cf/tasks/`, one per task, in the shape
+`tasks/smoke_one/one.json` uses and with every field the runner expects:
+
+```bash
+mkdir -p external/MyPCBench-main/tasks/cf_one
+cp cf/tasks/retrieval-f001.json external/MyPCBench-main/tasks/cf_one/one.json
+# then --tasks_dir tasks/cf_one
+```
+
+They are taken from the per-bucket rubric files (`tasks/final/<app>/<app>.rubrics.json`)
+rather than the compiled `all_tasks_with_grading.json`, because the compiled file
+drops seven fields including `persona`, `time_limit_seconds`, `date_policy` and
+`required_subtasks`.
 
 To check the injection alone, without an agent, boot with the dummy agent and
 run against the live Control API:

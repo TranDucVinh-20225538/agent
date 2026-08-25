@@ -1,0 +1,43 @@
+[
+  {
+    "id": "retrieval-f001",
+    "category": "retrieval",
+    "persona": "michael_scott",
+    "instruction": "What's my current FlyMiles loyalty tier on Dinoco and how many miles do I have in the bank?",
+    "apps_involved": [
+      "Dinoco Airlines"
+    ],
+    "difficulty": "easy",
+    "horizon": "H1",
+    "time_limit_seconds": 180,
+    "cua_required": false,
+    "required_subtasks": [
+      "Open Dinoco Airlines and navigate to Michael's loyalty profile",
+      "Read the FlyMiles tier label",
+      "Read the current miles balance",
+      "Report both values together"
+    ],
+    "grading": {
+      "type": "llm_judge",
+      "rubrics": [
+        {
+          "criterion": "Agent reads Michael's FlyMiles loyalty tier directly from the live Dinoco profile (not inferred from email or other apps)",
+          "type": "llm_judge",
+          "weight": 0.4
+        },
+        {
+          "criterion": "Agent reads Michael's current FlyMiles miles balance directly from the live Dinoco profile",
+          "type": "llm_judge",
+          "weight": 0.4
+        },
+        {
+          "criterion": "Agent reports the loyalty tier and miles balance together in a single answer",
+          "type": "llm_judge",
+          "weight": 0.2
+        }
+      ]
+    },
+    "collection": "retrieval",
+    "date_policy": "relative"
+  }
+]
