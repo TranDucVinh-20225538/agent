@@ -23,6 +23,42 @@ Note for an Intel Mac: it will boot but under TCG, so expect roughly an order of
 magnitude slowdown. Prefer Linux, WSL2 with nested virtualisation, or a cloud
 instance.
 
+## First, on whatever host you picked
+
+```bash
+python3 scripts/preflight.py --workdir /path/where/the/image/will/live
+```
+
+It checks the same things `env.py` checks at boot — architecture, `/dev/kvm`,
+OVMF discovery in the exact order and with the exact filename globs env.py uses,
+RAM against the guest's `-m 8G`, disk, and every forwarded port — and writes
+`host.env.sh` with overrides for any port already taken. Run it before
+downloading 5 GB, not after.
+
+## If the host is a shared or SSH-reachable Linux box
+
+This is the good case for speed and the bad case for two other reasons.
+
+**Ports are fixed, not allocated.** `env.py` forwards 5000, 5901, 3001–3018 and
+2222 as literal numbers, and one collision makes QEMU exit immediately with
+"Could not set up host forwarding rule". On a shared node the 3001–3018 range is
+very likely occupied. `preflight.py` finds a free block and emits the
+`MYPCBENCH_HOST_APP_PORT_*` overrides; source `host.env.sh` before every run.
+
+**Every forward binds all interfaces.** The hostfwd strings are `tcp::PORT`, not
+`tcp:127.0.0.1:PORT`, so the apps and the Control API listen on every interface —
+and the Control API runs arbitrary shell commands in the guest with no
+authentication. Before the first boot on a machine anyone else can reach, change
+those two hostfwd strings in `_start_qemu` to bind loopback, and tunnel in:
+
+```bash
+ssh -N -L 5901:127.0.0.1:5901 -L 5000:127.0.0.1:5000 user@host
+```
+
+Run the harness under `tmux`, since an SSH drop otherwise kills the runner in the
+middle of a task. QEMU itself survives, because `env.py` starts it with
+`start_new_session=True`, which leaves an orphan VM holding the ports.
+
 ## If the host is Windows
 
 Everything runs inside WSL2, which needs nested virtualisation to expose
