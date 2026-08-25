@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -73,8 +74,13 @@ def main() -> int:
     parser.add_argument("--api", required=True, help="harness Control API base URL")
     parser.add_argument("--task", required=True)
     parser.add_argument("--probe-only", action="store_true")
-    parser.add_argument("--out", type=Path, default=ROOT / "out" / "cf_runs")
+    parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()
+    if os.environ.get("MYPCBENCH_CF_PROBE_ONLY", "").lower() in ("1", "true", "yes"):
+        args.probe_only = True
+    if args.out is None:
+        env_out = os.environ.get("MYPCBENCH_CF_OUT")
+        args.out = Path(env_out) if env_out else ROOT / "out" / "cf_runs"
 
     spec, email = load_spec(args.task)
     if not spec.get("probe"):
@@ -84,11 +90,34 @@ def main() -> int:
     before = sqlite(args.api, spec["db"], probe_sql, json_out=True)
     print(f"probe before: {before}")
 
+    def sqlite_bound(sql: str, json_out: bool = False) -> str:
+        return sqlite(args.api, spec["db"], sql.replace(":email", f"'{email}'"), json_out=json_out)
+
     if args.probe_only:
+        args.out.mkdir(parents=True, exist_ok=True)
+        record = {
+            "id": args.task,
+            "role": spec["role"],
+            "db": spec.get("db"),
+            "where": "guest",
+            "mode": "probe-only",
+            "probe_before": before,
+        }
+        path = args.out / f"{args.task}.guest.json"
+        path.write_text(json.dumps(record, indent=2) + "\n")
+        print(f"wrote {path}")
         return 0
 
-    for statement in spec["patch"]:
-        sqlite(args.api, spec["db"], statement.replace(":email", f"'{email}'"))
+    statements = list(spec.get("patch") or [])
+    builder = spec.get("dynamic_patch")
+    if builder:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import f009_dynamic
+        kind = builder.split("_")[-1].upper()
+        statements = f009_dynamic.build(kind, sqlite_bound, email)
+
+    for statement in statements:
+        sqlite_bound(statement)
 
     after = sqlite(args.api, spec["db"], probe_sql, json_out=True)
     print(f"probe after:  {after}")
@@ -111,15 +140,22 @@ def main() -> int:
         "db": spec["db"],
         "where": "guest",
         "applied_at": datetime.now(timezone.utc).isoformat(),
-        "patch": spec["patch"],
+        "patch": statements,
         "probe": spec["probe"],
         "probe_before": before,
         "probe_after": after,
         "gold_moved": moved,
     }
     path = args.out / f"{args.task}.guest.json"
-    path.write_text(json.dumps(record, indent=2))
+    path.write_text(json.dumps(record, indent=2) + "\n")
+    patch_path = args.out / "sql-patch.json"
+    patch_path.write_text(json.dumps({
+        "condition": args.task,
+        "id": args.task,
+        "patch": statements,
+    }, indent=2) + "\n")
     print(f"wrote {path}")
+    print(f"wrote {patch_path}")
     return 0 if moved else 1
 
 

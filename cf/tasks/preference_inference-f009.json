@@ -1,0 +1,60 @@
+[
+  {
+    "id": "preference_inference-f009",
+    "category": "preference_inference",
+    "persona": "michael_scott",
+    "instruction": "What's my favorite grocery store, and what do I actually buy there? Rank my stores and give me a quick profile of my shopping habits in LibreOffice Writer. ",
+    "required_subtasks": [
+      "Open Kwik-E-Mart and list all stores Michael has ordered from",
+      "Count orders per store and rank them",
+      "Identify the top store by Michael's Kwik-E-Mart order count (plurality, not necessarily majority) from /api/orders",
+      "Scan the line items at the top store to characterize what Michael typically buys there",
+      "Give a one-paragraph profile of Michael's Kwik-E-Mart shopping preference"
+    ],
+    "apps_involved": [
+      "Kwik-E-Mart",
+      "LibreOffice Writer"
+    ],
+    "difficulty": "easy",
+    "horizon": "H1",
+    "time_limit_seconds": 600,
+    "cua_required": false,
+    "grading": {
+      "type": "llm_judge",
+      "rubrics": [
+        {
+          "criterion": "Agent identifies the favorite grocery store from the live Kwik-E-Mart order history under a basis it states or makes evident \u2014 order count or total spend are both defensible readings of 'favorite'",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent reports the live per-store figures for that basis across every store and ranks the stores by it",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent accurately characterizes the typical line items bought at the top-ranked store",
+          "type": "llm_judge",
+          "weight": 0.15
+        },
+        {
+          "criterion": "Agent writes a concise shopping-habits profile grounded in the favorite store's order history",
+          "type": "llm_judge",
+          "weight": 0.15
+        },
+        {
+          "criterion": "Agent uses the Kwik-E-Mart order-history rows and line items as the evidence source rather than inventing a preference",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "Agent creates a LibreOffice Writer document containing the complete store ranking and shopping-habits profile",
+          "type": "llm_judge",
+          "weight": 0.2
+        }
+      ]
+    },
+    "collection": "preference_inference",
+    "date_policy": "relative"
+  }
+]

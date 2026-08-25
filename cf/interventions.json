@@ -72,10 +72,43 @@
       "db": "kwik-e-mart.sqlite",
       "rubric_depends_on": "favourite store under either order count or total spend, both accepted by the graded rubric",
       "rubric_text_edit_needed": false,
-      "probe": "SELECT store, COUNT(*) AS n, SUM(total) AS spend FROM orders WHERE user_email = :email GROUP BY store ORDER BY n DESC",
+      "probe": "SELECT s.id AS store_id, s.name AS store, COUNT(*) AS n, SUM(o.total) AS spend FROM orders o JOIN stores s ON s.id = o.store_id WHERE o.user_email = :email GROUP BY s.id, s.name ORDER BY n DESC, spend DESC",
       "patch": [],
-      "expect": {"probe_changes": false, "note": "not a first counterfactual. The graded rubric accepts two bases, so a patch that flips order count but not total spend leaves two defensible golds. Report the divergence between the two bases instead."},
-      "todo_verify": ["columns store, total"]
+      "expect": {"probe_changes": false, "note": "baseline dump only. Stop the factorial if count winner equals spend winner."},
+      "verified": "Live table is orders.store_id + stores.name, not a store column. Guest file /data/kwik-e-mart.sqlite."
+    },
+    {
+      "id": "preference_inference-f009-A",
+      "role": "factorial_A",
+      "db": "kwik-e-mart.sqlite",
+      "rubric_depends_on": "order-count plurality; spend ranking must stay put",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT s.id AS store_id, s.name AS store, COUNT(*) AS n, SUM(o.total) AS spend FROM orders o JOIN stores s ON s.id = o.store_id WHERE o.user_email = :email GROUP BY s.id, s.name ORDER BY n DESC, spend DESC",
+      "dynamic_patch": "f009_A",
+      "patch": [],
+      "expect": {"probe_changes": true, "note": "count winner must change; spend winner must not. Built at inject time from the live ranking. Aborts if the two winners coincide."}
+    },
+    {
+      "id": "preference_inference-f009-B",
+      "role": "factorial_B",
+      "db": "kwik-e-mart.sqlite",
+      "rubric_depends_on": "total-spend maximum; order-count ranking must stay put",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT s.id AS store_id, s.name AS store, COUNT(*) AS n, SUM(o.total) AS spend FROM orders o JOIN stores s ON s.id = o.store_id WHERE o.user_email = :email GROUP BY s.id, s.name ORDER BY n DESC, spend DESC",
+      "dynamic_patch": "f009_B",
+      "patch": [],
+      "expect": {"probe_changes": true, "note": "spend winner must change; count winner must not."}
+    },
+    {
+      "id": "preference_inference-f009-AB",
+      "role": "factorial_AB",
+      "db": "kwik-e-mart.sqlite",
+      "rubric_depends_on": "both bases flipped",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT s.id AS store_id, s.name AS store, COUNT(*) AS n, SUM(o.total) AS spend FROM orders o JOIN stores s ON s.id = o.store_id WHERE o.user_email = :email GROUP BY s.id, s.name ORDER BY n DESC, spend DESC",
+      "dynamic_patch": "f009_AB",
+      "patch": [],
+      "expect": {"probe_changes": true, "note": "optional. Run only if A and B alone do not tell the bases apart."}
     }
   ]
 }
