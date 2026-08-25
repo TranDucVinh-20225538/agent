@@ -1,0 +1,528 @@
+===== vaultbank.sqlite =====
+_seed_marker            credit_score_reports    user_preferences      
+_seed_meta              investment_accounts     user_profiles         
+accounts                investment_holdings     user_security_settings
+bill_pay                investment_performance  vaultbank_billers     
+bill_payments           notifications           zelle_contacts        
+credit_score_factors    transactions            zelle_transfers       
+---SCHEMA---
+CREATE TABLE accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                type TEXT NOT NULL CHECK(type IN ('checking', 'savings', 'credit_card')),
+                name TEXT NOT NULL,
+                balance REAL NOT NULL DEFAULT 0,
+                credit_limit REAL,
+                account_number TEXT,
+                routing_number TEXT
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_id INTEGER NOT NULL REFERENCES accounts(id),
+                date TEXT NOT NULL,
+                description TEXT NOT NULL,
+                amount REAL NOT NULL,
+                category TEXT,
+                status TEXT NOT NULL DEFAULT 'posted' CHECK(status IN ('posted', 'pending')),
+                running_balance REAL,
+                source_app TEXT, transfer_id TEXT,
+                FOREIGN KEY (account_id) REFERENCES accounts(id)
+            );
+CREATE TABLE zelle_transfers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                direction TEXT NOT NULL CHECK(direction IN ('sent', 'received', 'requested')),
+                contact_name TEXT NOT NULL,
+                contact_email TEXT,
+                contact_phone TEXT,
+                amount REAL NOT NULL,
+                memo TEXT,
+                date TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'completed'
+            );
+CREATE TABLE zelle_contacts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT,
+                phone TEXT
+            );
+CREATE TABLE bill_pay (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                payee TEXT NOT NULL,
+                amount REAL,
+                due_date TEXT,
+                autopay INTEGER DEFAULT 0,
+                frequency TEXT,
+                last_paid TEXT
+            );
+CREATE TABLE notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                title TEXT NOT NULL,
+                body TEXT NOT NULL,
+                date TEXT NOT NULL,
+                read INTEGER DEFAULT 0
+            );
+CREATE TABLE _seed_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            );
+CREATE TABLE _seed_marker (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE vaultbank_billers (  id INTEGER PRIMARY KEY AUTOINCREMENT,  user_email TEXT NOT NULL,  name TEXT NOT NULL,  address TEXT,  account_number TEXT,  category TEXT NOT NULL DEFAULT 'Other',  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX idx_vaultbank_billers_user ON vaultbank_billers(user_email);
+CREATE INDEX idx_transactions_account ON transactions(account_id);
+CREATE INDEX idx_transactions_date ON transactions(date);
+CREATE INDEX idx_zelle_user ON zelle_transfers(user_email);
+CREATE TABLE bill_payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      bill_id INTEGER,
+      payee TEXT NOT NULL,
+      source_account_id INTEGER NOT NULL REFERENCES accounts(id),
+      amount REAL NOT NULL,
+      scheduled_date TEXT NOT NULL,
+      processed_date TEXT,
+      status TEXT NOT NULL CHECK(status IN ('processed', 'scheduled')),
+      confirmation_number TEXT NOT NULL,
+      memo TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+CREATE TABLE investment_accounts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      cash_balance REAL NOT NULL DEFAULT 0,
+      last_updated TEXT NOT NULL
+    );
+CREATE TABLE investment_holdings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      investment_account_id INTEGER NOT NULL REFERENCES investment_accounts(id),
+      symbol TEXT NOT NULL,
+      name TEXT NOT NULL,
+      quantity REAL NOT NULL,
+      price REAL NOT NULL,
+      price_change REAL NOT NULL DEFAULT 0,
+      cost_basis REAL NOT NULL DEFAULT 0
+    );
+CREATE TABLE investment_performance (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      investment_account_id INTEGER NOT NULL REFERENCES investment_accounts(id),
+      date TEXT NOT NULL,
+      total_value REAL NOT NULL
+    );
+CREATE TABLE credit_score_reports (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      bureau TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      reported_at TEXT NOT NULL
+    );
+CREATE TABLE credit_score_factors (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      label TEXT NOT NULL,
+      status TEXT NOT NULL,
+      impact TEXT NOT NULL,
+      description TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+CREATE TABLE user_profiles (
+      user_email TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      phone TEXT,
+      street TEXT,
+      city TEXT,
+      state TEXT,
+      zip_code TEXT
+    );
+CREATE TABLE user_preferences (
+      user_email TEXT PRIMARY KEY,
+      email_alerts INTEGER NOT NULL DEFAULT 1,
+      sms_alerts INTEGER NOT NULL DEFAULT 0,
+      push_alerts INTEGER NOT NULL DEFAULT 1,
+      bill_due_alerts INTEGER NOT NULL DEFAULT 1,
+      security_alerts INTEGER NOT NULL DEFAULT 1,
+      weekly_digest INTEGER NOT NULL DEFAULT 1,
+      marketing_emails INTEGER NOT NULL DEFAULT 0
+    );
+CREATE TABLE user_security_settings (
+      user_email TEXT PRIMARY KEY,
+      two_factor_enabled INTEGER NOT NULL DEFAULT 1,
+      biometric_enabled INTEGER NOT NULL DEFAULT 0,
+      login_alerts INTEGER NOT NULL DEFAULT 1,
+      trusted_devices INTEGER NOT NULL DEFAULT 3,
+      session_timeout_minutes INTEGER NOT NULL DEFAULT 30
+    );
+CREATE UNIQUE INDEX idx_accounts_user_product
+      ON accounts(user_email, type, name, account_number);
+CREATE INDEX idx_bill_payments_user_date ON bill_payments(user_email, scheduled_date DESC);
+CREATE INDEX idx_investment_performance_account_date ON investment_performance(investment_account_id, date);
+CREATE INDEX idx_credit_score_reports_user_date ON credit_score_reports(user_email, reported_at DESC);
+
+===== speedtax.sqlite =====
+_seed_marker       tax_data           tax_filing_events
+_speedtax_meta     tax_documents      tax_returns      
+---SCHEMA---
+CREATE TABLE tax_returns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                tax_year INTEGER NOT NULL DEFAULT 2025,
+                status TEXT NOT NULL DEFAULT 'in_progress' CHECK(status IN ('in_progress', 'review', 'filed')),
+                current_step INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                filed_at TEXT,
+                last_saved_at TEXT,
+                confirmation_number TEXT,
+                estimated_refund_date TEXT,
+                federal_refund_amount REAL,
+                state_refund_amount REAL,
+                state_code TEXT,
+                filing_status TEXT NOT NULL DEFAULT 'not_submitted',
+                filing_channel TEXT,
+                submission_reference TEXT,
+                acknowledgement_number TEXT,
+                filing_receipt_number TEXT
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE tax_filing_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                event_order INTEGER NOT NULL,
+                event_key TEXT NOT NULL,
+                title TEXT NOT NULL,
+                detail TEXT NOT NULL,
+                state TEXT NOT NULL CHECK(state IN ('queued', 'submitted', 'accepted', 'processing', 'completed')),
+                occurred_at TEXT NOT NULL,
+                receipt_number TEXT,
+                acknowledgement_number TEXT
+            );
+CREATE TABLE tax_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                step INTEGER NOT NULL,
+                field_name TEXT NOT NULL,
+                field_value TEXT NOT NULL DEFAULT '',
+                UNIQUE(return_id, step, field_name)
+            );
+CREATE TABLE tax_documents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                step INTEGER NOT NULL,
+                doc_type TEXT NOT NULL,
+                data_json TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+CREATE TABLE _seed_marker (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE INDEX idx_tax_returns_user ON tax_returns(user_email);
+CREATE INDEX idx_tax_data_return ON tax_data(return_id, step);
+CREATE INDEX idx_tax_documents_return_step ON tax_documents(return_id, step);
+CREATE TABLE _speedtax_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+
+===== hoolicalendar.sqlite =====
+_seed_meta           colleague_calendars  event_reminders    
+calendars            event_attendees      events             
+---SCHEMA---
+CREATE TABLE calendars (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                color TEXT NOT NULL DEFAULT '#1a73e8',
+                is_primary INTEGER NOT NULL DEFAULT 0,
+                is_visible INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                calendar_id INTEGER NOT NULL REFERENCES calendars(id),
+                user_email TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                location TEXT,
+                start_at TEXT NOT NULL,
+                end_at TEXT NOT NULL,
+                is_all_day INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'confirmed' CHECK(status IN ('confirmed', 'tentative', 'cancelled')),
+                source_app TEXT,
+                source_ref TEXT,
+                source_kind TEXT,
+                color TEXT,
+                created_by TEXT,
+                updated_by TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            , organizer_email TEXT, related_mail_thread_id TEXT, recurrence TEXT, source_url TEXT);
+CREATE TABLE event_attendees (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+                email TEXT NOT NULL,
+                display_name TEXT,
+                response_status TEXT NOT NULL DEFAULT 'needsAction' CHECK(response_status IN ('needsAction', 'accepted', 'declined', 'tentative')),
+                is_organizer INTEGER NOT NULL DEFAULT 0,
+                invited_by TEXT
+            );
+CREATE TABLE event_reminders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+                minutes_before INTEGER NOT NULL DEFAULT 30,
+                channel TEXT NOT NULL DEFAULT 'popup' CHECK(channel IN ('popup', 'email'))
+            );
+CREATE TABLE _seed_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            );
+CREATE INDEX idx_events_calendar ON events(calendar_id);
+CREATE INDEX idx_events_user ON events(user_email);
+CREATE INDEX idx_events_start ON events(start_at);
+CREATE INDEX idx_events_end ON events(end_at);
+CREATE INDEX idx_events_source ON events(source_app, source_ref);
+CREATE INDEX idx_attendees_event ON event_attendees(event_id);
+CREATE INDEX idx_reminders_event ON event_reminders(event_id);
+CREATE TABLE colleague_calendars (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      colleague_email TEXT NOT NULL,
+      colleague_name TEXT NOT NULL,
+      color TEXT NOT NULL DEFAULT '#7986cb',
+      is_visible INTEGER NOT NULL DEFAULT 1,
+      UNIQUE(user_email, colleague_email)
+    );
+CREATE UNIQUE INDEX idx_calendars_user_name
+        ON calendars(user_email, name);
+CREATE UNIQUE INDEX idx_events_source_user
+        ON events(user_email, source_app, source_ref)
+        WHERE source_ref IS NOT NULL;
+CREATE UNIQUE INDEX idx_events_user_created_unique
+        ON events(user_email, calendar_id, title, start_at)
+        WHERE source_ref IS NULL;
+
+===== mail.sqlite =====
+_mail_meta                     labels                       
+_seed_meta                     mail_entry_state             
+attachments                    mail_threads                 
+contacts                       mailbox_email_entries        
+drafts                         message_metadata             
+emails                         sent                         
+emails_send_idempotency_cache  user_preferences             
+filters                      
+---SCHEMA---
+CREATE TABLE emails (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_email TEXT NOT NULL,
+                    from_name TEXT,
+                    from_email TEXT,
+                    to_email TEXT,
+                    subject TEXT,
+                    body TEXT,
+                    body_html TEXT,
+                    date TEXT,
+                    has_attachment INTEGER DEFAULT 0,
+                    attachment_name TEXT,
+                    attachment_count INTEGER DEFAULT 0,
+                    category TEXT DEFAULT 'primary',
+                    subject_normalized TEXT,
+                    thread_id TEXT,
+                    in_reply_to INTEGER,
+                    canonical_id TEXT,
+                    world_id TEXT,
+                    vm_id TEXT,
+                    actor_id TEXT
+                );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE mail_threads (
+                    user_email TEXT NOT NULL,
+                    thread_id TEXT NOT NULL,
+                    subject TEXT NOT NULL,
+                    subject_normalized TEXT NOT NULL,
+                    participant_emails TEXT NOT NULL,
+                    participant_actor_ids TEXT NOT NULL,
+                    participant_lookup TEXT NOT NULL DEFAULT '',
+                    last_message_at TEXT,
+                    world_id TEXT,
+                    vm_id TEXT,
+                    actor_id TEXT,
+                    PRIMARY KEY (user_email, thread_id)
+                );
+CREATE TABLE contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      name TEXT,
+      email TEXT,
+      frequency INTEGER DEFAULT 0
+    );
+CREATE TABLE drafts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      to_email TEXT,
+      subject TEXT,
+      body TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      attachment_scope_id TEXT,
+      send_at TEXT,
+      thread_id TEXT,
+      in_reply_to INTEGER
+    , world_id TEXT, vm_id TEXT, actor_id TEXT);
+CREATE TABLE labels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      name TEXT,
+      color TEXT
+    , world_id TEXT, vm_id TEXT, actor_id TEXT);
+CREATE TABLE sent (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      to_name TEXT,
+      to_email TEXT,
+      subject TEXT,
+      body TEXT,
+      date TEXT,
+      thread_id TEXT,
+      subject_normalized TEXT,
+      status TEXT DEFAULT 'sent',
+      send_at TEXT,
+      undo_expires_at TEXT,
+      delivered_at TEXT,
+      in_reply_to INTEGER,
+      outbox_id TEXT
+    , world_id TEXT, vm_id TEXT, actor_id TEXT);
+CREATE TABLE attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      scope_type TEXT NOT NULL,
+      scope_id TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_size INTEGER DEFAULT 0,
+      mime_type TEXT,
+      storage_path TEXT NOT NULL,
+      created_at TEXT
+    , world_id TEXT, vm_id TEXT, actor_id TEXT);
+CREATE TABLE filters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      from_pattern TEXT,
+      to_pattern TEXT,
+      subject_pattern TEXT,
+      has_words TEXT,
+      action_label TEXT,
+      action_archive INTEGER DEFAULT 0,
+      action_star INTEGER DEFAULT 0,
+      action_mark_read INTEGER DEFAULT 0,
+      created_at TEXT,
+      updated_at TEXT
+    , world_id TEXT, vm_id TEXT, actor_id TEXT);
+CREATE TABLE user_preferences (
+      user_email TEXT PRIMARY KEY,
+      signature TEXT,
+      vacation_enabled INTEGER DEFAULT 0,
+      vacation_subject TEXT,
+      vacation_body TEXT,
+      vacation_start_date TEXT,
+      vacation_end_date TEXT,
+      send_confirm_dont_ask INTEGER DEFAULT 0,
+      created_at TEXT,
+      updated_at TEXT
+    );
+CREATE TABLE message_metadata (
+      user_email TEXT NOT NULL,
+      source TEXT NOT NULL,
+      message_id INTEGER NOT NULL,
+      to_recipients TEXT,
+      cc_email TEXT,
+      bcc_email TEXT,
+      body_html TEXT,
+      created_at TEXT,
+      updated_at TEXT, world_id TEXT, vm_id TEXT, actor_id TEXT,
+      PRIMARY KEY (user_email, source, message_id)
+    );
+CREATE TABLE mail_entry_state (
+      user_email TEXT NOT NULL,
+      email_id INTEGER NOT NULL,
+      folder TEXT DEFAULT 'inbox',
+      read INTEGER DEFAULT 0,
+      starred INTEGER DEFAULT 0,
+      important INTEGER DEFAULT 0,
+      labels TEXT,
+      snooze_until TEXT,
+      snoozed_from_folder TEXT,
+      world_id TEXT,
+      vm_id TEXT,
+      actor_id TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      PRIMARY KEY (user_email, email_id)
+    );
+CREATE TABLE emails_send_idempotency_cache (
+      user_email TEXT NOT NULL,
+      idempotency_key TEXT NOT NULL,
+      response_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (user_email, idempotency_key)
+    );
+CREATE TABLE _mail_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+CREATE INDEX idx_emails_thread ON emails (user_email, thread_id, subject_normalized);
+CREATE UNIQUE INDEX idx_emails_user_canonical ON emails (user_email, canonical_id) WHERE canonical_id IS NOT NULL;
+CREATE INDEX idx_sent_status_send_at ON sent (user_email, status, send_at);
+CREATE INDEX idx_attachments_scope ON attachments (user_email, scope_type, scope_id);
+CREATE INDEX idx_filters_user ON filters (user_email);
+CREATE INDEX idx_message_metadata_user_source ON message_metadata (user_email, source);
+CREATE INDEX idx_mail_threads_user_time ON mail_threads (user_email, last_message_at DESC);
+CREATE INDEX idx_mail_entry_state_user_folder ON mail_entry_state (user_email, folder, read);
+CREATE TABLE _seed_meta (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
+CREATE VIEW mailbox_email_entries AS
+    SELECT
+      emails.id,
+      emails.user_email,
+      mail_entry_state.folder AS folder,
+      emails.from_name,
+      emails.from_email,
+      emails.to_email,
+      emails.subject,
+      emails.body,
+      emails.body_html,
+      emails.date,
+      mail_entry_state.read AS read,
+      mail_entry_state.starred AS starred,
+      mail_entry_state.important AS important,
+      emails.has_attachment,
+      emails.attachment_name,
+      emails.attachment_count,
+      mail_entry_state.labels AS labels,
+      emails.category,
+      mail_entry_state.snooze_until AS snooze_until,
+      mail_entry_state.snoozed_from_folder AS snoozed_from_folder,
+      emails.subject_normalized,
+      emails.thread_id,
+      emails.in_reply_to,
+      emails.canonical_id,
+      emails.world_id,
+      emails.vm_id,
+      emails.actor_id
+    FROM emails
+    INNER JOIN mail_entry_state
+      ON mail_entry_state.user_email = emails.user_email
+     AND mail_entry_state.email_id = emails.id
+/* mailbox_email_entries(id,user_email,folder,from_name,from_email,to_email,subject,body,body_html,date,read,starred,important,has_attachment,attachment_name,attachment_count,labels,category,snooze_until,snoozed_from_folder,subject_normalized,thread_id,in_reply_to,canonical_id,world_id,vm_id,actor_id) */;
+
+===== Tax_2025 files =====
+total 12
+drwxr-xr-x  3 root root 4096 Jun  9 06:02 .
+drwxr-xr-x 25 root root 4096 Aug 21 01:18 ..
+drwxr-x--- 15 user user 4096 Aug 25 18:42 user
+---
+/home/user/Documents/Tax_2025/1099s.txt
+/home/user/Documents/Tax_2025/w2_summary.txt

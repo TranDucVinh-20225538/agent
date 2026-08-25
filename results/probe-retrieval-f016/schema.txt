@@ -1,0 +1,155 @@
+===== batbucks.sqlite =====
+analyst_ratings    holdings           price_alerts       watchlist_groups 
+batbucks_meta      orders             stock_news         watchlist_items  
+dividends          portfolio          stock_profiles   
+historical_prices  portfolio_history  transfers        
+---SCHEMA---
+CREATE TABLE portfolio (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL UNIQUE,
+                cash REAL NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE holdings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                shares REAL NOT NULL,
+                avg_cost REAL NOT NULL,
+                UNIQUE(user_email, ticker)
+            );
+CREATE TABLE dividends (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                amount REAL NOT NULL,
+                pay_date TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'paid'
+            );
+CREATE TABLE orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                side TEXT NOT NULL CHECK(side IN ('buy', 'sell')),
+                shares REAL NOT NULL,
+                order_type TEXT NOT NULL CHECK(order_type IN ('market', 'limit', 'stop', 'stop_limit')),
+                time_in_force TEXT NOT NULL CHECK(time_in_force IN ('day', 'gtc', 'ioc')),
+                status TEXT NOT NULL CHECK(status IN ('pending', 'filled', 'cancelled', 'expired')),
+                submitted_price REAL NOT NULL,
+                limit_price REAL,
+                stop_price REAL,
+                estimated_total REAL NOT NULL,
+                executed_price REAL,
+                filled_total REAL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT,
+                filled_at TEXT,
+                cancelled_at TEXT,
+                reason TEXT
+            );
+CREATE TABLE watchlist_groups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                color TEXT NOT NULL DEFAULT '#00C805',
+                sort_order INTEGER NOT NULL DEFAULT 0,
+                UNIQUE(user_email, name)
+            );
+CREATE TABLE watchlist_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                group_id INTEGER REFERENCES watchlist_groups(id) ON DELETE SET NULL,
+                added_at TEXT NOT NULL,
+                UNIQUE(user_email, ticker)
+            );
+CREATE TABLE price_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                direction TEXT NOT NULL CHECK(direction IN ('above', 'below')),
+                target_price REAL NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'triggered', 'disabled')),
+                created_at TEXT NOT NULL,
+                triggered_at TEXT,
+                UNIQUE(user_email, ticker, direction)
+            );
+CREATE TABLE transfers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                type TEXT NOT NULL CHECK(type IN ('deposit', 'withdrawal')),
+                amount REAL NOT NULL,
+                status TEXT NOT NULL CHECK(status IN ('pending', 'completed', 'cancelled')),
+                reference TEXT,
+                created_at TEXT NOT NULL,
+                completed_at TEXT
+            );
+CREATE TABLE stock_profiles (
+                ticker TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                sector TEXT NOT NULL,
+                description TEXT NOT NULL,
+                market_cap REAL NOT NULL,
+                pe REAL,
+                eps REAL,
+                dividend_yield REAL,
+                fifty_two_week_high REAL NOT NULL,
+                fifty_two_week_low REAL NOT NULL
+            , logo_url TEXT);
+CREATE TABLE analyst_ratings (
+                ticker TEXT PRIMARY KEY,
+                buy_count INTEGER NOT NULL,
+                hold_count INTEGER NOT NULL,
+                sell_count INTEGER NOT NULL,
+                consensus TEXT NOT NULL,
+                target_low REAL NOT NULL,
+                target_average REAL NOT NULL,
+                target_high REAL NOT NULL
+            );
+CREATE TABLE stock_news (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker TEXT NOT NULL,
+                headline TEXT NOT NULL,
+                source TEXT NOT NULL,
+                published_at TEXT NOT NULL,
+                url TEXT NOT NULL,
+                summary TEXT NOT NULL, image_url TEXT,
+                UNIQUE(ticker, headline)
+            );
+CREATE TABLE historical_prices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker TEXT NOT NULL,
+                interval TEXT NOT NULL CHECK(interval IN ('1d', '1h')),
+                sampled_at TEXT NOT NULL,
+                open REAL NOT NULL,
+                high REAL NOT NULL,
+                low REAL NOT NULL,
+                close REAL NOT NULL,
+                volume INTEGER NOT NULL,
+                UNIQUE(ticker, interval, sampled_at)
+            );
+CREATE TABLE portfolio_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                interval TEXT NOT NULL CHECK(interval IN ('1d', '1h')),
+                sampled_at TEXT NOT NULL,
+                total_value REAL NOT NULL,
+                cash_value REAL NOT NULL,
+                invested_value REAL NOT NULL,
+                UNIQUE(user_email, interval, sampled_at)
+            );
+CREATE TABLE batbucks_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+CREATE INDEX idx_holdings_user ON holdings(user_email);
+CREATE INDEX idx_dividends_user ON dividends(user_email);
+CREATE INDEX idx_orders_user ON orders(user_email, created_at DESC);
+CREATE INDEX idx_watchlist_groups_user ON watchlist_groups(user_email);
+CREATE INDEX idx_watchlist_items_user ON watchlist_items(user_email);
+CREATE INDEX idx_price_alerts_user ON price_alerts(user_email, ticker);
+CREATE INDEX idx_transfers_user ON transfers(user_email, created_at DESC);
+CREATE INDEX idx_stock_news_ticker ON stock_news(ticker, published_at DESC);
+CREATE INDEX idx_historical_prices_ticker ON historical_prices(ticker, interval, sampled_at);
+CREATE INDEX idx_portfolio_history_user ON portfolio_history(user_email, interval, sampled_at);

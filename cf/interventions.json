@@ -109,6 +109,130 @@
       "dynamic_patch": "f009_AB",
       "patch": [],
       "expect": {"probe_changes": true, "note": "optional. Run only if A and B alone do not tell the bases apart."}
+    },
+    {
+      "id": "retrieval-f029",
+      "role": "probe",
+      "db": "speedtax.sqlite",
+      "rubric_depends_on": "most-recent W-2 wages, employer, federal withholding; cross-check Tax_2025/w2_summary.txt",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT tr.id, tr.tax_year, tr.status, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id AND lower(td.doc_type) LIKE '%w2%' WHERE tr.user_email = :email ORDER BY tr.tax_year DESC",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email ORDER BY tr.tax_year, d.field_name"}
+      ],
+      "files": ["~/Documents/Tax_2025/w2_summary.txt"],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "retrieval-f030",
+      "role": "probe",
+      "db": "speedtax.sqlite",
+      "rubric_depends_on": "most-recent 1099 amount/payer and charitable total; cross-check Tax_2025/1099s.txt",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT tr.id, tr.tax_year, tr.status, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id AND (lower(td.doc_type) LIKE '%1099%' OR lower(td.doc_type) LIKE '%nec%') WHERE tr.user_email = :email ORDER BY tr.tax_year DESC",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND (lower(d.field_name) LIKE '%1099%' OR lower(d.field_name) LIKE '%charit%' OR lower(d.field_name) LIKE '%payer%' OR lower(d.field_name) LIKE '%nec%') ORDER BY tr.tax_year, d.field_name"}
+      ],
+      "files": ["~/Documents/Tax_2025/1099s.txt"],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "aggregation-f003",
+      "role": "probe",
+      "db": "speedtax.sqlite",
+      "rubric_depends_on": "sum of federal_refund_amount + state_refund_amount over filed prior-year returns; n_filed >= 2",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT id, tax_year, status, federal_refund_amount, state_refund_amount, (federal_refund_amount + state_refund_amount) AS combined FROM tax_returns WHERE user_email = :email ORDER BY tax_year",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT COUNT(*) AS n_filed, SUM(federal_refund_amount + state_refund_amount) AS combined_refund FROM tax_returns WHERE user_email = :email AND lower(status) = 'filed' AND tax_year < COALESCE((SELECT MIN(tax_year) FROM tax_returns WHERE user_email = :email AND lower(status) != 'filed'), (SELECT MAX(tax_year) + 1 FROM tax_returns WHERE user_email = :email))"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "aggregation-f018",
+      "role": "probe",
+      "db": "speedtax.sqlite",
+      "rubric_depends_on": "in-progress TY2025 line items vs Files Tax_2025/*",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT tr.id, tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 ORDER BY d.field_name",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT td.id, tr.tax_year, tr.status, td.doc_type, td.data_json FROM tax_documents td JOIN tax_returns tr ON tr.id = td.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025"}
+      ],
+      "files": ["~/Documents/Tax_2025/w2_summary.txt", "~/Documents/Tax_2025/1099s.txt"],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "preference_inference-f004",
+      "role": "probe",
+      "db": "tablefind.sqlite",
+      "rubric_depends_on": "TableFind reservation top-5 vs HangryDash order top-5; dine-out vs delivery split",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT r.name, COUNT(*) AS n FROM reservations rv JOIN restaurants r ON r.id = rv.restaurant_id WHERE rv.user_email = :email AND lower(COALESCE(rv.status,'')) NOT IN ('cancelled','canceled') GROUP BY r.id, r.name ORDER BY n DESC, r.name",
+      "extra_probes": [
+        {"db": "hangrydash.sqlite", "sql": "SELECT r.name, COUNT(*) AS n FROM orders o JOIN restaurants r ON r.id = o.restaurant_id WHERE o.user_email = :email GROUP BY r.id, r.name ORDER BY n DESC, r.name"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only. Rubric names Cooper's Seafood House as HangryDash top."}
+    },
+    {
+      "id": "preference_inference-f018",
+      "role": "probe",
+      "db": "batbucks.sqlite",
+      "rubric_depends_on": "BatBucks GME shares/avg_cost and OddsMarket GameStop-above-$100 YES position",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker) = 'GME'",
+      "extra_probes": [
+        {"db": "oddsmarket.sqlite", "sql": "SELECT market_ticker, title, side, shares, status FROM positions WHERE user_email = :email AND (lower(title) LIKE '%gamestop%' OR lower(title) LIKE '%gme%' OR lower(market_ticker) LIKE '%gme%' OR lower(market_ticker) LIKE '%gamestop%')"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "counterfactual-f004",
+      "role": "probe",
+      "db": "vaultbank.sqlite",
+      "rubric_depends_on": "Gringotts improv charges vs SpeedTax 1099 from same payer vs calendar blocks vs HooliMail threads",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT t.id, t.date, t.description, t.amount, t.category FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND (lower(t.description) LIKE '%improv%' OR lower(t.description) LIKE '%scranton improv%') ORDER BY t.date",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT tr.tax_year, tr.status, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id WHERE tr.user_email = :email AND (lower(COALESCE(td.doc_type,'')) LIKE '%1099%' OR lower(COALESCE(td.data_json,'')) LIKE '%improv%')"},
+        {"db": "speedtax.sqlite", "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND (lower(d.field_name) LIKE '%1099%' OR lower(d.field_value) LIKE '%improv%' OR lower(d.field_name) LIKE '%payer%')"},
+        {"db": "hoolicalendar.sqlite", "sql": "SELECT id, title, start_at, end_at FROM events WHERE user_email = :email AND lower(title) LIKE '%improv%'"},
+        {"db": "mail.sqlite", "sql": "SELECT id, from_email, subject, date, thread_id FROM emails WHERE lower(subject) LIKE '%improv%' OR lower(from_email) LIKE '%improv%' OR lower(COALESCE(from_name,'')) LIKE '%improv%' LIMIT 50"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "retrieval-f003",
+      "role": "probe",
+      "db": "speedtax.sqlite",
+      "rubric_depends_on": "W-2 wages on the most recent filed prior-year SpeedTax return, not the refund",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT tr.id, tr.tax_year, tr.status, tr.federal_refund_amount, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id AND lower(td.doc_type) LIKE '%w2%' WHERE tr.user_email = :email AND lower(tr.status) = 'filed' ORDER BY tr.tax_year DESC",
+      "extra_probes": [
+        {"db": "speedtax.sqlite", "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND lower(tr.status) = 'filed' AND (lower(d.field_name) LIKE '%wage%' OR lower(d.field_name) LIKE '%w2%') ORDER BY tr.tax_year DESC, d.field_name"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+    },
+    {
+      "id": "retrieval-f016",
+      "role": "probe",
+      "db": "batbucks.sqlite",
+      "rubric_depends_on": "sum(shares * avg_cost) across holdings plus cash, not market value",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT ticker, shares, avg_cost, (shares * avg_cost) AS cost_basis FROM holdings WHERE user_email = :email ORDER BY ticker",
+      "extra_probes": [
+        {"db": "batbucks.sqlite", "sql": "SELECT SUM(shares * avg_cost) AS cost_basis_total FROM holdings WHERE user_email = :email"},
+        {"db": "batbucks.sqlite", "sql": "SELECT cash FROM portfolio WHERE user_email = :email"}
+      ],
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
     }
   ]
 }

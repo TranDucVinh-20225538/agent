@@ -1,0 +1,139 @@
+===== Stage 3 probe start 2026-08-25T22:32:09+00:00 =====
+python3=/mnt/data2/Vinh/agent/external/MyPCBench-main/.venv/bin/python3
+MYPCBENCH_QCOW2=/mnt/data2/Vinh/agent/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2
+ANTHROPIC_API_KEY set? 
+OPENAI_API_KEY set? 
+reset() starting; Control API will bind 127.0.0.1; qcow2=/mnt/data2/Vinh/agent/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2
+No usable /dev/kvm — VM will be very slow (TCG emulation)
+Execute failed (attempt 1/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Execute failed (attempt 2/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Execute failed (attempt 3/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+VM image is 114h old — NOT the current daily build. Docker runs and the managed qemu cache auto-refresh, but a pinned --qcow2_path does not; re-fetch with scripts/get-eval-image.sh (or unset the pin) for the daily image. Intentionally pinned runs can ignore this or set MYPCBENCH_MAX_IMAGE_AGE_HOURS=0.
+guest ready at http://127.0.0.1:5000
+schema dinoco-airlines.sqlite
+schema speedtax.sqlite
+schema tablefind.sqlite
+schema hangrydash.sqlite
+schema batbucks.sqlite
+schema oddsmarket.sqlite
+schema vaultbank.sqlite
+schema hoolicalendar.sqlite
+schema mail.sqlite
+total 12
+drwxr-xr-x  3 root root 4096 Jun  9 06:02 .
+drwxr-xr-x 25 root root 4096 Aug 21 01:18 ..
+drwxr-x--- 15 user user 4096 Aug 25 18:42 user
+---
+/home/user/Documents/Tax_2025/1099s.txt
+/home/user/Documents/Tax_2025/w2_summary.txt
+cf_inject --probe-only retrieval-f001
+probe before: [{"status":"Gold Voyager","miles":38450,"miles_ytd":14280}]
+wrote /mnt/data2/Vinh/agent/results/probe-retrieval-f001/retrieval-f001.guest.json
+
+  status=identifiable identifiable=true pre_gold=status=Gold Voyager miles=38450 miles_ytd=14280
+cf_inject --probe-only retrieval-f029
+probe before: [{"id":3,"tax_year":2025,"status":"in_progress","doc_type":"w2","data_json":"{\"id\":\"seed-w2-2025-michael\",\"docType\":\"w2\",\"employer_name\":\"Dunder Mifflin\",\"employer_ein\":\"12-3456789\",\"wages\":\"142000\",\"federal_tax_withheld\":\"28400\",\"social_security_wages\":\"142000\",\"medicare_wages\":\"142000\",\"state_name\":\"Pennsylvania\",\"state_wages\":\"142000\",\"state_tax_withheld\":\"4359\"}"},
+{"id":2,"tax_year":2024,"status":"filed","doc_type":"w2","data_json":"{\"id\": \"seed-w2-2024-michael\", \"docType\": \"w2\", \"employer_name\": \"Dunder Mifflin\", \"employer_ein\": \"12-3456789\", \"wages\": \"136320.0\", \"federal_tax_withheld\": \"27264.0\", \"social_security_wages\": \"136320.0\", \"medicare_wages\": \"136320.0\", \"state_name\": \"Pennsylvania\", \"state_wages\": \"136320.0\", \"state_tax_withheld\": \"4184.64\"}"},
+{"id":1,"tax_year":2023,"status":"filed","doc_type":"w2","data_json":"{\"id\": \"seed-w2-2023-michael\", \"docType\": \"w2\", \"employer_name\": \"Dunder Mifflin\", \"employer_ein\": \"12-3456789\", \"wages\": \"130867.2\", \"federal_tax_withheld\": \"26173.44\", \"social_security_wages\": \"130867.2\", \"medicare_wages\": \"130867.2\", \"state_name\": \"Pennsylvania\", \"state_wages\": \"130867.2\", \"state_tax_withheld\": \"4017.25\"}"}]
+wrote /mnt/data2/Vinh/agent/results/probe-retrieval-f029/retrieval-f029.guest.json
+
+  status=confounded identifiable=true pre_gold=year=2025 wages=142000 employer=Dunder Mifflin fed_wh=None file_agree=True
+cf_inject --probe-only retrieval-f030
+probe before: [{"id":3,"tax_year":2025,"status":"in_progress","doc_type":"1099-nec","data_json":"{\"id\":\"seed-1099-nec-2025-0\",\"docType\":\"1099-nec\",\"payer_name\":\"Scranton Improv Academy\",\"payer_tin\":\"XX-XXX3847\",\"nonemployee_compensation\":\"1200\",\"federal_tax_withheld\":\"0\",\"state_tax_withheld\":\"0\"}"},
+{"id":2,"tax_year":2024,"status":"filed","doc_type":"1099-nec","data_json":"{\"id\": \"seed-1099-nec-2024-michael\", \"docType\": \"1099-nec\", \"payer_name\": \"Scranton Improv Academy\", \"payer_tin\": \"XX-XXX3847\", \"nonemployee_compensation\": \"1080.0\", \"federal_tax_withheld\": \"0\", \"state_tax_withheld\": \"0\"}"},
+{"id":1,"tax_year":2023,"status":"filed","doc_type":"1099-nec","data_json":"{\"id\": \"seed-1099-nec-2023-michael\", \"docType\": \"1099-nec\", \"payer_name\": \"Scranton Improv Academy\", \"payer_tin\": \"XX-XXX3847\", \"nonemployee_compensation\": \"972.0\", \"federal_tax_withheld\": \"0\", \"state_tax_withheld\": \"0\"}"}]
+wrote /mnt/data2/Vinh/agent/results/probe-retrieval-f030/retrieval-f030.guest.json
+
+  status=confounded identifiable=true pre_gold=year=2025 1099_amount=972.0 payer=Scranton Improv Academy charitable=950 file_agree=False
+cf_inject --probe-only aggregation-f003
+probe before: [{"id":1,"tax_year":2023,"status":"filed","federal_refund_amount":1258.75999999999999,"state_refund_amount":463.060000000000002,"combined":1721.81999999999993},
+{"id":2,"tax_year":2024,"status":"filed","federal_refund_amount":2555.7800000000002,"state_refund_amount":594.100000000000022,"combined":3149.8800000000001},
+{"id":3,"tax_year":2025,"status":"in_progress","federal_refund_amount":null,"state_refund_amount":null,"combined":null}]
+wrote /mnt/data2/Vinh/agent/results/probe-aggregation-f003/aggregation-f003.guest.json
+
+  status=identifiable identifiable=true pre_gold=n_filed=2 current_year=2025 combined_refund=4871.70 filed_years=[2023, 2024]
+cf_inject --probe-only aggregation-f018
+:2025,"status":"in_progress","field_name":"first_name","field_value":"Michael"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"home_office_days","field_value":"104"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"home_office_days_claimed_raw","field_value":"104"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"last_name","field_value":"Scott"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"medical_expenses","field_value":"0"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"mortgage_interest","field_value":"0"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"phone","field_value":"+1-570-555-0147"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"preparer_name","field_value":"Self-Prepared (SpeedTax Online)"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"preparer_ptin","field_value":"SELF"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"ssn","field_value":"503-42-5160"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"state","field_value":"PA"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"state_local_tax","field_value":"4359"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_employer","field_value":"Dunder Mifflin"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_federal_withheld","field_value":"28400"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_gross_wages","field_value":"142000"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_pretax_401k","field_value":"6000"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_pretax_health","field_value":"2400"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"w2_state_withheld","field_value":"4359"},
+{"id":3,"tax_year":2025,"status":"in_progress","field_name":"zip","field_value":"18505"}]
+wrote /mnt/data2/Vinh/agent/results/probe-aggregation-f018/aggregation-f018.guest.json
+
+  status=confounded identifiable=true pre_gold=ty2025_fields={"1099_amount_0":"1200","1099_payer_0":"Scranton Improv Academy","__step_saved_at":"2026-08-25T22:42:17Z","address":"1725 Slough Ave, Apt 4B","charitable_contribution
+cf_inject --probe-only preference_inference-f004
+probe before: [{"name":"Cooper's Seafood House","n":12},
+{"name":"Backyard Ale House","n":6},
+{"name":"Abe's Place","n":3},
+{"name":"Coney Island Texas Weiners","n":3},
+{"name":"Cotogna","n":3},
+{"name":"Cara Mia Trattoria","n":2},
+{"name":"Northern Light Espresso Bar","n":2},
+{"name":"Pizza by Alfredo","n":2},
+{"name":"Posh @ The Scranton Club","n":2},
+{"name":"State Street Grill","n":2},
+{"name":"Zuma Sushi & Grill","n":2},
+{"name":"Andy Gavin's","n":1},
+{"name":"Benihana","n":1},
+{"name":"La Trattoria","n":1},
+{"name":"The Neighborhood Bistro","n":1}]
+wrote /mnt/data2/Vinh/agent/results/probe-preference_inference-f004/preference_inference-f004.guest.json
+
+  status=confounded identifiable=true pre_gold=tablefind_top=Cooper's Seafood House n=12 hangrydash_top=Cooper's Seafood House n=88 split=delivery tf_total=43 hd_total=409 coopers_hd_top=True
+cf_inject --probe-only preference_inference-f018
+probe before: [{"ticker":"GME","shares":85.0,"avg_cost":42.1199999999999974}]
+wrote /mnt/data2/Vinh/agent/results/probe-preference_inference-f018/preference_inference-f018.guest.json
+
+  status=identifiable identifiable=true pre_gold=gme=[{"ticker":"GME","shares":85.0,"avg_cost":42.12}] odds=[{"market_ticker":"WILL-GME-100-YEAREND","title":"GameStop above $100 by year-end","side":"YES","shares":200,"status":"ac
+cf_inject --probe-only counterfactual-f004
+-10","description":"SCRANTON IMPROV ACADEMY SCR","amount":-120.0,"category":"entertainment"},
+{"id":701,"date":"2026-02-14","description":"Scranton Improv Workshop","amount":-122.310000000000002,"category":"entertainment"},
+{"id":1460,"date":"2026-02-24","description":"SCRANTON IMPROV ACADEMY SCR","amount":-120.0,"category":"entertainment"},
+{"id":1447,"date":"2026-03-10","description":"SCRANTON IMPROV ACADEMY SCR","amount":-120.0,"category":"entertainment"},
+{"id":1433,"date":"2026-03-24","description":"SCRANTON IMPROV ACADEMY SCR","amount":-120.0,"category":"entertainment"},
+{"id":861,"date":"2026-04-16","description":"Scranton Improv Workshop","amount":-122.39,"category":"entertainment"},
+{"id":870,"date":"2026-04-18","description":"Scranton Improv Workshop","amount":-117.299999999999997,"category":"entertainment"},
+{"id":884,"date":"2026-04-24","description":"Scranton Improv Workshop","amount":-122.159999999999996,"category":"entertainment"},
+{"id":944,"date":"2026-05-22","description":"Scranton Improv Workshop","amount":-117.680000000000006,"category":"entertainment"},
+{"id":998,"date":"2026-06-14","description":"Scranton Improv Workshop","amount":-121.480000000000003,"category":"entertainment"},
+{"id":1047,"date":"2026-07-04","description":"HooliShop - Improv 201 Workshop Registrati [HLS-9]","amount":-380.620000000000004,"category":"shopping"},
+{"id":1083,"date":"2026-07-17","description":"Scranton Improv Workshop","amount":-122.799999999999997,"category":"entertainment"},
+{"id":1096,"date":"2026-07-22","description":"HooliShop - Improv for Dummies [HLS-13]","amount":-20.6499999999999985,"category":"shopping"},
+{"id":1113,"date":"2026-07-28","description":"Scranton Improv Workshop","amount":-122.159999999999996,"category":"entertainment"},
+{"id":1131,"date":"2026-08-04","description":"Scranton Improv Workshop","amount":-122.790000000000006,"category":"entertainment"}]
+wrote /mnt/data2/Vinh/agent/results/probe-counterfactual-f004/counterfactual-f004.guest.json
+
+  status=identifiable identifiable=true pre_gold=gringotts_n=60 pays=True has_1099=True calendar_improv_n=17 mail_improv_n=14
+cf_inject --probe-only retrieval-f003
+probe before: [{"id":2,"tax_year":2024,"status":"filed","federal_refund_amount":2555.7800000000002,"doc_type":"w2","data_json":"{\"id\": \"seed-w2-2024-michael\", \"docType\": \"w2\", \"employer_name\": \"Dunder Mifflin\", \"employer_ein\": \"12-3456789\", \"wages\": \"136320.0\", \"federal_tax_withheld\": \"27264.0\", \"social_security_wages\": \"136320.0\", \"medicare_wages\": \"136320.0\", \"state_name\": \"Pennsylvania\", \"state_wages\": \"136320.0\", \"state_tax_withheld\": \"4184.64\"}"},
+{"id":1,"tax_year":2023,"status":"filed","federal_refund_amount":1258.75999999999999,"doc_type":"w2","data_json":"{\"id\": \"seed-w2-2023-michael\", \"docType\": \"w2\", \"employer_name\": \"Dunder Mifflin\", \"employer_ein\": \"12-3456789\", \"wages\": \"130867.2\", \"federal_tax_withheld\": \"26173.44\", \"social_security_wages\": \"130867.2\", \"medicare_wages\": \"130867.2\", \"state_name\": \"Pennsylvania\", \"state_wages\": \"130867.2\", \"state_tax_withheld\": \"4017.25\"}"}]
+wrote /mnt/data2/Vinh/agent/results/probe-retrieval-f003/retrieval-f003.guest.json
+
+  status=identifiable identifiable=true pre_gold=year=2024 wages=136320.0 employer=Dunder Mifflin fed_wh=None file_agree=False
+cf_inject --probe-only retrieval-f016
+probe before: [{"ticker":"DIS","shares":8.0,"avg_cost":112.0,"cost_basis":896.0},
+{"ticker":"GME","shares":85.0,"avg_cost":42.1199999999999974,"cost_basis":3580.19999999999981},
+{"ticker":"RIVN","shares":200.0,"avg_cost":7.3099999999999996,"cost_basis":1462.0},
+{"ticker":"SBUX","shares":12.0,"avg_cost":98.0,"cost_basis":1176.0},
+{"ticker":"VTI","shares":5.0,"avg_cost":219.810000000000002,"cost_basis":1099.04999999999995}]
+wrote /mnt/data2/Vinh/agent/results/probe-retrieval-f016/retrieval-f016.guest.json
+
+  status=identifiable identifiable=true pre_gold=cost_basis_total=8213.25 cash=420.0 holdings=[{"ticker":"DIS","shares":8.0,"avg_cost":112.0,"cost_basis":896.0},{"ticker":"GME","shares":85.0,"avg_cost":42.12,"cost_basis":3580.2},
+wrote /mnt/data2/Vinh/agent/out/evidence_probe_results.csv
+wrote /mnt/data2/Vinh/agent/out/evidence_probe_results.md
+counts identifiable=6 rejected=0 confounded=4 technical_failure=0
+===== Stage 3 probe done 2026-08-25T22:43:49+00:00 =====

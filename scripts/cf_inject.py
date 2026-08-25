@@ -24,6 +24,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+import shlex
 
 import urllib.error
 import urllib.request
@@ -93,6 +94,26 @@ def main() -> int:
     def sqlite_bound(sql: str, json_out: bool = False) -> str:
         return sqlite(args.api, spec["db"], sql.replace(":email", f"'{email}'"), json_out=json_out)
 
+    extra_before = []
+    for ep in spec.get("extra_probes") or []:
+        ep_sql = ep["sql"].replace(":email", f"'{email}'")
+        try:
+            ep_result = sqlite(args.api, ep["db"], ep_sql, json_out=True)
+        except SystemExit as exc:
+            ep_result = f"ERROR: {exc}"
+        extra_before.append({"db": ep["db"], "sql": ep["sql"], "result": ep_result})
+
+    file_blobs = {}
+    for rel in spec.get("files") or []:
+        guest_path = rel.replace("~", "/home/user")
+        listed = guest_exec(
+            args.api,
+            f"if [ -f {shlex.quote(guest_path)} ]; then cat {shlex.quote(guest_path)}; "
+            f"else echo FILE_MISSING:{shlex.quote(guest_path)}; "
+            f"find /home -name $(basename {shlex.quote(guest_path)}) 2>/dev/null; fi",
+        )
+        file_blobs[rel] = ((listed.get("output") or "") + (listed.get("error") or "")).strip()
+
     if args.probe_only:
         args.out.mkdir(parents=True, exist_ok=True)
         record = {
@@ -101,7 +122,10 @@ def main() -> int:
             "db": spec.get("db"),
             "where": "guest",
             "mode": "probe-only",
+            "probe": spec.get("probe"),
             "probe_before": before,
+            "extra_probes": extra_before,
+            "files": file_blobs,
         }
         path = args.out / f"{args.task}.guest.json"
         path.write_text(json.dumps(record, indent=2) + "\n")
