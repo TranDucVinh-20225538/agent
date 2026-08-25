@@ -1,0 +1,15 @@
+{
+  "id": "hard_app-f033-AB",
+  "role": "factorial_AB",
+  "db": "hoolicalendar.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-25T21:26:32.465222+00:00",
+  "patch": [
+    "UPDATE events SET start_at = replace(datetime(start_at, '+2 hours'), ' ', 'T'), end_at = replace(datetime(end_at, '+2 hours'), ' ', 'T'), updated_at = updated_at WHERE user_email = :email AND lower(title) LIKE '%improv%' AND date(start_at) = (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days'))",
+    "UPDATE events SET description = replace(replace(replace(replace(description, ' Scheduling train-wreck: overlaps Thursday improv class \u2014 will need to reschedule and send updated invites.', ''), 'Scheduling train-wreck: overlaps Thursday improv class \u2014 will need to reschedule and send updated invites.', ''), ' Scheduling train-wreck: overlaps Thursday improv class - will need to reschedule and send updated invites.', ''), 'Scheduling train-wreck: overlaps Thursday improv class - will need to reschedule and send updated invites.', '') WHERE user_email = :email AND lower(title) LIKE '%dunmore%' AND date(start_at) = (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days'))"
+  ],
+  "probe": "WITH thu AS (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days') AS d) SELECT e.id, e.title, e.description, e.start_at, e.end_at, (SELECT COUNT(*) FROM events i JOIN events m ON m.id <> i.id, thu WHERE i.user_email = :email AND lower(i.title) LIKE '%improv%' AND date(i.start_at) = thu.d AND date(m.start_at) = thu.d AND i.start_at < m.end_at AND m.start_at < i.end_at AND EXISTS (SELECT 1 FROM event_attendees a WHERE a.event_id = m.id AND a.email LIKE 'andy.bernard@%') AND EXISTS (SELECT 1 FROM event_attendees a WHERE a.event_id = m.id AND a.email LIKE 'jim.halpert@%')) AS overlap_n FROM events e, thu WHERE e.user_email = :email AND lower(e.title) LIKE '%dunmore%' AND date(e.start_at) = thu.d",
+  "probe_before": "[{\"id\":766,\"title\":\"Client Dinner - Dunmore High School\",\"description\":\"School supply paper contract follow-up. Principal wants to close this week. Scheduling train-wreck: overlaps Thursday improv class \u2014 will need to reschedule and send updated invites.\",\"start_at\":\"2026-08-27T18:45:00\",\"end_at\":\"2026-08-27T20:15:00\",\"overlap_n\":1}]",
+  "probe_after": "[{\"id\":766,\"title\":\"Client Dinner - Dunmore High School\",\"description\":\"School supply paper contract follow-up. Principal wants to close this week.\",\"start_at\":\"2026-08-27T18:45:00\",\"end_at\":\"2026-08-27T20:15:00\",\"overlap_n\":0}]",
+  "gold_moved": true
+}

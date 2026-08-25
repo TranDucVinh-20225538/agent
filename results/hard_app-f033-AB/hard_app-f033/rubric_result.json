@@ -1,0 +1,263 @@
+{
+  "score": 51,
+  "passed": false,
+  "reasoning": "per-step max-reduce over 11 of 11 steps",
+  "n_steps_total": 11,
+  "n_steps_scored": 11,
+  "concurrency": 4,
+  "model": "claude-sonnet-4-6",
+  "final_fraction": 0.51,
+  "per_rubric_max": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0
+  ],
+  "per_step_scores": [
+    {
+      "step_num": 1,
+      "screenshot": "step_1_20260825@212648818716.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 2,
+      "screenshot": "step_2_20260825@212702545566.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 3,
+      "screenshot": "step_3_20260825@212712581615.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 4,
+      "screenshot": "step_4_20260825@212722546736.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 5,
+      "screenshot": "step_5_20260825@212731393460.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 6,
+      "screenshot": "step_6_20260825@212739122901.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 7,
+      "screenshot": "step_7_20260825@212753303252.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 8,
+      "screenshot": "step_8_20260825@212802968280.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 9,
+      "screenshot": "step_9_20260825@212814356521.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 10,
+      "screenshot": "step_10_20260825@212846025565.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 11,
+      "screenshot": "step_11_20260825@212911828953.png",
+      "scores": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "rubrics": [
+    {
+      "criterion": "Agent resolves the next Thursday strictly after the VM date and opens that exact date in HooliCalendar to check for a scheduling conflict",
+      "type": "llm_judge",
+      "weight": 0.09
+    },
+    {
+      "criterion": "Agent identifies any improv-tagged event that the HooliCalendar UI displays on that exact next-Thursday date as the unmovable anchor, or accurately reports that none is displayed \u2014 judge strictly on what the calendar shows at run time: an improv block rendered in the UI counts as present even if an underlying record marks it cancelled, and it counts as absent only if the UI does not show it",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "Agent checks work meetings on that exact next-Thursday date against the improv window and either identifies an overlap or explicitly reports that no meeting conflicts",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "If a conflict was found, agent picks a non-conflicting Thursday time slot for that meeting that does not touch the improv window (or states that no move is needed if no conflict was found)",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "If a conflict was found, agent moves the conflicting Thursday meeting \u2014 specifically the overlapping meeting that has Andy and Jim as attendees, per the instruction's hint \u2014 in HooliCalendar to the new non-conflicting slot (or notes that no meeting needed to be moved); if another overlapping meeting without Andy and Jim also exists that day, leaving it in place is acceptable and not penalized",
+      "type": "llm_judge",
+      "weight": 0.11
+    },
+    {
+      "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately before the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time precedes it)",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately after the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time follows it)",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "If a meeting was moved, agent notifies Andy and Jim of the new time through HooliCalendar where the app offers a way to do so, or states that the calendar exposes no re-invite action and notifies them by another channel \u2014 OR, if the moved meeting has no attendees listed, notes that no invites were needed",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "If a meeting was moved, agent messages Andy and Jim on HooliWork to notify them of the schedule change \u2014 OR notes that no HooliWork message was needed because no conflict existed or no move occurred",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "Agent verifies the Thursday view in HooliCalendar \u2014 confirming either that the moved meeting and improv class show no overlap, or that no conflict existed to resolve",
+      "type": "llm_judge",
+      "weight": 0.1
+    }
+  ]
+}

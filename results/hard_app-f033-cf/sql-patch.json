@@ -1,0 +1,8 @@
+{
+  "condition": "A",
+  "id": "hard_app-f033",
+  "note": "hard_app-f033",
+  "patch": [
+    "UPDATE events SET start_at = replace(datetime(start_at, '+2 hours'), ' ', 'T'), end_at = replace(datetime(end_at, '+2 hours'), ' ', 'T'), updated_at = updated_at WHERE user_email = :email AND lower(title) LIKE '%improv%' AND date(start_at) = (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days'))"
+  ]
+}

@@ -97,6 +97,13 @@ def main() -> int:
     if spec["expect"].get("probe_changes") and not moved:
         print("FAILED: the gold did not move inside the guest")
 
+    forbidden = spec["expect"].get("after_must_not_contain")
+    if forbidden and forbidden.lower() in after.lower():
+        print(f"FAILED: after probe still contains {forbidden!r}")
+        moved = False
+
+    print(f"description dump (after): {after}")
+
     args.out.mkdir(parents=True, exist_ok=True)
     record = {
         "id": args.task,

@@ -1,0 +1,209 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 11
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_1_20260825@212648818716.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_2_20260825@212702545566.png",
+        "step_num": 2
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_3_20260825@212712581615.png",
+        "step_num": 3
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_4_20260825@212722546736.png",
+        "step_num": 4
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_5_20260825@212731393460.png",
+        "step_num": 5
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_6_20260825@212739122901.png",
+        "step_num": 6
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_7_20260825@212753303252.png",
+        "step_num": 7
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_8_20260825@212802968280.png",
+        "step_num": 8
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_9_20260825@212814356521.png",
+        "step_num": 9
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_10_20260825@212846025565.png",
+        "step_num": 10
+      },
+      {
+        "parsed_action_obj": {
+          "action": "DONE",
+          "done": true,
+          "reward": 0.0
+        },
+        "raw_response_text": "Now I have a clear picture of Thursday, August 27, 2026:\n\n| Event | Time |\n|---|---|\n| Client Dinner - Dunmore High School (Work, with Andy & Jim) | 18:45 \u2013 20:15 |\n| Client Dinner - Prestige Worldwide (Work) | 19:30 \u2013 20:30 |\n| Scranton Improv Workshop (Personal) | 21:00 \u2013 23:00 |\n\nLet me check for conflicts with the improv block including 15-minute buffers:\n\n- Improv with buffers: **20:45 \u2013 23:15**\n- Latest work meeting ends at **20:30** (Prestige Worldwide)\n- 20:30 is before 20:45, so no work meeting intrudes into the improv buffer zone.\n\n**All clear.** No Thursday work meeting overlaps with the Scranton Improv Workshop block (even accounting for 15-minute buffers on both sides). The Dunmore High School dinner (with Andy and Jim) ends at 20:15, and the Prestige Worldwide dinner ends at 20:30 \u2014 both finish before the 20:45 pre-improv buffer begins.\n\nNo rescheduling, messaging, or calendar invite updates are needed.\n\n```DONE```",
+        "screenshot": "step_11_20260825@212911828953.png",
+        "step_num": 11
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "situated_action",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent resolves the next Thursday strictly after the VM date and opens that exact date in HooliCalendar to check for a scheduling conflict",
+        "type": "llm_judge",
+        "weight": 0.09
+      },
+      {
+        "criterion": "Agent identifies any improv-tagged event that the HooliCalendar UI displays on that exact next-Thursday date as the unmovable anchor, or accurately reports that none is displayed \u2014 judge strictly on what the calendar shows at run time: an improv block rendered in the UI counts as present even if an underlying record marks it cancelled, and it counts as absent only if the UI does not show it",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "Agent checks work meetings on that exact next-Thursday date against the improv window and either identifies an overlap or explicitly reports that no meeting conflicts",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "If a conflict was found, agent picks a non-conflicting Thursday time slot for that meeting that does not touch the improv window (or states that no move is needed if no conflict was found)",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "If a conflict was found, agent moves the conflicting Thursday meeting \u2014 specifically the overlapping meeting that has Andy and Jim as attendees, per the instruction's hint \u2014 in HooliCalendar to the new non-conflicting slot (or notes that no meeting needed to be moved); if another overlapping meeting without Andy and Jim also exists that day, leaving it in place is acceptable and not penalized",
+        "type": "llm_judge",
+        "weight": 0.11
+      },
+      {
+        "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately before the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time precedes it)",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "If a meeting was moved, agent protects a 15-minute transition buffer immediately after the rescheduled Thursday meeting (either by creating a buffer event or by scheduling the meeting so at least 15 minutes of empty time follows it)",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "If a meeting was moved, agent notifies Andy and Jim of the new time through HooliCalendar where the app offers a way to do so, or states that the calendar exposes no re-invite action and notifies them by another channel \u2014 OR, if the moved meeting has no attendees listed, notes that no invites were needed",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "If a meeting was moved, agent messages Andy and Jim on HooliWork to notify them of the schedule change \u2014 OR notes that no HooliWork message was needed because no conflict existed or no move occurred",
+        "type": "llm_judge",
+        "weight": 0.1
+      },
+      {
+        "criterion": "Agent verifies the Thursday view in HooliCalendar \u2014 confirming either that the moved meeting and improv class show no overlap, or that no conflict existed to resolve",
+        "type": "llm_judge",
+        "weight": 0.1
+      }
+    ],
+    "task_id": "hard_app-f033"
+  },
+  "task": {
+    "apps_involved": [
+      "HooliCalendar",
+      "HooliWork"
+    ],
+    "category": "situated_action",
+    "difficulty": "hard",
+    "id": "hard_app-f033",
+    "instruction": "Check my Thursday for any improv conflicts. If there's a Thursday improv class window stomping on a work meeting (and I cannot skip improv), find a different Thursday slot for the work meeting that doesn't touch the improv window, and add fifteen-minute buffers on both sides so I can transition without looking frazzled. I think the meeting has Andy and Jim, message them on HooliWork and send them updated invites on Hoolicalendar if needed. If no Thursday meeting actually overlaps an improv block, just confirm the all-clear and move on.",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}

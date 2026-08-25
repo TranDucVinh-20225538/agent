@@ -1,0 +1,8 @@
+{
+  "condition": "B",
+  "id": "hard_app-f033-B",
+  "note": "hard_app-f033-B",
+  "patch": [
+    "UPDATE events SET description = replace(replace(replace(replace(description, ' Scheduling train-wreck: overlaps Thursday improv class \u2014 will need to reschedule and send updated invites.', ''), 'Scheduling train-wreck: overlaps Thursday improv class \u2014 will need to reschedule and send updated invites.', ''), ' Scheduling train-wreck: overlaps Thursday improv class - will need to reschedule and send updated invites.', ''), 'Scheduling train-wreck: overlaps Thursday improv class - will need to reschedule and send updated invites.', '') WHERE user_email = :email AND lower(title) LIKE '%dunmore%' AND date(start_at) = (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days'))"
+  ]
+}
