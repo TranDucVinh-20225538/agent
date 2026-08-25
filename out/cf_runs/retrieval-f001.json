@@ -1,0 +1,42 @@
+{
+  "id": "retrieval-f001",
+  "role": "point",
+  "db": "dinoco-airlines.sqlite",
+  "applied_at": "2026-08-25T16:33:50.139169+00:00",
+  "patch": [
+    "UPDATE loyalty SET status = 'Silver Voyager', miles = 8620, miles_ytd = 8620 WHERE user_email = :email"
+  ],
+  "probe": "SELECT status, miles, miles_ytd FROM loyalty WHERE user_email = :email",
+  "probe_before": [
+    [
+      "Gold Voyager",
+      38450,
+      14280
+    ]
+  ],
+  "probe_after": [
+    [
+      "Silver Voyager",
+      8620,
+      8620
+    ]
+  ],
+  "gold_moved": true,
+  "rubric_text_edit_needed": false,
+  "tables_touched": [
+    "loyalty"
+  ],
+  "tables_unchanged": [
+    "_seed_marker",
+    "boarding_passes",
+    "flight_alternatives",
+    "flight_baggage",
+    "flight_passengers",
+    "flight_seats",
+    "flight_upgrades",
+    "flights",
+    "passenger_profiles",
+    "payment_methods",
+    "travel_credits"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "_note": "One entry per task. `probe` returns the gold value the rubric depends on; `patch` is the counterfactual; the run is valid only if the probe value changes and the control probes do not. Column names marked TODO_VERIFY are placeholders until the qcow2 is opened; env.py only guarantees table names and the user_email key.",
+  "_email": "michael.scott@dundermifflin.com",
+  "interventions": [
+    {
+      "id": "retrieval-f001",
+      "role": "point",
+      "db": "dinoco-airlines.sqlite",
+      "rubric_depends_on": "loyalty tier and miles balance as shown on the live Dinoco profile",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT status, miles, miles_ytd FROM loyalty WHERE user_email = :email",
+      "patch": [
+        "UPDATE loyalty SET status = 'Silver Voyager', miles = 8620, miles_ytd = 8620 WHERE user_email = :email"
+      ],
+      "expect": {"probe_changes": true},
+      "verified": "Schema read from the image: table `loyalty`, columns status/miles/miles_ytd. Live value with the WAL applied is ('Gold Voyager', 38450, 14280). The counterfactual values are the ones sitting in the pre-WAL main database, so the app is known to render them."
+    },
+    {
+      "id": "hard_app-f033",
+      "role": "branching",
+      "db": "hoolicalendar.sqlite",
+      "rubric_depends_on": "whether an improv block rendered in the UI overlaps a Thursday meeting with Andy and Jim",
+      "rubric_text_edit_needed": false,
+      "probe": "WITH thu AS (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days') AS d) SELECT COUNT(*) FROM events i JOIN events m ON m.id <> i.id, thu WHERE i.user_email = :email AND lower(i.title) LIKE '%improv%' AND date(i.start_at) = thu.d AND date(m.start_at) = thu.d AND i.start_at < m.end_at AND m.start_at < i.end_at AND EXISTS (SELECT 1 FROM event_attendees a WHERE a.event_id = m.id AND a.email LIKE 'andy.bernard@%') AND EXISTS (SELECT 1 FROM event_attendees a WHERE a.event_id = m.id AND a.email LIKE 'jim.halpert@%')",
+      "patch": [
+        "UPDATE events SET start_at = replace(datetime(start_at, '+2 hours'), ' ', 'T'), end_at = replace(datetime(end_at, '+2 hours'), ' ', 'T'), updated_at = updated_at WHERE user_email = :email AND lower(title) LIKE '%improv%' AND date(start_at) = (SELECT date('now', '+' || (((10 - CAST(strftime('%w','now') AS INTEGER)) % 7) + 1) || ' days'))"
+      ],
+      "expect": {"probe_changes": true, "note": "overlap count must go from 1 to 0, flipping the correct branch from reschedule-and-notify to all-clear"},
+      "verified": "Schema and data read from the image. On the Thursday after the bake date the improv block is 'Scranton Improv 201' 19:54-21:54 and the only overlapping meeting carrying both andy.bernard@ and jim.halpert@ is event 755, 'Client Dinner - Dunmore High School' 18:45-20:15, a 21-minute overlap. Two further overlapping events (717, 754) have no attendees, which criterion 5 explicitly permits leaving in place. The Thursday is computed from the guest clock rather than hardcoded because the image rebases dates on boot.",
+      "caveat": "This task's rubric wording is not identical across the four release channels, so the channel must be pinned when it is used."
+    },
+    {
+      "id": "situated_action-f028",
+      "role": "control",
+      "db": null,
+      "rubric_depends_on": "nothing in the persona's records; books any well-rated Scranton property Friday to Sunday",
+      "rubric_text_edit_needed": false,
+      "probe": null,
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "run under every intervention above; success must not move"}
+    },
+    {
+      "id": "preference_inference-f009",
+      "role": "ambiguity_case",
+      "db": "kwik-e-mart.sqlite",
+      "rubric_depends_on": "favourite store under either order count or total spend, both accepted by the graded rubric",
+      "rubric_text_edit_needed": false,
+      "probe": "SELECT store, COUNT(*) AS n, SUM(total) AS spend FROM orders WHERE user_email = :email GROUP BY store ORDER BY n DESC",
+      "patch": [],
+      "expect": {"probe_changes": false, "note": "not a first counterfactual. The graded rubric accepts two bases, so a patch that flips order count but not total spend leaves two defensible golds. Report the divergence between the two bases instead."},
+      "todo_verify": ["columns store, total"]
+    }
+  ]
+}
