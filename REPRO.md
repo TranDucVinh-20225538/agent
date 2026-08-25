@@ -23,6 +23,44 @@ Note for an Intel Mac: it will boot but under TCG, so expect roughly an order of
 magnitude slowdown. Prefer Linux, WSL2 with nested virtualisation, or a cloud
 instance.
 
+## If the host is Windows
+
+Everything runs inside WSL2, which needs nested virtualisation to expose
+`/dev/kvm`. That is a Windows 11 feature; Windows 10 cannot do it, and on
+Windows 10 the options are a Linux dual boot, a live USB, or a cloud instance.
+
+Put this in `%UserProfile%\.wslconfig`, then run `wsl --shutdown` in PowerShell:
+
+```ini
+[wsl2]
+nestedVirtualization=true
+memory=16GB
+processors=8
+```
+
+In the Ubuntu shell, the one check that decides everything:
+
+```bash
+ls -l /dev/kvm && sudo usermod -aG kvm "$USER"   # then close and reopen the shell
+sudo apt update && sudo apt install -y qemu-system-x86 ovmf python3-venv git curl
+```
+
+If `/dev/kvm` is missing, `wsl --update` first — nested virtualisation needs a
+recent WSL kernel. Nothing further will work until that file exists, since
+`env.py` decides on acceleration purely by `os.path.exists("/dev/kvm")`.
+
+Two Windows-specific traps:
+
+- Keep the image and the repo inside the Linux filesystem (`~/`), never under
+  `/mnt/c`. The Windows mount goes through a translation layer and a 5 GB qcow2
+  with random writes on it is painfully slow.
+- Use the default `--backend qemu`, not `--backend docker`. The Docker backend
+  passes `--device /dev/kvm` into a container, and Docker Desktop on Windows runs
+  its own separate VM that will not hand that device through.
+
+If boot is slow but working, raise the readiness budget rather than concluding it
+failed: `export MYPCBENCH_VM_READY_TIMEOUT=1800` (default 900 s).
+
 ## Setup
 
 ```bash
