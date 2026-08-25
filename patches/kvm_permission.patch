@@ -1,0 +1,20 @@
+--- a/agent-harness/env.py
++++ b/agent-harness/env.py
+@@ -461,13 +461,16 @@
+         ssh_port = int(os.environ.get("MYPCBENCH_HOST_SSH_PORT", "2222"))
+         hostfwd += f",hostfwd=tcp::{ssh_port}-:22"
+ 
+-        # Detect KVM
++        # Detect KVM. Existence is not enough: a node we cannot open still
++        # makes -enable-kvm exit immediately (Permission denied).
+         kvm_args = []
+-        if os.path.exists("/dev/kvm"):
++        if os.access("/dev/kvm", os.R_OK | os.W_OK):
+             kvm_args = ["-enable-kvm", "-cpu", "host"]
+         else:
+             kvm_args = ["-cpu", "qemu64"]
+-            log.warning("No /dev/kvm — VM will be very slow (TCG emulation)")
++            log.warning("No usable /dev/kvm — VM will be very slow (TCG emulation)")
+ 
+         # UEFI firmware (raises with actionable error if OVMF missing)
+         code_path, vars_src = self._find_uefi_firmware()

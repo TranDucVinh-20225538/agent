@@ -11,7 +11,7 @@ From `agent-harness/env.py` and the upstream README:
 | | |
 | --- | --- |
 | CPU | x86-64. The guest is x86; on Apple silicon it can only be emulated. |
-| Acceleration | `/dev/kvm`. Without it `env.py` falls back to `-cpu qemu64` and logs "VM will be very slow (TCG emulation)". |
+| Acceleration | `/dev/kvm` must be **writable**, not merely present. Upstream `env.py` used `os.path.exists("/dev/kvm")`, which passes `-enable-kvm` on a node we cannot open and QEMU exits with `Permission denied`. Apply `patches/kvm_permission.patch` after `scripts/setup.sh`. |
 | OS | Linux. The QEMU line uses `accel=kvm:tcg`, so macOS gets no acceleration even on Intel. |
 | RAM | guest takes `-m 8G`, `-smp 4`, so 16 GB host is comfortable |
 | Disk | ~25 GB (5.1 GB image, plus per-run overlay and results) |
@@ -22,6 +22,22 @@ A boot is about 90 seconds and a task one to three minutes once warm.
 Note for an Intel Mac: it will boot but under TCG, so expect roughly an order of
 magnitude slowdown. Prefer Linux, WSL2 with nested virtualisation, or a cloud
 instance.
+
+## KVM permission bugfix
+
+Upstream `agent-harness/env.py` treats `/dev/kvm` as usable if the path exists.
+On a user-namespace or shared node the node can exist with mode `660` and still
+be unopenable; QEMU then dies immediately. The TCG fallback never runs.
+
+`patches/kvm_permission.patch` changes the check to
+`os.access("/dev/kvm", os.R_OK | os.W_OK)`. If KVM is later granted, the same
+line takes `-enable-kvm` again. This is a bugfix, not a paper-specific hack.
+Do not commit `external/` (vendored). After `bash scripts/setup.sh`:
+
+```bash
+cd external/MyPCBench-main
+git apply ../../patches/kvm_permission.patch
+```
 
 ## First, on whatever host you picked
 

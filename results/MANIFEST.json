@@ -1,0 +1,38 @@
+{
+  "created_utc": "2026-08-25T20:14:49.571528+00:00",
+  "note": "Phase A artifacts snapshotted from completed runs. control-situated_action-f028 was still booting and is NOT included. No new experiments were started.",
+  "mypcbench": {
+    "repo": "https://github.com/ljang0/MyPCBench",
+    "fetched_via": "https://codeload.github.com/ljang0/MyPCBench/tar.gz/refs/heads/main (scripts/setup.sh); vendored tree is gitignored as external/",
+    "github_main_sha_at_archive": "937ec49882508223c7ea3f79ead3330c6810feb1",
+    "github_main_date": "2026-08-21T01:15:03Z",
+    "github_main_subject": "ci: keep required checks and dependency updates actionable (#10)",
+    "local_env_py_sha256": "d05d278802d4e8343ce018f00457d3b1cfd3d1c75c00f2fe68dafee2266493e2",
+    "local_deltas": [
+      "patches/kvm_permission.patch (os.access R_OK|W_OK instead of exists)",
+      "hostfwd bound to 127.0.0.1 (shared-node hardening; not in the kvm patch file)"
+    ]
+  },
+  "agent": "claude_cuabash / claude-opus-4-6",
+  "judge": "MYPCBENCH_JUDGE_FLAVOR=per_step (Anthropic fallback). retrieval-f001 judged; hard_app-f033 not judged yet.",
+  "included": [
+    "results/base-retrieval-f001/",
+    "results/cf-retrieval-f001/",
+    "results/hard_app-f033-baseline/",
+    "results/hard_app-f033-cf/",
+    "results/phase_a_claude.log",
+    "results/harness-httpx.log",
+    "results/agent-transcript/",
+    "results/counterfactual_report.md",
+    "cf/interventions.json (already on main)",
+    "patches/kvm_permission.patch",
+    "scripts/phase_a_claude.sh"
+  ],
+  "excluded": [
+    "external/ (vendored MyPCBench + qcow2)",
+    ".venv-vllm/",
+    "results/control-situated_action-f028/ (incomplete at snapshot)",
+    "ANTHROPIC_API_KEY / .env"
+  ],
+  "browser_logs": "No Chromium HAR/CDP log is written by claude_cuabash. Guest HTTP is in each job's http-requests.json (curl via bash). Host Anthropic calls are in harness-httpx.log and phase_a_claude.log."
+}

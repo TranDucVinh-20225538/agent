@@ -1,0 +1,127 @@
+[
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01Xwwa9DvCcXf7QjDFNESUB9",
+    "command": "curl -s http://localhost:3017/api/events 2>/dev/null | head -200",
+    "urls": [
+      "http://localhost:3017/api/events"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01H8SytPFutPjNPMPi7iUna6",
+    "command": "curl -s http://localhost:3005/ 2>/dev/null | head -50",
+    "urls": [
+      "http://localhost:3005/"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01TZR9rfmZiLEtx19pNsqfkG",
+    "command": "curl -s -b /tmp/cookies.txt -c /tmp/cookies.txt http://localhost:3017/?_autologin=1 > /dev/null 2>&1\ncurl -s -b /tmp/cookies.txt http://localhost:3017/api/events 2>/dev/null | python3 -m json.tool 2>/dev/null | head -200",
+    "urls": [
+      "http://localhost:3017/?_autologin=1",
+      "http://localhost:3017/api/events"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01RadBaoAFWFJTgQ7zZDJQUv",
+    "command": "curl -s -b /tmp/cookies.txt http://localhost:3017/api/events?start=2026-08-27T00:00:00&end=2026-08-28T00:00:00 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events?start=2026-08-27T00:00:00&end=2026-08-28T00:00:00"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01MjQEyu5fxaSFEGdWqpodA4",
+    "command": "# Try to get the session cookie by auto-logging in\ncurl -s -c /tmp/cal_cookies.txt -L \"http://localhost:3017/?_autologin=1\" > /dev/null 2>&1\n# Now try different API endpoint formats\necho \"=== Try 1 ===\"\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events?start=2026-08-27T00:00:00Z&end=2026-08-28T00:00:00Z\" 2>/dev/null | head -500\necho \"\"\necho \"=== Try 2 ===\"\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events?start=2026-08-27&end=2026-08-28\" 2>/dev/null | head -500\necho \"\"\necho \"=== Try 3 - different endpoints ===\"\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/calendars\" 2>/dev/null | head -200",
+    "urls": [
+      "http://localhost:3017/?_autologin=1",
+      "http://localhost:3017/api/events?start=2026-08-27T00:00:00Z&end=2026-08-28T00:00:00Z",
+      "http://localhost:3017/api/events?start=2026-08-27&end=2026-08-28",
+      "http://localhost:3017/api/calendars"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_012QMos8qyhsxeREiNXuWh5j",
+    "command": "# Check event 766 attendees\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events/766\" 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01X4CXbHi33AmqZYk82Ruiz8",
+    "command": "# Check API endpoints for invitees/attendees\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events/766/attendees\" 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events/766/attendees"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01UinLz5JXTAFxiKAqSAaLCa",
+    "command": "# Get users to find Andy and Jim's emails\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/users\" 2>/dev/null | python3 -m json.tool 2>/dev/null | head -100",
+    "urls": [
+      "http://localhost:3017/api/users"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01EAoXMEiTf2SwbwhFws94Lr",
+    "command": "# Update the Client Dinner - Dunmore High School event to 4:30 PM - 6:00 PM\ncurl -s -b /tmp/cal_cookies.txt -X PUT \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"title\": \"Client Dinner - Dunmore High School\",\n    \"description\": \"School supply paper contract follow-up. Principal wants to close this week. Scheduling train-wreck: overlaps Thursday improv class — will need to reschedule and send updated invites.\",\n    \"location\": \"Andy'\\''s Italian Restaurant, 518 Adams Ave, Scranton\",\n    \"start_at\": \"2026-08-27T16:30:00\",\n    \"end_at\": \"2026-08-27T18:00:00\",\n    \"is_all_day\": 0,\n    \"calendar_id\": 7,\n    \"color\": \"#1565C0\",\n    \"status\": \"confirmed\"\n  }' 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_011cXQCpvWuZc8sk2ZGbUJQX",
+    "command": "# Check what the raw response is\ncurl -s -b /tmp/cal_cookies.txt -X PUT \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"start_at\": \"2026-08-27T16:30:00\", \"end_at\": \"2026-08-27T18:00:00\"}' 2>&1",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_015oFhPnQFGWdeFqjd21dFJi",
+    "command": "# Try PATCH instead of PUT, and check verbose output\ncurl -v -b /tmp/cal_cookies.txt -X PATCH \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"start_at\": \"2026-08-27T16:30:00\", \"end_at\": \"2026-08-27T18:00:00\"}' 2>&1",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01P1x2ANosDYWyQAUWDPD2Y5",
+    "command": "# Verify the event was updated and attendees are still there\ncurl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events/766\" 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01EbPiz97nB7Zi6a5nY6S5fi",
+    "command": "# Get HooliWork session\ncurl -s -c /tmp/hw_cookies.txt -L \"http://localhost:3005/?_autologin=1\" > /dev/null 2>&1\n# Search for users\ncurl -s -b /tmp/hw_cookies.txt \"http://localhost:3005/api/users\" 2>/dev/null | python3 -m json.tool 2>/dev/null | grep -A5 -i \"andy\\|jim\"",
+    "urls": [
+      "http://localhost:3005/?_autologin=1",
+      "http://localhost:3005/api/users"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_01NufqoBUXhw5YPWKxuGNQCk",
+    "command": "# Explore HooliWork API\ncurl -s -b /tmp/hw_cookies.txt \"http://localhost:3005/api/users\" 2>/dev/null | python3 -c \"import sys,json; data=json.load(sys.stdin); [print(u.get('id'),u.get('email'),u.get('display_name',u.get('name',''))) for u in data]\" 2>/dev/null | head -30",
+    "urls": [
+      "http://localhost:3005/api/users"
+    ]
+  },
+  {
+    "kind": "in_guest_curl",
+    "tool_use_id": "toolu_0161i5aG66Nf9FDf1hZ5afKc",
+    "command": "curl -s -b /tmp/cal_cookies.txt \"http://localhost:3017/api/events/766\" 2>/dev/null | python3 -m json.tool 2>/dev/null",
+    "urls": [
+      "http://localhost:3017/api/events/766"
+    ]
+  }
+]

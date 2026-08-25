@@ -1,0 +1,338 @@
+[
+  {
+    "name": "bash",
+    "id": "toolu_01JZP2YSRmszFoNVRsUVuyKS",
+    "input": {
+      "command": "curl -s http://localhost:3017 | head -50"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01MRwLGkGe6RDViVSpdnnEPa",
+    "input": {
+      "command": "curl -s http://localhost:3005 | head -50"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01H3qTczgXyrEpi8buqdRX2n",
+    "input": {
+      "command": "curl -sL http://localhost:3017/?_autologin=1 | head -100"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01KxbmTJceUtvruKAQ4Yxsov",
+    "input": {
+      "command": "curl -sL http://localhost:3005/?_autologin=1 | head -100"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01LWY6zirLocZ82k11HqfYEu",
+    "input": {
+      "command": "ss -tlnp | grep -E '300[0-9]|301[0-9]'"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01N2fw3odVK9umsKmqzgfAS3",
+    "input": {
+      "command": "curl -s -c /tmp/cal_cookies -b /tmp/cal_cookies -L \"http://localhost:3017/api/auth/session\" 2>&1 | head -20"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01MBBoK2CPpY8ZWhFgYiC5bm",
+    "input": {
+      "command": "curl -s -c /tmp/cal_cookies -b /tmp/cal_cookies -L \"http://localhost:3017/api/events\" 2>&1 | head -200"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01Ka9uxfPwVcQq4YktZ5cqqR",
+    "input": {
+      "command": "curl -s -c /tmp/work_cookies -b /tmp/work_cookies -L \"http://localhost:3005/api/auth/session\" 2>&1 | head -20"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_011mWsjryUtw397fcAV3EJK6",
+    "input": {
+      "command": "curl -s -c /tmp/cal_cookies -b /tmp/cal_cookies -L \"http://localhost:3017/?_autologin=1\" -o /dev/null -w \"%{http_code}\" 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01Q7VzKShoLhPxz8qd3FMykj",
+    "input": {
+      "command": "curl -sv \"http://localhost:3017/?_autologin=1\" 2>&1 | head -40"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_019YaZE93rnBixxTATPz5AjZ",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events\" | python3 -m json.tool 2>&1 | head -200"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_013UPzC9gkwTRxiECaeS1j2G",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Thursday Aug 27, 2026\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events?start=2026-08-27T00:00:00&end=2026-08-27T23:59:59\" | python3 -m json.tool"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01PgY6AZ8ccscwwo7CBYWb6q",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Check event details/attendees for the three events\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/766\" | python3 -m json.tool 2>&1\necho \"---\"\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/765\" | python3 -m json.tool 2>&1\necho \"---\"\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/764\" | python3 -m json.tool 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01XCHAiwMb2wi8HXQAmPqixd",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Update event 766 to new time: 17:15-18:45\ncurl -s -b \"$CAL_COOKIE\" -X PUT \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"title\": \"Client Dinner - Dunmore High School\",\n    \"description\": \"School supply paper contract follow-up. Principal wants to close this week. Scheduling train-wreck: overlaps Thursday improv class — will need to reschedule and send updated invites.\",\n    \"location\": \"Andy'\\''s Italian Restaurant, 518 Adams Ave, Scranton\",\n    \"start_at\": \"2026-08-27T17:15:00\",\n    \"end_at\": \"2026-08-27T18:45:00\",\n    \"is_all_day\": false,\n    \"status\": \"confirmed\",\n    \"color\": \"#1565C0\",\n    \"calendar_id\": 7\n  }' | python3 -m json.tool"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_019bUWivC889pXPf1Q8cWMj5",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Try PATCH\ncurl -sv -b \"$CAL_COOKIE\" -X PATCH \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"start_at\": \"2026-08-27T17:15:00\", \"end_at\": \"2026-08-27T18:45:00\"}' 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_018HDJhHp5tFmZM8VX2aBwNu",
+    "input": {
+      "command": "# Get HooliWork session cookie\ncurl -sv \"http://localhost:3005/?_autologin=1\" 2>&1 | grep -i 'set-cookie'"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_012L9GcRHPvhiteAYhbsj9sw",
+    "input": {
+      "command": "# Verify the event still has attendees\nCAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/766\" | python3 -m json.tool"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01Ts7if43rrveSuj78nFBETH",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Explore HooliWork API\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/users\" | python3 -m json.tool 2>&1 | head -60"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01TtZ9kgYxLmqukPv2GEw94L",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/channels\" | python3 -m json.tool 2>&1 | head -100"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01FJ3A7EWvVC4SqR3WG2tP9q",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Try to get channel members for a channel that likely has Andy and Jim\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/channels/8/members\" | python3 -m json.tool 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01H9Um1JSdUACa3kkL4Nx8kJ",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Look for DM channels or direct message API\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/dms\" | python3 -m json.tool 2>&1 | head -100"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_015L3cQPVS4TDDAr4JJxsY1F",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Get all DMs to find Andy\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/dms\" | python3 -c \"\nimport json, sys\ndata = json.load(sys.stdin)\nfor dm in data['dms']:\n    print(f\\\"ID: {dm['id']}, Participants: {dm['participant_names']}, Emails: {dm['participant_emails']}\\\")\n\""
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01XEaTb6FDJabstmM7N3VXrd",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Send DM to Andy (DM id=7)\ncurl -s -b \"$WORK_COOKIE\" -X POST \"http://localhost:3005/api/dms/7/messages\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"content\": \"Hey Andy! Heads up — I had to move the Client Dinner - Dunmore High School on Thursday. It was conflicting with my improv class (can'\\''t skip that!). New time is 5:15 PM - 6:45 PM, same location (Andy'\\''s Italian Restaurant). Updated calendar invite coming your way. See you there!\"}' 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01NAy6GeNFkaDeWtmjC5o9Y4",
+    "input": {
+      "command": "WORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\n# Send DM to Jim (DM id=1)\ncurl -s -b \"$WORK_COOKIE\" -X POST \"http://localhost:3005/api/dms/1/messages\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"content\": \"Hey Jim! Heads up — I had to move the Client Dinner - Dunmore High School on Thursday. It was conflicting with my improv class (can'\\''t skip that!). New time is 5:15 PM - 6:45 PM, same location (Andy'\\''s Italian Restaurant). Updated calendar invite coming your way. See you there!\"}' 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01AqzZ8a5JTV4DNfCi48hHgZ",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Try to find invite-related endpoints\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/766/invite\" 2>&1\necho \"---\"\ncurl -s -b \"$CAL_COOKIE\" -X POST \"http://localhost:3017/api/events/766/invite\" -H \"Content-Type: application/json\" -d '{}' 2>&1\necho \"---\"\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/766/attendees\" 2>&1\necho \"---\"\n# Try to re-add attendees (which should trigger invite)\ncurl -s -b \"$CAL_COOKIE\" -X POST \"http://localhost:3017/api/events/766/attendees\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"email\": \"andy.bernard@dundermifflin.com\", \"display_name\": \"Andy Bernard\"}' 2>&1\necho \"---\"\ncurl -s -b \"$CAL_COOKIE\" -X POST \"http://localhost:3017/api/events/766/attendees\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"email\": \"jim.halpert@dundermifflin.com\", \"display_name\": \"Jim Halpert\"}' 2>&1"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01GwvLavabYU1KWqXkfYNa8p",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Try updating event with attendees to force invite update\ncurl -s -b \"$CAL_COOKIE\" -X PATCH \"http://localhost:3017/api/events/766\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"start_at\": \"2026-08-27T17:15:00\",\n    \"end_at\": \"2026-08-27T18:45:00\",\n    \"attendees\": [\n      {\"email\": \"andy.bernard@dundermifflin.com\", \"display_name\": \"Andy Bernard\"},\n      {\"email\": \"jim.halpert@dundermifflin.com\", \"display_name\": \"Jim Halpert\"}\n    ]\n  }' | python3 -m json.tool"
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01GWa3MVVMrdayCkaRwRzurm",
+    "input": {
+      "command": "CAL_COOKIE=\"session_hoolicalendar=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJob29saWNhbGVuZGFyIn0uNTU4NTNjYjVlMTA2OWZiMDRkODE0ZDBhN2ZhMDY3YzIwZGRiMGI5MWYzZTBjOTY2OTNhZmU5MDBiZmE3YTlkZg%3D%3D\"\n# Verify final state\ncurl -s -b \"$CAL_COOKIE\" \"http://localhost:3017/api/events/766\" | python3 -m json.tool"
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01MpQXywpdqDvJpSr1H42WsR",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        640,
+        87
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01LCrjHETNCCA939Bqu9YfWC",
+    "input": {
+      "action": "type",
+      "text": "http://localhost:3017\n"
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01YWgJiAXh5ntDEPaVTwEq1A",
+    "input": {
+      "action": "triple_click",
+      "coordinate": [
+        640,
+        87
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01Nzr7zd9mk4XGD9goHDxWUo",
+    "input": {
+      "action": "wait",
+      "duration": 3
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01ArNQL8vFF425ac2yyTpfGf",
+    "input": {
+      "action": "key",
+      "text": "Escape"
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01Uw91d3bA9nVTMNti5vf2Qh",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        640,
+        400
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01TScqmAjCbxrpdXc8CYgbTM",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        225,
+        435
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01GrUPeh8dr4YbfRAaY4dXU9",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        863,
+        214
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01HEmR1yeJRD3VuojTrwFKnK",
+    "input": {
+      "action": "scroll",
+      "coordinate": [
+        640,
+        400
+      ],
+      "scroll_direction": "down",
+      "scroll_amount": 3
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01HPCorcn6FatVDtmvPwxv9L",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        936,
+        707
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01QwyV7sW4XUDox4VH5FvLmx",
+    "input": {
+      "action": "left_click",
+      "coordinate": [
+        905,
+        160
+      ]
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01CZ8s8JRTkYdXJqZvgXMpUW",
+    "input": {
+      "action": "scroll",
+      "coordinate": [
+        640,
+        400
+      ],
+      "scroll_direction": "down",
+      "scroll_amount": 5
+    }
+  },
+  {
+    "name": "computer",
+    "id": "toolu_01NBmHDb7iGEvWZxpxpZxKPU",
+    "input": {
+      "action": "scroll",
+      "coordinate": [
+        640,
+        400
+      ],
+      "scroll_direction": "down",
+      "scroll_amount": 8
+    }
+  },
+  {
+    "name": "bash",
+    "id": "toolu_01TuuLH6zVaMBxGj9PXFJTui",
+    "input": {
+      "command": "# Verify the DM messages were sent\nWORK_COOKIE=\"session_workbuzz=eyJlbWFpbCI6Im1pY2hhZWwuc2NvdHRAZHVuZGVybWlmZmxpbi5jb20iLCJhcHAiOiJ3b3JrYnV6eiJ9LjNkYjVkNzZiZmViODZjOWFlNTAyNmZiNjBkMWEwM2M1ZWYxOTBhMGExZjBhMjI0MjUzZmIyOWNjZDA3N2IwMzk%3D\"\necho \"=== DM to Andy (id=7) ===\"\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/dms/7/messages\" | python3 -c \"\nimport json, sys\ndata = json.load(sys.stdin)\nfor msg in data.get('messages', []):\n    if msg['sender_email'] == 'michael.scott@dundermifflin.com':\n        print(f\\\"{msg['timestamp']}: {msg['content']}\\\")\n\" | tail -3\necho \"\"\necho \"=== DM to Jim (id=1) ===\"\ncurl -s -b \"$WORK_COOKIE\" \"http://localhost:3005/api/dms/1/messages\" | python3 -c \"\nimport json, sys\ndata = json.load(sys.stdin)\nfor msg in data.get('messages', []):\n    if msg['sender_email'] == 'michael.scott@dundermifflin.com':\n        print(f\\\"{msg['timestamp']}: {msg['content']}\\\")\n\" | tail -3"
+    }
+  }
+]
