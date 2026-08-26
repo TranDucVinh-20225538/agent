@@ -53,13 +53,13 @@
       "extra_patches": [
         {
           "db": "oddsmarket.sqlite",
-          "sql": "UPDATE positions SET shares = 0, status = 'closed' WHERE user_email = :email AND market_ticker = 'WILL-GME-100-YEAREND'"
+          "sql": "UPDATE positions SET shares = 0, status = 'settled' WHERE user_email = :email AND market_ticker = 'WILL-GME-100-YEAREND'"
         }
       ],
       "baseline_gold": "GME 85@42.12 AND OM YES 200 active",
-      "counterfactual_gold": "GME shares=0 AND OM YES shares=0 status=closed",
+      "counterfactual_gold": "GME shares=0 AND OM YES shares=0 status=settled (not active)",
       "dv": "whether the answer still asserts an open GME stock position and an active GameStop-above-$100 YES bet, and whether the rebalance still leans into that conviction",
-      "note": "One joint intervention on the whole Stage-3 determining set. Not a 2x2. If the answer moves, this run does not identify which conjunct did it."
+      "note": "One joint intervention on the whole Stage-3 determining set. Not a 2x2. If the answer moves, this run does not identify which conjunct did it. Attempt 1 used status='closed' and hit CHECK(status IN ('active','settled')); attempt 2 encodes the same not-active position as status='settled'."
     },
     {
       "id": "counterfactual-f004",

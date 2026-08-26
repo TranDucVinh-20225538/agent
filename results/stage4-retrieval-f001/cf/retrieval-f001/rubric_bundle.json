@@ -1,0 +1,113 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 5
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(1131, 130)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_1_20260826@062531710983.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(640, 96)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "It seems the page didn't navigate. Let me click directly on the \"Dinoco Airlines\" bookmark link.",
+        "screenshot": "step_2_20260826@062541927854.png",
+        "step_num": 2
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.tripleClick(640, 96)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "I can see the URL bar shows localhost:3005 and the status bar shows localhost:3011. Let me type the correct URL for Dinoco Airlines (port 3011).",
+        "screenshot": "step_3_20260826@062555665438.png",
+        "step_num": 3
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.press('esc')",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "The Dinoco Airlines page has loaded and I can see the information I need. Let me click elsewhere to dismiss the dropdown and read the details clearly.",
+        "screenshot": "step_4_20260826@062605663536.png",
+        "step_num": 4
+      },
+      {
+        "parsed_action_obj": {
+          "action": "DONE",
+          "done": true,
+          "reward": 0.0
+        },
+        "raw_response_text": "I can clearly see the Dinoco Airlines dashboard with the loyalty information:\n\n- **FlyMiles Loyalty Tier**: Silver Voyager\n- **Miles Balance**: 8,620\n\nMy current FlyMiles loyalty tier on Dinoco Airlines is **Silver Voyager**, and I have **8,620 miles** in the bank.\n\n```DONE```",
+        "screenshot": "step_5_20260826@062616273884.png",
+        "step_num": 5
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "retrieval",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent reads Michael's FlyMiles loyalty tier directly from the live Dinoco profile (not inferred from email or other apps)",
+        "type": "llm_judge",
+        "weight": 0.4
+      },
+      {
+        "criterion": "Agent reads Michael's current FlyMiles miles balance directly from the live Dinoco profile",
+        "type": "llm_judge",
+        "weight": 0.4
+      },
+      {
+        "criterion": "Agent reports the loyalty tier and miles balance together in a single answer",
+        "type": "llm_judge",
+        "weight": 0.2
+      }
+    ],
+    "task_id": "retrieval-f001"
+  },
+  "task": {
+    "apps_involved": [
+      "Dinoco Airlines"
+    ],
+    "category": "retrieval",
+    "difficulty": "easy",
+    "id": "retrieval-f001",
+    "instruction": "What's my current FlyMiles loyalty tier on Dinoco and how many miles do I have in the bank?",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}

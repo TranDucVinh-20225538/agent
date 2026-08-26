@@ -143,8 +143,23 @@ def main() -> int:
     for statement in statements:
         sqlite_bound(statement)
 
+    extra_patch_sql = []
+    for ep in spec.get("extra_patches") or []:
+        extra_patch_sql.append({"db": ep["db"], "sql": ep["sql"]})
+        sqlite(args.api, ep["db"], ep["sql"].replace(":email", f"'{email}'"))
+
     after = sqlite(args.api, spec["db"], probe_sql, json_out=True)
     print(f"probe after:  {after}")
+
+    extra_after = []
+    for ep in spec.get("extra_probes") or []:
+        ep_sql = ep["sql"].replace(":email", f"'{email}'")
+        try:
+            ep_result = sqlite(args.api, ep["db"], ep_sql, json_out=True)
+        except SystemExit as exc:
+            ep_result = f"ERROR: {exc}"
+        extra_after.append({"db": ep["db"], "sql": ep["sql"], "result": ep_result})
+        print(f"extra probe after [{ep['db']}]: {ep_result[:500]}")
 
     moved = before != after
     if spec["expect"].get("probe_changes") and not moved:
@@ -165,9 +180,12 @@ def main() -> int:
         "where": "guest",
         "applied_at": datetime.now(timezone.utc).isoformat(),
         "patch": statements,
+        "extra_patches": extra_patch_sql,
         "probe": spec["probe"],
         "probe_before": before,
         "probe_after": after,
+        "extra_probes_before": extra_before,
+        "extra_probes_after": extra_after,
         "gold_moved": moved,
     }
     path = args.out / f"{args.task}.guest.json"

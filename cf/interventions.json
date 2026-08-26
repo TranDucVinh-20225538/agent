@@ -148,8 +148,12 @@
       "extra_probes": [
         {"db": "speedtax.sqlite", "sql": "SELECT COUNT(*) AS n_filed, SUM(federal_refund_amount + state_refund_amount) AS combined_refund FROM tax_returns WHERE user_email = :email AND lower(status) = 'filed' AND tax_year < COALESCE((SELECT MIN(tax_year) FROM tax_returns WHERE user_email = :email AND lower(status) != 'filed'), (SELECT MAX(tax_year) + 1 FROM tax_returns WHERE user_email = :email))"}
       ],
-      "patch": [],
-      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+      "patch": [
+        "UPDATE tax_returns SET federal_refund_amount = 100.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2023 AND lower(status) = 'filed'",
+        "UPDATE tax_returns SET federal_refund_amount = 200.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed'"
+      ],
+      "do_not_touch": "2025 in_progress row; n_filed must stay 2",
+      "expect": {"probe_changes": true, "note": "Stage 4 locked. n_filed stays 2; combined 4871.70 → 400.00"}
     },
     {
       "id": "aggregation-f018",
@@ -163,7 +167,7 @@
       ],
       "files": ["~/Documents/Tax_2025/w2_summary.txt", "~/Documents/Tax_2025/1099s.txt"],
       "patch": [],
-      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only. Confounded; no Stage 4 Claude."}
     },
     {
       "id": "preference_inference-f004",
@@ -188,8 +192,16 @@
       "extra_probes": [
         {"db": "oddsmarket.sqlite", "sql": "SELECT market_ticker, title, side, shares, status FROM positions WHERE user_email = :email AND (lower(title) LIKE '%gamestop%' OR lower(title) LIKE '%gme%' OR lower(market_ticker) LIKE '%gme%' OR lower(market_ticker) LIKE '%gamestop%')"}
       ],
-      "patch": [],
-      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+      "patch": [
+        "UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'GME'"
+      ],
+      "extra_patches": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "UPDATE positions SET shares = 0, status = 'settled' WHERE user_email = :email AND market_ticker = 'WILL-GME-100-YEAREND'"
+        }
+      ],
+      "expect": {"probe_changes": true, "note": "Stage 4 locked joint D. GME shares 85→0 and OM YES shares=0 status=settled (schema-legal encoding of not-active; CHECK forbids closed). Not a 2x2."}
     },
     {
       "id": "counterfactual-f004",
@@ -204,8 +216,25 @@
         {"db": "hoolicalendar.sqlite", "sql": "SELECT id, title, start_at, end_at FROM events WHERE user_email = :email AND lower(title) LIKE '%improv%'"},
         {"db": "mail.sqlite", "sql": "SELECT id, from_email, subject, date, thread_id FROM emails WHERE lower(subject) LIKE '%improv%' OR lower(from_email) LIKE '%improv%' OR lower(COALESCE(from_name,'')) LIKE '%improv%' LIMIT 50"}
       ],
-      "patch": [],
-      "expect": {"probe_changes": false, "note": "Stage 3 probe-only; SELECT only."}
+      "patch": [
+        "UPDATE transactions SET amount = 0 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount > 0 AND lower(t.description) LIKE '%improv%')"
+      ],
+      "extra_patches": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "UPDATE tax_data SET field_value = '0' WHERE field_name = '1099_amount_0' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email)"
+        },
+        {
+          "db": "speedtax.sqlite",
+          "sql": "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"nonemployee_compensation\": \"1200\"', '\"nonemployee_compensation\": \"0\"'), '\"nonemployee_compensation\": \"1200.0\"', '\"nonemployee_compensation\": \"0\"') WHERE lower(doc_type) LIKE '%1099%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email)"
+        },
+        {
+          "db": "speedtax.sqlite",
+          "sql": "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"nonemployee_compensation\": \"972.0\"', '\"nonemployee_compensation\": \"0\"'), '\"nonemployee_compensation\": \"1080.0\"', '\"nonemployee_compensation\": \"0\"') WHERE lower(doc_type) LIKE '%1099%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email)"
+        }
+      ],
+      "do_not_touch": "tuition charges (negative amounts), calendar events, mail",
+      "expect": {"probe_changes": true, "note": "Stage 4 locked. Zero improv income/1099; keep tuition/calendar/mail. 972.0/1080.0 replaces are the same pattern as the locked 1200 replace."}
     },
     {
       "id": "retrieval-f003",
