@@ -1,0 +1,321 @@
+===== tablefind.sqlite =====
+_seed_marker         restaurants          slot_inventory     
+menus                reviews              user_rewards       
+reservations         reward_transactions  waitlist_entries   
+restaurant_photos    saved_lists        
+---SCHEMA---
+CREATE TABLE restaurants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                cuisine TEXT,
+                price_range TEXT,
+                neighborhood TEXT,
+                city TEXT,
+                rating REAL,
+                review_count INTEGER DEFAULT 0,
+                has_outdoor INTEGER DEFAULT 0,
+                has_tasting_menu INTEGER DEFAULT 0,
+                is_vegetarian_friendly INTEGER DEFAULT 0,
+                has_private_dining INTEGER DEFAULT 0,
+                has_bar INTEGER DEFAULT 0,
+                distance_miles REAL DEFAULT 0,
+                popularity_score INTEGER DEFAULT 0,
+                dietary_options TEXT DEFAULT '',
+                description TEXT,
+                address TEXT,
+                hours TEXT,
+                image_url TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT ''
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                restaurant_id INTEGER,
+                reservation_id INTEGER,
+                user_email TEXT,
+                user_name TEXT,
+                rating INTEGER,
+                food_rating INTEGER,
+                service_rating INTEGER,
+                ambiance_rating INTEGER,
+                text TEXT,
+                date TEXT,
+                dined_on TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT '',
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
+                FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+            );
+CREATE TABLE reservations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                restaurant_id INTEGER,
+                date TEXT,
+                time TEXT,
+                party_size INTEGER,
+                special_requests TEXT,
+                confirmation_code TEXT,
+                status TEXT DEFAULT 'confirmed',
+                slot_id INTEGER,
+                cancellation_reason TEXT,
+                cancelled_at TEXT,
+                modified_at TEXT,
+                honored_at TEXT,
+                reward_points_awarded INTEGER DEFAULT 0,
+                reward_awarded_at TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT '',
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
+                FOREIGN KEY (slot_id) REFERENCES slot_inventory(id)
+            );
+CREATE TABLE saved_lists (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                name TEXT,
+                restaurant_ids TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT ''
+            );
+CREATE TABLE restaurant_photos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                restaurant_id INTEGER NOT NULL,
+                image_url TEXT NOT NULL,
+                alt_text TEXT,
+                sort_order INTEGER DEFAULT 0,
+                is_primary INTEGER DEFAULT 0,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT '',
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+            );
+CREATE TABLE slot_inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                restaurant_id INTEGER NOT NULL,
+                slot_date TEXT NOT NULL,
+                slot_time TEXT NOT NULL,
+                party_size INTEGER NOT NULL,
+                capacity INTEGER NOT NULL,
+                booked_count INTEGER DEFAULT 0,
+                popularity_score INTEGER DEFAULT 0,
+                UNIQUE (restaurant_id, slot_date, slot_time, party_size),
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+            );
+CREATE TABLE waitlist_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                restaurant_id INTEGER NOT NULL,
+                reservation_id INTEGER UNIQUE,
+                date TEXT NOT NULL,
+                preferred_time TEXT NOT NULL,
+                party_size INTEGER NOT NULL,
+                position INTEGER DEFAULT 1,
+                status TEXT DEFAULT 'active',
+                notes TEXT,
+                created_at TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT '',
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
+                FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+            );
+CREATE TABLE user_rewards (
+                user_email TEXT PRIMARY KEY,
+                points_balance INTEGER DEFAULT 0,
+                credits_balance_cents INTEGER DEFAULT 0,
+                lifetime_points INTEGER DEFAULT 0,
+                updated_at TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT ''
+            );
+CREATE TABLE reward_transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                reservation_id INTEGER,
+                transaction_type TEXT NOT NULL,
+                points_delta INTEGER DEFAULT 0,
+                credit_delta_cents INTEGER DEFAULT 0,
+                description TEXT,
+                created_at TEXT,
+                world_id TEXT DEFAULT '',
+                actor_id TEXT DEFAULT '',
+                vm_id TEXT DEFAULT '',
+                FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+            );
+CREATE TABLE menus (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                restaurant_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT NOT NULL DEFAULT 'Entree',
+                is_vegetarian INTEGER DEFAULT 0,
+                is_gluten_free INTEGER DEFAULT 0,
+                sort_order INTEGER DEFAULT 0,
+                FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+            );
+CREATE TABLE _seed_marker (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE INDEX idx_restaurants_rating ON restaurants(rating DESC);
+CREATE INDEX idx_slots_lookup ON slot_inventory(restaurant_id, slot_date, party_size);
+CREATE INDEX idx_reservations_user ON reservations(user_email, date);
+CREATE INDEX idx_reviews_restaurant ON reviews(restaurant_id, date DESC);
+CREATE INDEX idx_waitlist_restaurant ON waitlist_entries(restaurant_id, date, preferred_time);
+CREATE INDEX idx_menus_restaurant ON menus(restaurant_id, category, sort_order);
+CREATE UNIQUE INDEX idx_saved_lists_user_name ON saved_lists(user_email, name);
+CREATE UNIQUE INDEX idx_reservations_active_uniq
+    ON reservations(user_email, restaurant_id, date, time)
+    WHERE status IN ('confirmed', 'waitlisted')
+  ;
+
+===== hangrydash.sqlite =====
+_seed_marker           menu_items             promo_codes          
+_seed_meta             order_issue_reports    restaurants          
+cart_items             order_reviews          saved_addresses      
+cart_settings          order_timeline_events  user_memberships     
+credit_ledger          orders               
+---SCHEMA---
+CREATE TABLE restaurants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                cuisine TEXT NOT NULL,
+                rating REAL NOT NULL DEFAULT 4.5,
+                rating_count INTEGER NOT NULL DEFAULT 0,
+                delivery_time TEXT NOT NULL DEFAULT '25-35 min',
+                delivery_fee REAL NOT NULL DEFAULT 2.99,
+                image_url TEXT,
+                hero_image_url TEXT,
+                address TEXT,
+                is_favorite INTEGER NOT NULL DEFAULT 0,
+                description TEXT,
+                review_summary TEXT,
+                dashpass_eligible INTEGER NOT NULL DEFAULT 0,
+                prep_time_min INTEGER NOT NULL DEFAULT 12,
+                prep_time_max INTEGER NOT NULL DEFAULT 18,
+                latitude REAL,
+                longitude REAL,
+                promo_text TEXT
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE menu_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                restaurant_id INTEGER NOT NULL REFERENCES restaurants(id),
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT NOT NULL,
+                image_url TEXT
+            );
+CREATE TABLE orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                restaurant_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'delivered',
+                subtotal REAL NOT NULL,
+                tax REAL NOT NULL,
+                service_fee REAL NOT NULL DEFAULT 0,
+                tip REAL NOT NULL DEFAULT 0,
+                delivery_fee REAL NOT NULL DEFAULT 2.99,
+                total REAL NOT NULL,
+                delivery_address TEXT,
+                items TEXT NOT NULL,
+                placed_at TEXT,
+                fulfillment_type TEXT NOT NULL DEFAULT 'delivery',
+                promo_code TEXT,
+                promo_discount REAL NOT NULL DEFAULT 0,
+                credits_applied REAL NOT NULL DEFAULT 0,
+                dashpass_applied INTEGER NOT NULL DEFAULT 0,
+                dashpass_savings REAL NOT NULL DEFAULT 0,
+                tip_amount REAL,
+                tip_adjusted_at TEXT,
+                delivered_at TEXT
+            , scheduled_for TEXT, cancelled_at TEXT, order_note TEXT, payment_method_id TEXT);
+CREATE TABLE saved_addresses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                label TEXT NOT NULL,
+                address TEXT NOT NULL,
+                is_default INTEGER NOT NULL DEFAULT 0,
+                latitude REAL,
+                longitude REAL
+            );
+CREATE TABLE cart_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                restaurant_id INTEGER NOT NULL,
+                menu_item_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                customizations TEXT
+            , extra_price REAL NOT NULL DEFAULT 0);
+CREATE TABLE cart_settings (
+                user_email TEXT PRIMARY KEY,
+                restaurant_id INTEGER,
+                fulfillment_type TEXT NOT NULL DEFAULT 'delivery',
+                updated_at TEXT NOT NULL
+            );
+CREATE TABLE user_memberships (
+                user_email TEXT PRIMARY KEY,
+                dashpass_enabled INTEGER NOT NULL DEFAULT 0,
+                updated_at TEXT NOT NULL
+            );
+CREATE TABLE promo_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT NOT NULL UNIQUE,
+                description TEXT NOT NULL,
+                discount_type TEXT NOT NULL,
+                discount_value REAL NOT NULL,
+                min_subtotal REAL NOT NULL DEFAULT 0,
+                is_active INTEGER NOT NULL DEFAULT 1
+            );
+CREATE TABLE credit_ledger (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                amount REAL NOT NULL,
+                entry_type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                order_id INTEGER,
+                created_at TEXT NOT NULL
+            );
+CREATE TABLE order_reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL UNIQUE,
+                user_email TEXT NOT NULL,
+                restaurant_id INTEGER NOT NULL,
+                rating INTEGER NOT NULL,
+                review_text TEXT,
+                created_at TEXT NOT NULL
+            );
+CREATE TABLE order_issue_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                user_email TEXT NOT NULL,
+                category TEXT NOT NULL,
+                details TEXT,
+                status TEXT NOT NULL DEFAULT 'open',
+                resolution_note TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+CREATE TABLE order_timeline_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                step_key TEXT NOT NULL,
+                step_label TEXT NOT NULL,
+                event_time TEXT NOT NULL,
+                sort_order INTEGER NOT NULL
+            );
+CREATE TABLE _seed_marker (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE INDEX idx_menu_items_restaurant ON menu_items(restaurant_id);
+CREATE INDEX idx_orders_user ON orders(user_email);
+CREATE INDEX idx_cart_user ON cart_items(user_email);
+CREATE INDEX idx_saved_addresses_user ON saved_addresses(user_email);
+CREATE INDEX idx_reviews_restaurant ON order_reviews(restaurant_id);
+CREATE INDEX idx_issues_order ON order_issue_reports(order_id);
+CREATE INDEX idx_credit_ledger_user ON credit_ledger(user_email);
+CREATE INDEX idx_timeline_order_sort ON order_timeline_events(order_id, sort_order);
+CREATE TABLE _seed_meta (key TEXT PRIMARY KEY, value TEXT, updated_at TEXT);

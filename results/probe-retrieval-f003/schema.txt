@@ -1,0 +1,71 @@
+===== speedtax.sqlite =====
+_seed_marker       tax_data           tax_filing_events
+_speedtax_meta     tax_documents      tax_returns      
+---SCHEMA---
+CREATE TABLE tax_returns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                tax_year INTEGER NOT NULL DEFAULT 2025,
+                status TEXT NOT NULL DEFAULT 'in_progress' CHECK(status IN ('in_progress', 'review', 'filed')),
+                current_step INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                filed_at TEXT,
+                last_saved_at TEXT,
+                confirmation_number TEXT,
+                estimated_refund_date TEXT,
+                federal_refund_amount REAL,
+                state_refund_amount REAL,
+                state_code TEXT,
+                filing_status TEXT NOT NULL DEFAULT 'not_submitted',
+                filing_channel TEXT,
+                submission_reference TEXT,
+                acknowledgement_number TEXT,
+                filing_receipt_number TEXT
+            );
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE tax_filing_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                event_order INTEGER NOT NULL,
+                event_key TEXT NOT NULL,
+                title TEXT NOT NULL,
+                detail TEXT NOT NULL,
+                state TEXT NOT NULL CHECK(state IN ('queued', 'submitted', 'accepted', 'processing', 'completed')),
+                occurred_at TEXT NOT NULL,
+                receipt_number TEXT,
+                acknowledgement_number TEXT
+            );
+CREATE TABLE tax_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                step INTEGER NOT NULL,
+                field_name TEXT NOT NULL,
+                field_value TEXT NOT NULL DEFAULT '',
+                UNIQUE(return_id, step, field_name)
+            );
+CREATE TABLE tax_documents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                return_id INTEGER NOT NULL REFERENCES tax_returns(id) ON DELETE CASCADE,
+                step INTEGER NOT NULL,
+                doc_type TEXT NOT NULL,
+                data_json TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+CREATE TABLE _seed_marker (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE INDEX idx_tax_returns_user ON tax_returns(user_email);
+CREATE INDEX idx_tax_data_return ON tax_data(return_id, step);
+CREATE INDEX idx_tax_documents_return_step ON tax_documents(return_id, step);
+CREATE TABLE _speedtax_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+
+===== Tax_2025 files =====
+total 12
+drwxr-xr-x  3 root root 4096 Jun  9 06:02 .
+drwxr-xr-x 25 root root 4096 Aug 21 01:18 ..
+drwxr-x--- 15 user user 4096 Aug 25 18:42 user
+---
+/home/user/Documents/Tax_2025/1099s.txt
+/home/user/Documents/Tax_2025/w2_summary.txt
