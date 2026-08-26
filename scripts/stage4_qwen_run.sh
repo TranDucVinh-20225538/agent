@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
+# ABANDONED: HPC Qwen 27B. Use scripts/stage4_qwen_openrouter_run.sh on node30.
 # Stage 4 Qwen3.5-27B CUA. Frozen SQL as Claude. Does not touch Claude/OpenAI dirs.
 # HPC 57951: vLLM+vision passed; QEMU died on romfile because env.py has no -L.
-# Default this job: f001 only. f003 only if f001 pair is complete AND requested.
 set -euo pipefail
+
+if [ "${MYPCBENCH_QWEN_HPC_FORCE:-}" != "1" ]; then
+  echo "FAIL: HPC Qwen Stage 4 is abandoned. Use OpenRouter 35B-A3B on node30." >&2
+  echo "  bash scripts/stage4_qwen_openrouter_run.sh" >&2
+  echo "  (override only with MYPCBENCH_QWEN_HPC_FORCE=1)" >&2
+  exit 1
+fi
 
 A="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 H="$A/external/MyPCBench-main"

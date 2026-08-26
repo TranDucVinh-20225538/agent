@@ -2,6 +2,10 @@
 
 You are on **node30**. Workdir: `/mnt/data2/Vinh/agent`. Branch: `phase-a-results`.
 
+HPC Qwen (node004 / 27B / vLLM) is **abandoned**. Do not wait for
+57948/57951. `scancel` any leftover job. This OpenRouter path is the
+Qwen lane.
+
 Text smoke (`"OK"`, ~$0.00014) already passed. That is **not** Stage 4.
 Next is a **vision + CUA XML** gate, then **`retrieval-f001` only**.
 

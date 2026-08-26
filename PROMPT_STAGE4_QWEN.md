@@ -1,4 +1,23 @@
-# Stage 4 Qwen3.5-27B — frozen tasks, qwen_cuabash, cu129 vLLM
+# ABANDONED — HPC Qwen Stage 4
+
+**Do not submit SLURM. Do not start vLLM. Do not run this prompt.**
+
+Qwen Stage 4 moved to **node30 + OpenRouter** `qwen/qwen3.5-35b-a3b`
+(`PROMPT_STAGE4_QWEN_OPENROUTER.md`, `scripts/stage4_qwen_openrouter_run.sh`).
+That is the paper model id. HPC 27B + QEMU ROM/`-L` is closed.
+
+If a job is still **R** on node004 (57948/57951 or later):
+
+```bash
+scancel <jobid>
+```
+
+57943 smoke, 57946 `.env`, 57947 port, 57951 ROM: **not Stage 4 cells**.
+Do not score empty `traj` / `no_bundle`.
+
+---
+
+# (historical) Stage 4 Qwen3.5-27B — HPC, do not run
 
 You are on the **HPC Qwen node** (node004 / driver 560.35.03). Find the
 MyPCBench agent repo (likely `/mnt/data2/Vinh/agent` or the clone that
