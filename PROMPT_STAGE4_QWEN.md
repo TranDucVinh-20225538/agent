@@ -81,6 +81,23 @@ vllm serve Qwen/Qwen3.5-27B \
 `set -euo pipefail` + `source .env` must not abort if `.env` is absent
 (HPC 57946 died there and a trap killed vLLM). `.env` is optional.
 
+QEMU hostfwd on a shared node is not free by default. **57947 is not
+Stage 4:** vLLM + image gate passed, then QEMU failed to bind
+`127.0.0.1:16000`; eight cells crashed in ~50s with empty `traj`. Do
+not score those dirs. Do not treat “no DONE on f004” from that job as
+an attribution result.
+
+Runner defaults (override if still busy):
+
+```
+MYPCBENCH_HOST_SSH_PORT=18700
+MYPCBENCH_HOST_VNC_PORT=5917
+MYPCBENCH_HOST_API_PORT=12800
+```
+
+The script refuses to start if any of those three is already listening,
+and **stops after f001 baseline if `traj.jsonl` is missing or empty**.
+
 ---
 
 ## Gate 1 — screenshot, not text-only
@@ -128,8 +145,10 @@ Order (do not reorder):
 3. `preference_inference-f018`
 4. `counterfactual-f004`
 
-Each: baseline (probe-only) then CF. If one pair technically fails,
-record and continue. Do not substitute tasks.
+Each: baseline (probe-only) then CF. If f001 baseline has no `traj`,
+**STOP** — that is a boot/port failure, not a task result. Later pairs:
+if one pair technically fails, record and continue. Do not substitute
+tasks. Do not `git pull` into a job that is already running.
 
 ---
 
