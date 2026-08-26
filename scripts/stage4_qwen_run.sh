@@ -13,11 +13,26 @@ mkdir -p "$A/results" "$H/results" "$ONE_DIR" "$A/out"
 
 cd "$H"
 set -a
-# shellcheck disable=SC1091
-source .env
-# shellcheck disable=SC1091
-source ./mypcbench-vm/env.sh
+# HPC clones often have no .env (keys live in the SLURM environment).
+# Missing file must not abort the job or trip a trap that kills vLLM.
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  source .env
+else
+  echo "WARN: $H/.env missing; using process env only"
+fi
+if [ -f ./mypcbench-vm/env.sh ]; then
+  # shellcheck disable=SC1091
+  source ./mypcbench-vm/env.sh
+else
+  echo "WARN: mypcbench-vm/env.sh missing; MYPCBENCH_QCOW2 must already be set"
+fi
 set +a
+
+if [ -z "${MYPCBENCH_QCOW2:-}" ]; then
+  echo "FAIL: MYPCBENCH_QCOW2 unset and no mypcbench-vm/env.sh" >&2
+  exit 1
+fi
 
 export OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:8000/v1}"
 export OPENAI_API_KEY="${OPENAI_API_KEY:-dummy}"

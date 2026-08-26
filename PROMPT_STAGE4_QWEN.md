@@ -78,7 +78,8 @@ vllm serve Qwen/Qwen3.5-27B \
   --port 8000 --trust-remote-code
 ```
 
-Keep this process alive for the whole Stage 4 run.
+`set -euo pipefail` + `source .env` must not abort if `.env` is absent
+(HPC 57946 died there and a trap killed vLLM). `.env` is optional.
 
 ---
 
