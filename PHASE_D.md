@@ -1,5 +1,9 @@
 # Phase D — confirmatory sample, not slot-picking
 
+**Frozen.** Stage 1–4 on Claude Opus 4.6 are closed. Do not add Opus
+runs to increase N. Analysis: `out/PHASE_A_memo.md`. Next spend is
+cross-model replication, not more Claude.
+
 Hypothesis (the thing we are allowed to test):
 
 > Overall task success is insufficient to identify which personal evidence

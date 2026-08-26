@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
-"""Write Stage 4 confirmatory results. Judge score is auxiliary, not the DV."""
+"""Write Stage 4 confirmatory results. Judge score is auxiliary, not the DV.
+
+Set STAGE4_TAG=openai to read results/stage4-openai-<task>/ and write
+out/evidence_stage4_openai_results.{md,csv} without touching the Claude tables.
+"""
 from __future__ import annotations
 
 import csv
 import json
+import os
 import re
 from pathlib import Path
 
-A = Path("/mnt/data2/Vinh/agent")
-OUT_MD = A / "out" / "evidence_stage4_results.md"
-OUT_CSV = A / "out" / "evidence_stage4_results.csv"
+A = Path(os.environ.get("MYPCBENCH_AGENT_ROOT") or Path(__file__).resolve().parents[1])
+TAG = (os.environ.get("STAGE4_TAG") or "").strip()
+_PREFIX = f"stage4-{TAG}-" if TAG else "stage4-"
+_OUT = f"evidence_stage4_{TAG}_results" if TAG else "evidence_stage4_results"
+OUT_MD = A / "out" / f"{_OUT}.md"
+OUT_CSV = A / "out" / f"{_OUT}.csv"
 
 LOCKED = {
     "retrieval-f001": {
@@ -189,7 +197,7 @@ def tracks(task_id: str, base_dv: str, cf_dv: str, base_txt: str, cf_txt: str) -
 
 
 def cell_dir(task_id: str, which: str) -> Path:
-    return A / "results" / f"stage4-{task_id}" / which
+    return A / "results" / f"{_PREFIX}{task_id}" / which
 
 
 def row_for(task_id: str) -> dict:
@@ -239,10 +247,23 @@ def main() -> int:
         writer.writeheader()
         writer.writerows(rows)
 
+    title = "Stage 4 confirmatory Claude"
+    body = (
+        "Stage 1–2 frozen. Stage 3 probes frozen. This table is Stage 4 Claude "
+        "on the 4 identifiable frozen-sample tasks only."
+    )
+    if TAG:
+        title = f"Stage 4 exploratory {TAG} (same frozen tasks/SQL as Claude)"
+        body = (
+            "Exploratory cross-model transfer under the same frozen "
+            "task/intervention protocol. Agent/model changed "
+            f"({TAG}); tasks, SQL, rubric, and DVs are unchanged. Not "
+            "confirmatory Qwen replication. Claude Stage 4 tables were not modified."
+        )
     lines = [
-        "# Stage 4 confirmatory Claude",
+        f"# {title}",
         "",
-        "Stage 1–2 frozen. Stage 3 probes frozen. This table is Stage 4 Claude on the 4 identifiable frozen-sample tasks only.",
+        body,
         "",
         "Funnel: 184 → 10 eligible → 8 confirmatory sample → 4 confounded (no Claude, remain in sample) → 4 identifiable Claude (this session). Reserves retrieval-f003 / retrieval-f016 were not promoted.",
         "",
