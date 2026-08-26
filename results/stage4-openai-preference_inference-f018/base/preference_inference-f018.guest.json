@@ -1,0 +1,17 @@
+{
+  "id": "preference_inference-f018",
+  "role": "probe",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker) = 'GME'",
+  "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+  "extra_probes": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT market_ticker, title, side, shares, status FROM positions WHERE user_email = :email AND (lower(title) LIKE '%gamestop%' OR lower(title) LIKE '%gme%' OR lower(market_ticker) LIKE '%gme%' OR lower(market_ticker) LIKE '%gamestop%')",
+      "result": "[{\"market_ticker\":\"WILL-GME-100-YEAREND\",\"title\":\"GameStop above $100 by year-end\",\"side\":\"YES\",\"shares\":200,\"status\":\"active\"}]"
+    }
+  ],
+  "files": {}
+}
