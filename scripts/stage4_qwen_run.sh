@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Stage 4 Qwen3.5-27B CUA: same 4 frozen tasks + same SQL as Claude.
-# Requires a live vLLM at OPENAI_BASE_URL (cu129 smoke stack).
-# Writes results/stage4-qwen35-* — does not touch Claude or OpenAI dirs.
+# Stage 4 Qwen3.5-27B CUA. Frozen SQL as Claude. Does not touch Claude/OpenAI dirs.
+# HPC 57951: vLLM+vision passed; QEMU died on romfile because env.py has no -L.
+# Default this job: f001 only. f003 only if f001 pair is complete AND requested.
 set -euo pipefail
 
 A="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -58,12 +58,17 @@ then
 fi
 
 export PATH="$H/.venv/bin:$PATH"
+# HPC 57951: extracted QEMU ROM dir exists; binary needs -L. TCG is fine.
+# shellcheck disable=SC1091
+source "$A/scripts/qemu_datadir_wrap.sh"
 export MYPCBENCH_SKIP_QCOW2_REFRESH=1
 export MYPCBENCH_VM_READY_TIMEOUT=3600
 export MYPCBENCH_CF_SCRIPT="$A/scripts/cf_inject.py"
 export MYPCBENCH_VM_HOST=127.0.0.1
 export MYPCBENCH_AGENT_ROOT="$A"
 export STAGE4_TAG=qwen35
+# f001 only until that pair is a real episode. Not a sample shrink.
+STAGE4_QWEN_TASKS="${STAGE4_QWEN_TASKS:-f001}"
 
 # HPC 57947: default SSH 16000 was already bound on node004. QEMU died
 # immediately; 8 cells wrote empty traj. That is not a Stage 4 result.
@@ -97,14 +102,36 @@ if busy:
 print("QEMU ports free")
 PY
 
+# Prove -L before any agent cell. Immediate romfile error = stop, not a DV.
+# Timeout means the machine stayed up (ROM found). Quick exit with romfile = fail.
+python3 - <<'PY'
+import os, subprocess
+datadir = os.environ["QEMU_DATADIR"]
+cmd = [
+    "qemu-system-x86_64", "-L", datadir,
+    "-machine", "q35,accel=tcg", "-cpu", "qemu64", "-m", "64M",
+    "-vga", "virtio", "-display", "none", "-monitor", "none",
+]
+try:
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+    err = (p.stderr or "") + (p.stdout or "")
+    if "failed to find romfile" in err:
+        raise SystemExit(f"FAIL: QEMU still missing ROM despite -L {datadir}: {err[:800]}")
+    print(f"QEMU ROM probe: no romfile error (rc={p.returncode})")
+except subprocess.TimeoutExpired:
+    print("QEMU ROM probe: no romfile error (rc=timeout)")
+PY
+
 exec > >(tee -a "$LOG") 2>&1
 echo "===== Stage 4 Qwen3.5-27B start $(date -Is) ====="
 echo "python3=$(which python3) agent=$AGENT_TYPE model=$AGENT_MODEL"
 echo "OPENAI_BASE_URL=$OPENAI_BASE_URL"
 echo "QEMU hostfwd SSH=$MYPCBENCH_HOST_SSH_PORT VNC=$MYPCBENCH_HOST_VNC_PORT API=$MYPCBENCH_HOST_API_PORT"
+echo "QEMU -L=${QEMU_DATADIR:-unset} EXTRACTED=${MYPCBENCH_QEMU_EXTRACTED:-unset}"
+echo "STAGE4_QWEN_TASKS=$STAGE4_QWEN_TASKS"
 echo "label: Qwen3.5-27B qwen_cuabash; frozen SQL; dirs stage4-qwen35-*"
 echo "NOT paper 35B-A3B. NOT Claude/OpenAI overwrite."
-echo "57946/57947 are not Stage 4 cells (.env trap / bound port / empty traj)."
+echo "57946/57947/57951 are not Stage 4 cells (.env / port / ROM datadir)."
 
 pin_task() {
   local task_id="$1"
@@ -159,6 +186,54 @@ cell_has_traj() {
   find "$dir" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null | grep -q .
 }
 
+cell_has_step() {
+  local dir="$1"
+  local f
+  f=$(find "$dir" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null || true)
+  [ -n "$f" ] && grep -q '"step_num"' "$f"
+}
+
+cell_has_done() {
+  local dir="$1"
+  local f
+  f=$(find "$dir" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null || true)
+  [ -n "$f" ] && grep -Eq '"action": "DONE"|"done": true' "$f"
+}
+
+pair_complete() {
+  local task_id="$1"
+  cell_has_done "$H/results/stage4-qwen35-${task_id}/base" \
+    && cell_has_done "$H/results/stage4-qwen35-${task_id}/cf"
+}
+
+smoke_qemu_traj() {
+  local dest="$A/results/stage4-qwen35-qemu-smoke"
+  local src
+  echo "----- QEMU smoke dummy $(date -Is) -----"
+  mkdir -p "$dest"
+  unset MYPCBENCH_CF_TASK MYPCBENCH_CF_PROBE_ONLY MYPCBENCH_CF_OUT
+  src=""
+  if [ -d "$H/tasks/smoke_one" ]; then
+    src=tasks/smoke_one
+  else
+    pin_task retrieval-f001 "$FINAL/dinoco_airlines/dinoco_airlines.rubrics.json"
+    src=tasks/cf_one
+  fi
+  set +e
+  python3 agent-harness/run_mypcbench.py --backend qemu \
+    --qcow2_path "$MYPCBENCH_QCOW2" \
+    --agent_type dummy --model dummy \
+    --tasks_dir "$src" --max_steps 1 --timeout 3600 \
+    --result_dir "$dest"
+  set -e
+  if ! cell_has_step "$dest"; then
+    echo "FAIL: QEMU smoke wrote no traj step. Not a Stage 4 cell." >&2
+    echo "Check /tmp/mypcbench-*-stderr.log for romfile / KVM / OVMF." >&2
+    exit 1
+  fi
+  echo "QEMU smoke: first traj step present under $dest"
+}
+
 run_pair() {
   local task_id="$1"
   local src="$2"
@@ -176,8 +251,8 @@ run_pair() {
   export MYPCBENCH_CF_OUT="$base_a"
   run_agent "$base_h"
   if [ "$gate" = "gate" ]; then
-    if ! cell_has_traj "$base_h"; then
-      echo "FAIL: $task_id base has no traj — QEMU/agent did not run." >&2
+    if ! cell_has_step "$base_h"; then
+      echo "FAIL: $task_id base has no traj step — QEMU/agent did not run." >&2
       echo "Empty traj is not a Stage 4 cell. Do not judge or continue." >&2
       exit 1
     fi
@@ -193,10 +268,38 @@ run_pair() {
   archive_cell "$cf_h" "$cf_a"
 }
 
+smoke_qemu_traj
+
 run_pair retrieval-f001 "$FINAL/dinoco_airlines/dinoco_airlines.rubrics.json" gate
-run_pair aggregation-f003 "$FINAL/speedtax/speedtax.rubrics.json"
-run_pair preference_inference-f018 "$FINAL/multi_app/multi_app.rubrics.json"
-run_pair counterfactual-f004 "$FINAL/multi_app/multi_app.rubrics.json"
+if ! pair_complete retrieval-f001; then
+  echo "STOP: f001 pair is not a complete episode (need DONE on base and CF)."
+  echo "Not a DV. Do not start f003/f018/f004."
+  exit 1
+fi
+echo "f001 pair complete (DONE both cells). Pipeline gate passed."
+
+case ",$STAGE4_QWEN_TASKS," in
+  *,f003,*|*,all,*)
+    run_pair aggregation-f003 "$FINAL/speedtax/speedtax.rubrics.json"
+    ;;
+  *)
+    echo "STOP after f001. To run f003 in a later job: STAGE4_QWEN_TASKS=f001,f003"
+    echo "Do not call write_stage4_results.py for a partial 4-row table."
+    echo "===== Stage 4 Qwen3.5-27B stop $(date -Is) ====="
+    exit 0
+    ;;
+esac
+
+case ",$STAGE4_QWEN_TASKS," in
+  *,f018,*|*,all,*)
+    run_pair preference_inference-f018 "$FINAL/multi_app/multi_app.rubrics.json"
+    ;;
+esac
+case ",$STAGE4_QWEN_TASKS," in
+  *,f004,*|*,all,*)
+    run_pair counterfactual-f004 "$FINAL/multi_app/multi_app.rubrics.json"
+    ;;
+esac
 
 python3 "$A/scripts/write_stage4_results.py"
 echo "===== Stage 4 Qwen3.5-27B stop $(date -Is) ====="

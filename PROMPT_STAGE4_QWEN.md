@@ -8,9 +8,11 @@ Branch: `phase-a-results` after `git pull`.
 Smoke **57943 already passed**: vLLM `0.27.1+cu129`, torch `2.13.0+cu129`,
 model `Qwen/Qwen3.5-27B`, real GPU (~67 GiB `VLLM::EngineCore`).
 
-This session runs the **four frozen Stage 4 tasks** through
-`qwen_cuabash`. Same SQL / rubric / DVs as Claude. Different model size
-than the paper’s `Qwen3.5-35B-A3B`.
+This session proves the **QEMU datadir**, then runs **`retrieval-f001`
+only** (baseline then CF). Same SQL / rubric / DVs as Claude. Do not
+start f003 until f001 is a complete episode.
+
+Different model size than the paper’s `Qwen3.5-35B-A3B`.
 
 Label every artifact:
 
@@ -30,8 +32,11 @@ Label every artifact:
 - Do not change eligibility, sample, SQL, rubric, or gold.
 - Do not emulate a different tool XML than `qwen_cuabash`.
 - Do not run Gemini as the agent.
-- Do not expand beyond the four tasks.
+- Do not expand beyond the frozen four. This job is **f001 only**.
+- Do not start f003/f018/f004 because vLLM is up.
+- Do not treat 57946 / 57947 / 57951 empty dirs as Stage 4 cells.
 - Do not start OpenAI or Claude jobs in this session.
+- Do not `git pull` into a job that is already running.
 
 ---
 
@@ -83,9 +88,26 @@ vllm serve Qwen/Qwen3.5-27B \
 
 QEMU hostfwd on a shared node is not free by default. **57947 is not
 Stage 4:** vLLM + image gate passed, then QEMU failed to bind
-`127.0.0.1:16000`; eight cells crashed in ~50s with empty `traj`. Do
-not score those dirs. Do not treat “no DONE on f004” from that job as
-an attribution result.
+`127.0.0.1:16000`; eight cells crashed in ~50s with empty `traj`.
+
+**57951 is not a failed experiment.** vLLM ready (371s), `/v1/models`
+200, vision gate pass, QEMU process started, then died on:
+
+`failed to find romfile "vgabios-virtio.bin"` (and `kvmvapic.bin`)
+
+Those files exist under
+`/data2/cmdir/home/toandq/MyPCBench/.opt/qemu/usr/share/qemu/`.
+`env.py` launches `qemu-system-x86_64` with **no `-L`**, so a relocated
+RPM extract cannot see its datadir. Empty `traj` / `no_bundle` / `0.0`
+are not DVs.
+
+The runner now wraps QEMU with `-L` (do not install a new QEMU, do not
+touch KVM, do not change the model). TCG is fine.
+
+```
+MYPCBENCH_QEMU_EXTRACTED=/data2/cmdir/home/toandq/MyPCBench/.opt/qemu
+QEMU_DATADIR=$MYPCBENCH_QEMU_EXTRACTED/usr/share/qemu
+```
 
 Runner defaults (override if still busy):
 
@@ -95,8 +117,14 @@ MYPCBENCH_HOST_VNC_PORT=5917
 MYPCBENCH_HOST_API_PORT=12800
 ```
 
-The script refuses to start if any of those three is already listening,
-and **stops after f001 baseline if `traj.jsonl` is missing or empty**.
+The script refuses to start if any of those three is already listening.
+It also probes `-vga virtio` against that datadir, then a **dummy**
+1-step boot. No first `traj` step → **STOP**. Do not start f001.
+
+**This submit is f001 only** (`STAGE4_QWEN_TASKS=f001`). Do not start
+f003/f018/f004 in the same job. If f001 baseline+CF both `DONE`, a later
+job may set `STAGE4_QWEN_TASKS=f001,f003`. That is infrastructure
+sequencing, not a sample shrink. Frozen four remain f001/f003/f018/f004.
 
 ---
 
@@ -106,8 +134,8 @@ Smoke 57943 proved **text**. `qwen_cuabash` sends **1280×800 screenshots**.
 
 Before f001: one chat.completions call with a real MyPCBench screenshot
 (or any 1280×800 PNG) through the same base URL. HTTP 200 and a non-empty
-completion → continue. Image timeout / reject → **STOP**. Do not run the
-four tasks. Record `blocked_no_vision`. Do not fall back to Gemma.
+completion → continue. Image timeout / reject → **STOP**. Do not run
+f001. Record `blocked_no_vision`. Do not fall back to Gemma.
 
 ---
 
@@ -134,45 +162,51 @@ git pull origin phase-a-results
 export OPENAI_BASE_URL=http://127.0.0.1:8000/v1
 export OPENAI_API_KEY=dummy
 export MYPCBENCH_QWEN_MODEL=Qwen/Qwen3.5-27B
-chmod +x scripts/stage4_qwen_run.sh
+export MYPCBENCH_QEMU_EXTRACTED=/data2/cmdir/home/toandq/MyPCBench/.opt/qemu
+export STAGE4_QWEN_TASKS=f001
+chmod +x scripts/stage4_qwen_run.sh scripts/qemu_datadir_wrap.sh
 bash scripts/stage4_qwen_run.sh
 ```
 
-Order (do not reorder):
+Order for **this** job:
 
-1. `retrieval-f001`
-2. `aggregation-f003`
-3. `preference_inference-f018`
-4. `counterfactual-f004`
+1. QEMU `-L` ROM probe
+2. dummy 1-step smoke (`traj` has `step_num`)
+3. `retrieval-f001` baseline then CF
 
-Each: baseline (probe-only) then CF. If f001 baseline has no `traj`,
-**STOP** — that is a boot/port failure, not a task result. Later pairs:
-if one pair technically fails, record and continue. Do not substitute
-tasks. Do not `git pull` into a job that is already running.
+**STOP** after f001. Do not start f003 in this allocation.
+
+If f001 baseline has no traj step, **STOP** — boot/ROM/port, not a
+task result. Do not `git pull` into a job that is already running.
 
 ---
 
-## After all four pairs
+## After f001
 
-Confirm:
+Confirm `results/stage4-qwen35-retrieval-f001/{base,cf}/` have non-empty
+`traj.jsonl` with `DONE` on both cells, `gold_moved` on CF, and a judge
+row. That is the pipeline proof (screenshot → action → traj → inject →
+CF → judge).
 
-- `out/evidence_stage4_qwen35_results.md`
-- `out/evidence_stage4_qwen35_results.csv`
-- `results/stage4-qwen35-<task>/{base,cf}/`
+Do **not** write a four-row `evidence_stage4_qwen35_results.md` from
+f001 alone (missing tasks would look like failures).
 
-Report per task: completion, gold_moved, baseline DV, CF DV, score
-base→CF, tracking, status.
+If f001 is complete, a later job:
+
+```
+export STAGE4_QWEN_TASKS=f001,f003
+```
+
+f018/f004 stay in the frozen four; they are not this submit.
 
 Commit **results only** on `phase-a-results`. Do not commit venvs, wheels,
 `.env`, keys, qcow2.
 
 ```
-Record Qwen3.5-27B qwen_cuabash on the four frozen Stage 4 tasks.
+Record Qwen3.5-27B qwen_cuabash f001 after QEMU -L datadir fix.
 
-cu129 vLLM; same SQL as Claude; dirs stage4-qwen35-*.
+cu129 vLLM; same SQL as Claude; dirs stage4-qwen35-*. Not 57951.
 ```
-
-Push. Print `git rev-parse HEAD` and the four-row table.
 
 ---
 
