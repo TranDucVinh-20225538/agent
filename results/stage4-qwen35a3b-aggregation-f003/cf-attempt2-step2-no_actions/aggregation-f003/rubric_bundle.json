@@ -1,0 +1,78 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 1
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(1039, 133)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "<think>\nThe user wants to access their tax returns on SpeedTax. Currently, the browser is showing an error page for localhost:3005 (HooliWork), which is not the correct application. According to the table, SpeedTax runs on port 3015. I need to navigate to the SpeedTax application to access the tax returns. The most logical next action would be to click on the SpeedTax bookmark in the bookmarks bar, which should take me directly to the SpeedTax application at localhost:3015. This will allow me to proceed with accessing the tax returns and calculating the combined federal + state refund.\n</think>\n\nAction: Click on the SpeedTax bookmark in the bookmarks bar to navigate to the SpeedTax application.\n\n<tool_call>\n<function=computer_use>\n<parameter=action>\nleft_click\n</parameter>\n<parameter=coordinate>\n[811, 167]\n</parameter>\n</function>\n</tool_call>",
+        "screenshot": "step_1_20260827@045801718913.png",
+        "step_num": 1
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "aggregation",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent restricts the rollup to SpeedTax returns whose status is 'filed' and tax_year is strictly less than the current tax year, excluding any in-progress current-year return",
+        "type": "llm_judge",
+        "weight": 0.25
+      },
+      {
+        "criterion": "Agent reads both federal_refund_amount and state_refund_amount from each filed prior-year return rather than reading only one of the two refund fields",
+        "type": "llm_judge",
+        "weight": 0.25
+      },
+      {
+        "criterion": "Agent sums federal+state refunds across the filed prior-year returns and reports a single combined total alongside the count of prior years included",
+        "type": "llm_judge",
+        "weight": 0.3
+      },
+      {
+        "criterion": "Agent answers the persona's 'over the last few years' framing with a relative-year description (e.g. 'across the most recent N filed years') rather than hardcoding absolute calendar years",
+        "type": "llm_judge",
+        "weight": 0.2
+      }
+    ],
+    "task_id": "aggregation-f003"
+  },
+  "task": {
+    "apps_involved": [
+      "SpeedTax"
+    ],
+    "category": "aggregation",
+    "difficulty": "medium",
+    "id": "aggregation-f003",
+    "instruction": "Pull up my prior-year tax returns on SpeedTax and tell me my combined federal + state refund across the most recent filed years. I want one number that says 'over the last few years you've gotten back X total.'",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}

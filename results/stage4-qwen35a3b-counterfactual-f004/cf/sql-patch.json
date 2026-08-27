@@ -1,0 +1,7 @@
+{
+  "condition": "counterfactual-f004",
+  "id": "counterfactual-f004",
+  "patch": [
+    "UPDATE transactions SET amount = 0 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount > 0 AND lower(t.description) LIKE '%improv%')"
+  ]
+}

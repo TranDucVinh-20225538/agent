@@ -6,7 +6,7 @@ set -euo pipefail
 
 A="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 H="$A/external/MyPCBench-main"
-LOG="$A/results/stage4_qwen35a3b_run.log"
+LOG="$A/results/stage4_${STAGE4_TAG:-qwen35a3b}_run.log"
 FINAL="$H/tasks/final"
 ONE_DIR="$H/tasks/cf_one"
 mkdir -p "$A/results" "$H/results" "$ONE_DIR" "$A/out"
@@ -48,8 +48,10 @@ export MYPCBENCH_VM_READY_TIMEOUT=3600
 export MYPCBENCH_CF_SCRIPT="$A/scripts/cf_inject.py"
 export MYPCBENCH_VM_HOST=127.0.0.1
 export MYPCBENCH_AGENT_ROOT="$A"
-export STAGE4_TAG=qwen35a3b
+export STAGE4_TAG="${STAGE4_TAG:-qwen35a3b}"
 STAGE4_QWEN_TASKS="${STAGE4_QWEN_TASKS:-f001}"
+PREFIX="stage4-${STAGE4_TAG}-"
+LOG="$A/results/stage4_${STAGE4_TAG}_run.log"
 
 python3 "$A/scripts/qwen_vision_gate.py"
 
@@ -58,8 +60,8 @@ echo "===== Stage 4 Qwen3.5-35B-A3B OpenRouter start $(date -Is) ====="
 echo "python3=$(which python3) agent=$AGENT_TYPE model=$AGENT_MODEL"
 echo "OPENAI_BASE_URL=$OPENAI_BASE_URL"
 echo "OPENAI_API_KEY=sk-proj? no (OpenRouter process override)"
-echo "STAGE4_QWEN_TASKS=$STAGE4_QWEN_TASKS"
-echo "dirs stage4-qwen35a3b-* ; NOT HPC 27B ; NOT Claude/OpenAI"
+echo "STAGE4_TAG=$STAGE4_TAG STAGE4_QWEN_TASKS=$STAGE4_QWEN_TASKS"
+echo "dirs ${PREFIX}* ; NOT Claude/OpenAI/HPC-27B/35B-A3B overwrite unless TAG matches"
 
 pin_task() {
   local task_id="$1"
@@ -125,8 +127,8 @@ cell_has_done() {
 
 pair_complete() {
   local task_id="$1"
-  cell_has_done "$H/results/stage4-qwen35a3b-${task_id}/base" \
-    && cell_has_done "$H/results/stage4-qwen35a3b-${task_id}/cf"
+  cell_has_done "$H/results/${PREFIX}${task_id}/base" \
+    && cell_has_done "$H/results/${PREFIX}${task_id}/cf"
 }
 
 run_pair() {
@@ -134,10 +136,10 @@ run_pair() {
   local src="$2"
   pin_task "$task_id" "$src"
 
-  local base_h="$H/results/stage4-qwen35a3b-${task_id}/base"
-  local cf_h="$H/results/stage4-qwen35a3b-${task_id}/cf"
-  local base_a="$A/results/stage4-qwen35a3b-${task_id}/base"
-  local cf_a="$A/results/stage4-qwen35a3b-${task_id}/cf"
+  local base_h="$H/results/${PREFIX}${task_id}/base"
+  local cf_h="$H/results/${PREFIX}${task_id}/cf"
+  local base_a="$A/results/${PREFIX}${task_id}/base"
+  local cf_a="$A/results/${PREFIX}${task_id}/cf"
 
   unset MYPCBENCH_CF_PROBE_ONLY
   export MYPCBENCH_CF_TASK="$task_id"
@@ -161,10 +163,14 @@ run_pair() {
 
 run_pair retrieval-f001 "$FINAL/dinoco_airlines/dinoco_airlines.rubrics.json"
 if ! pair_complete retrieval-f001; then
-  echo "STOP: f001 pair not complete (need DONE on base and CF). Not a DV for later tasks."
-  exit 1
+  echo "STOP: f001 pair not complete (need DONE on base and CF)."
+  if [ "${STAGE4_REQUIRE_F001_DONE:-1}" = "1" ]; then
+    echo "Not a DV for later tasks."
+    exit 1
+  fi
+  echo "STAGE4_REQUIRE_F001_DONE=0 — still running later tasks once."
 fi
-echo "f001 pair complete."
+echo "f001 pair checked."
 
 case ",$STAGE4_QWEN_TASKS," in
   *,f003,*|*,all,*)
@@ -190,6 +196,6 @@ case ",$STAGE4_QWEN_TASKS," in
 esac
 
 python3 "$A/scripts/write_stage4_results.py"
-echo "===== Stage 4 Qwen3.5-35B-A3B OpenRouter stop $(date -Is) ====="
-echo "wrote $A/out/evidence_stage4_qwen35a3b_results.md"
-echo "STOP: Claude/OpenAI/HPC-27B dirs untouched"
+echo "===== Stage 4 ${STAGE4_TAG} OpenRouter stop $(date -Is) ====="
+echo "wrote $A/out/evidence_stage4_${STAGE4_TAG}_results.md"
+echo "STOP: Claude/OpenAI/HPC-27B/other-tag dirs untouched"

@@ -1,0 +1,34 @@
+{
+  "id": "preference_inference-f018",
+  "role": "probe",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-26T22:47:44.529775+00:00",
+  "patch": [
+    "UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'GME'"
+  ],
+  "extra_patches": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "UPDATE positions SET shares = 0, status = 'settled' WHERE user_email = :email AND market_ticker = 'WILL-GME-100-YEAREND'"
+    }
+  ],
+  "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker) = 'GME'",
+  "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+  "probe_after": "[{\"ticker\":\"GME\",\"shares\":0.0,\"avg_cost\":42.1199999999999974}]",
+  "extra_probes_before": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT market_ticker, title, side, shares, status FROM positions WHERE user_email = :email AND (lower(title) LIKE '%gamestop%' OR lower(title) LIKE '%gme%' OR lower(market_ticker) LIKE '%gme%' OR lower(market_ticker) LIKE '%gamestop%')",
+      "result": "[{\"market_ticker\":\"WILL-GME-100-YEAREND\",\"title\":\"GameStop above $100 by year-end\",\"side\":\"YES\",\"shares\":200,\"status\":\"active\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT market_ticker, title, side, shares, status FROM positions WHERE user_email = :email AND (lower(title) LIKE '%gamestop%' OR lower(title) LIKE '%gme%' OR lower(market_ticker) LIKE '%gme%' OR lower(market_ticker) LIKE '%gamestop%')",
+      "result": "[{\"market_ticker\":\"WILL-GME-100-YEAREND\",\"title\":\"GameStop above $100 by year-end\",\"side\":\"YES\",\"shares\":0,\"status\":\"settled\"}]"
+    }
+  ],
+  "gold_moved": true
+}

@@ -239,8 +239,27 @@ def row_for(task_id: str) -> dict:
     }
 
 
+def task_ids():
+    alias = {
+        "f001": "retrieval-f001",
+        "f003": "aggregation-f003",
+        "f018": "preference_inference-f018",
+        "f004": "counterfactual-f004",
+    }
+    raw = (os.environ.get("STAGE4_WRITE_TASKS") or "").strip()
+    if not raw:
+        return list(LOCKED)
+    out = []
+    for part in raw.split(","):
+        tid = alias.get(part.strip(), part.strip())
+        if tid in LOCKED and tid not in out:
+            out.append(tid)
+    return out or list(LOCKED)
+
+
 def main() -> int:
-    rows = [row_for(tid) for tid in LOCKED]
+    ids = task_ids()
+    rows = [row_for(tid) for tid in ids]
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with OUT_CSV.open("w", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=COLS, extrasaction="ignore")
@@ -252,6 +271,7 @@ def main() -> int:
         "Stage 1–2 frozen. Stage 3 probes frozen. This table is Stage 4 Claude "
         "on the 4 identifiable frozen-sample tasks only."
     )
+    subset = bool((os.environ.get("STAGE4_WRITE_TASKS") or "").strip())
     if TAG:
         title = f"Stage 4 exploratory {TAG} (same frozen tasks/SQL as Claude)"
         body = (
@@ -259,6 +279,18 @@ def main() -> int:
             "task/intervention protocol. Agent/model changed "
             f"({TAG}); tasks, SQL, rubric, and DVs are unchanged. Not "
             "confirmatory Qwen replication. Claude Stage 4 tables were not modified."
+        )
+    if TAG == "qwen359b":
+        title = "Stage 4 size ablation Qwen3.5-9B (frozen f001+f003)"
+        body = (
+            "Confirmatory size ablation vs OpenRouter Qwen3.5-35B-A3B. "
+            "Same SQL, rubric, and qwen_cuabash. Not a substitute for 35B-A3B."
+        )
+    elif TAG == "qwen38flash":
+        title = "Stage 4 exploratory Qwen3.8-Flash CUA (frozen f001+f003)"
+        body = (
+            "Exploratory CUA. Same SQL as Claude. Does not replace "
+            "Qwen3.5-35B-A3B even if cells complete."
         )
     lines = [
         f"# {title}",
@@ -276,7 +308,14 @@ def main() -> int:
     ]
     for row in rows:
         lines.append("| " + " | ".join(str(row[c]).replace("\n", " ") for c in COLS) + " |")
-    lines += ["", "Nulls and failures are kept as rows. No sampled id was omitted."]
+    lines += [
+        "",
+        (
+            f"Rows in this table: {', '.join(ids)}. f018/f004 were not run in this job."
+            if subset
+            else "Nulls and failures are kept as rows. No sampled id was omitted."
+        ),
+    ]
     OUT_MD.write_text("\n".join(lines) + "\n")
     print(f"wrote {OUT_MD}")
     print(f"wrote {OUT_CSV}")

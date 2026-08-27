@@ -1,0 +1,17 @@
+{
+  "id": "retrieval-f001",
+  "role": "point",
+  "db": "dinoco-airlines.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-26T21:18:11.554950+00:00",
+  "patch": [
+    "UPDATE loyalty SET status = 'Silver Voyager', miles = 8620, miles_ytd = 8620 WHERE user_email = :email"
+  ],
+  "extra_patches": [],
+  "probe": "SELECT status, miles, miles_ytd FROM loyalty WHERE user_email = :email",
+  "probe_before": "[{\"status\":\"Gold Voyager\",\"miles\":38450,\"miles_ytd\":14280}]",
+  "probe_after": "[{\"status\":\"Silver Voyager\",\"miles\":8620,\"miles_ytd\":8620}]",
+  "extra_probes_before": [],
+  "extra_probes_after": [],
+  "gold_moved": true
+}

@@ -1,0 +1,133 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 7
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click on the \"Dinoco Airlines\" bookmark in the bookmarks bar to navigate to the Dinoco Airlines website.\n\n",
+        "screenshot": "step_1_20260826@211849436727.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click on the \"Dinoco Airlines\" bookmark in the bookmarks bar to navigate to the Dinoco Airlines website.\n\n",
+        "screenshot": "step_2_20260826@211853949236.png",
+        "step_num": 2
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(1115, 128)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click on the \"Dinoco Airlines\" bookmark in the bookmarks bar to navigate to the Dinoco Airlines website.\n\n<tool_call>\n<function=computer_use>\n<parameter=action>\nleft_click\n</parameter>\n<parameter=coordinate>\n[871, 160]\n</parameter>\n</function>\n</tool_call>",
+        "screenshot": "step_3_20260826@211857156488.png",
+        "step_num": 3
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(1115, 128)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click on the Dinoco Airlines bookmark in the bookmarks bar to navigate to the Dinoco Airlines website.\n\n<tool_call>\n<function=computer_use>\n<parameter=action>\nleft_click\n</parameter>\n<parameter=coordinate>\n[871, 160]\n</parameter>\n</function>\n</tool_call>",
+        "screenshot": "step_4_20260826@211906042322.png",
+        "step_num": 4
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click the \"Try Again\" button on the error page to attempt reloading the Dinoco Airlines website.\n\n",
+        "screenshot": "step_5_20260826@211923734685.png",
+        "step_num": 5
+      },
+      {
+        "parsed_action_obj": {
+          "action": "pyautogui.click(902, 178)",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Click on the \"FlyMiles\" link in the top navigation bar to access detailed FlyMiles account information.\n\n<tool_call>\n<function=computer_use>\n<parameter=action>\nleft_click\n</parameter>\n<parameter=coordinate>\n[704, 223]\n</parameter>\n</function>\n</tool_call>",
+        "screenshot": "step_6_20260826@211934013104.png",
+        "step_num": 6
+      },
+      {
+        "parsed_action_obj": {
+          "action": "DONE",
+          "done": true,
+          "reward": 0.0
+        },
+        "raw_response_text": "Action: Terminate the task with success status as the goal has been accomplished - the user's FlyMiles loyalty tier is Silver Voyager and they have 8,620 miles in their account.\n\n<tool_call>\n<function=computer_use>\n<parameter=action>\nterminate\n</parameter>\n<parameter=status>\nsuccess\n</parameter>\n</function>\n</tool_call>",
+        "screenshot": "step_7_20260826@211946147515.png",
+        "step_num": 7
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "retrieval",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent reads Michael's FlyMiles loyalty tier directly from the live Dinoco profile (not inferred from email or other apps)",
+        "type": "llm_judge",
+        "weight": 0.4
+      },
+      {
+        "criterion": "Agent reads Michael's current FlyMiles miles balance directly from the live Dinoco profile",
+        "type": "llm_judge",
+        "weight": 0.4
+      },
+      {
+        "criterion": "Agent reports the loyalty tier and miles balance together in a single answer",
+        "type": "llm_judge",
+        "weight": 0.2
+      }
+    ],
+    "task_id": "retrieval-f001"
+  },
+  "task": {
+    "apps_involved": [
+      "Dinoco Airlines"
+    ],
+    "category": "retrieval",
+    "difficulty": "easy",
+    "id": "retrieval-f001",
+    "instruction": "What's my current FlyMiles loyalty tier on Dinoco and how many miles do I have in the bank?",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}
