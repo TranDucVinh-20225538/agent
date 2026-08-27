@@ -1,0 +1,216 @@
+{
+  "score": 80,
+  "passed": false,
+  "reasoning": "per-step max-reduce over 16 of 16 steps",
+  "n_steps_total": 16,
+  "n_steps_scored": 16,
+  "concurrency": 4,
+  "model": "claude-sonnet-4-6",
+  "final_fraction": 0.8,
+  "per_rubric_max": [
+    1,
+    1,
+    1,
+    0
+  ],
+  "per_step_scores": [
+    {
+      "step_num": 1,
+      "screenshot": "step_1_20260827@072603309747.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 2,
+      "screenshot": "step_2_20260827@072624666787.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 3,
+      "screenshot": "step_3_20260827@072640868137.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 4,
+      "screenshot": "step_4_20260827@072851619289.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 5,
+      "screenshot": "step_5_20260827@072907787172.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 6,
+      "screenshot": "step_6_20260827@073129034170.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 7,
+      "screenshot": "step_7_20260827@073145274830.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 8,
+      "screenshot": "step_8_20260827@073206397803.png",
+      "scores": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 9,
+      "screenshot": "step_9_20260827@073225341873.png",
+      "scores": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 9,
+      "screenshot": "step_9_20260827@073229106082.png",
+      "scores": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 10,
+      "screenshot": "step_10_20260827@073252430485.png",
+      "scores": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 11,
+      "screenshot": "step_11_20260827@073315598224.png",
+      "scores": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 12,
+      "screenshot": "step_12_20260827@073343171154.png",
+      "scores": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 13,
+      "screenshot": "step_13_20260827@073401904358.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 14,
+      "screenshot": "step_14_20260827@073430397957.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 15,
+      "screenshot": "step_15_20260827@073449686251.png",
+      "scores": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "rubrics": [
+    {
+      "criterion": "Agent restricts the rollup to SpeedTax returns whose status is 'filed' and tax_year is strictly less than the current tax year, excluding any in-progress current-year return",
+      "type": "llm_judge",
+      "weight": 0.25
+    },
+    {
+      "criterion": "Agent reads both federal_refund_amount and state_refund_amount from each filed prior-year return rather than reading only one of the two refund fields",
+      "type": "llm_judge",
+      "weight": 0.25
+    },
+    {
+      "criterion": "Agent sums federal+state refunds across the filed prior-year returns and reports a single combined total alongside the count of prior years included",
+      "type": "llm_judge",
+      "weight": 0.3
+    },
+    {
+      "criterion": "Agent answers the persona's 'over the last few years' framing with a relative-year description (e.g. 'across the most recent N filed years') rather than hardcoding absolute calendar years",
+      "type": "llm_judge",
+      "weight": 0.2
+    }
+  ]
+}

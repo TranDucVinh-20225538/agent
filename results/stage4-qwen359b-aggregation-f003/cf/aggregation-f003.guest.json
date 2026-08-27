@@ -1,0 +1,30 @@
+{
+  "id": "aggregation-f003",
+  "role": "probe",
+  "db": "speedtax.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-27T07:25:42.303364+00:00",
+  "patch": [
+    "UPDATE tax_returns SET federal_refund_amount = 100.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2023 AND lower(status) = 'filed'",
+    "UPDATE tax_returns SET federal_refund_amount = 200.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed'"
+  ],
+  "extra_patches": [],
+  "probe": "SELECT id, tax_year, status, federal_refund_amount, state_refund_amount, (federal_refund_amount + state_refund_amount) AS combined FROM tax_returns WHERE user_email = :email ORDER BY tax_year",
+  "probe_before": "[{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"federal_refund_amount\":1258.75999999999999,\"state_refund_amount\":463.060000000000002,\"combined\":1721.81999999999993},\n{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"federal_refund_amount\":2555.7800000000002,\"state_refund_amount\":594.100000000000022,\"combined\":3149.8800000000001},\n{\"id\":3,\"tax_year\":2025,\"status\":\"in_progress\",\"federal_refund_amount\":null,\"state_refund_amount\":null,\"combined\":null}]",
+  "probe_after": "[{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"federal_refund_amount\":100.0,\"state_refund_amount\":50.0,\"combined\":150.0},\n{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"federal_refund_amount\":200.0,\"state_refund_amount\":50.0,\"combined\":250.0},\n{\"id\":3,\"tax_year\":2025,\"status\":\"in_progress\",\"federal_refund_amount\":null,\"state_refund_amount\":null,\"combined\":null}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT COUNT(*) AS n_filed, SUM(federal_refund_amount + state_refund_amount) AS combined_refund FROM tax_returns WHERE user_email = :email AND lower(status) = 'filed' AND tax_year < COALESCE((SELECT MIN(tax_year) FROM tax_returns WHERE user_email = :email AND lower(status) != 'filed'), (SELECT MAX(tax_year) + 1 FROM tax_returns WHERE user_email = :email))",
+      "result": "[{\"n_filed\":2,\"combined_refund\":4871.69999999999981}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT COUNT(*) AS n_filed, SUM(federal_refund_amount + state_refund_amount) AS combined_refund FROM tax_returns WHERE user_email = :email AND lower(status) = 'filed' AND tax_year < COALESCE((SELECT MIN(tax_year) FROM tax_returns WHERE user_email = :email AND lower(status) != 'filed'), (SELECT MAX(tax_year) + 1 FROM tax_returns WHERE user_email = :email))",
+      "result": "[{\"n_filed\":2,\"combined_refund\":400.0}]"
+    }
+  ],
+  "gold_moved": true
+}

@@ -11,6 +11,15 @@ FINAL="$H/tasks/final"
 ONE_DIR="$H/tasks/cf_one"
 mkdir -p "$A/results" "$H/results" "$ONE_DIR" "$A/out"
 
+# Parent/CLI wins over .env. Otherwise MYPCBENCH_QWEN_MODEL=qwen/qwen3.5-35b-a3b
+# in .env clobbers 9B / Flash lanes into the wrong model under the right TAG.
+_SAVE_QWEN_MODEL="${MYPCBENCH_QWEN_MODEL:-}"
+_SAVE_STAGE4_TAG="${STAGE4_TAG:-}"
+_SAVE_STAGE4_QWEN_TASKS="${STAGE4_QWEN_TASKS:-}"
+_SAVE_STAGE4_WRITE_TASKS="${STAGE4_WRITE_TASKS:-}"
+_SAVE_STAGE4_REQUIRE_F001_DONE="${STAGE4_REQUIRE_F001_DONE:-}"
+_SAVE_QWEN_AGENT="${MYPCBENCH_QWEN_AGENT:-}"
+
 cd "$H"
 set -a
 if [ -f .env ]; then
@@ -22,6 +31,12 @@ if [ -f ./mypcbench-vm/env.sh ]; then
   source ./mypcbench-vm/env.sh
 fi
 set +a
+[ -n "$_SAVE_QWEN_MODEL" ] && export MYPCBENCH_QWEN_MODEL="$_SAVE_QWEN_MODEL"
+[ -n "$_SAVE_STAGE4_TAG" ] && export STAGE4_TAG="$_SAVE_STAGE4_TAG"
+[ -n "$_SAVE_STAGE4_QWEN_TASKS" ] && export STAGE4_QWEN_TASKS="$_SAVE_STAGE4_QWEN_TASKS"
+[ -n "$_SAVE_STAGE4_WRITE_TASKS" ] && export STAGE4_WRITE_TASKS="$_SAVE_STAGE4_WRITE_TASKS"
+[ -n "$_SAVE_STAGE4_REQUIRE_F001_DONE" ] && export STAGE4_REQUIRE_F001_DONE="$_SAVE_STAGE4_REQUIRE_F001_DONE"
+[ -n "$_SAVE_QWEN_AGENT" ] && export MYPCBENCH_QWEN_AGENT="$_SAVE_QWEN_AGENT"
 
 if [ -z "${MYPCBENCH_QCOW2:-}" ]; then
   echo "FAIL: MYPCBENCH_QCOW2 unset" >&2
@@ -43,6 +58,7 @@ AGENT_TYPE="${MYPCBENCH_QWEN_AGENT:-qwen_cuabash}"
 AGENT_MODEL="${MYPCBENCH_QWEN_MODEL:-qwen/qwen3.5-35b-a3b}"
 export MYPCBENCH_QWEN_MODEL="$AGENT_MODEL"
 export PATH="$H/.venv/bin:$PATH"
+export PYTHONUNBUFFERED=1
 export MYPCBENCH_SKIP_QCOW2_REFRESH=1
 export MYPCBENCH_VM_READY_TIMEOUT=3600
 export MYPCBENCH_CF_SCRIPT="$A/scripts/cf_inject.py"
@@ -53,15 +69,46 @@ STAGE4_QWEN_TASKS="${STAGE4_QWEN_TASKS:-f001}"
 PREFIX="stage4-${STAGE4_TAG}-"
 LOG="$A/results/stage4_${STAGE4_TAG}_run.log"
 
-python3 "$A/scripts/qwen_vision_gate.py"
+# Tag/model must match. .env default is 35B-A3B; do not silently swap.
+case "$STAGE4_TAG" in
+  qwen359b)
+    if [[ "$AGENT_MODEL" != *qwen3.5-9b* ]]; then
+      echo "FAIL: TAG=qwen359b but model=$AGENT_MODEL" >&2
+      exit 2
+    fi
+    ;;
+  qwen38flash)
+    if [[ "$AGENT_MODEL" != *qwen3.8-flash* ]]; then
+      echo "FAIL: TAG=qwen38flash but model=$AGENT_MODEL" >&2
+      exit 2
+    fi
+    ;;
+  qwen35a3b)
+    if [[ "$AGENT_MODEL" != *qwen3.5-35b-a3b* ]]; then
+      echo "FAIL: TAG=qwen35a3b but model=$AGENT_MODEL" >&2
+      exit 2
+    fi
+    ;;
+esac
+
+f001_base_done=0
+_f001_traj=$(find "$H/results/${PREFIX}retrieval-f001/base" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null || true)
+if [ -n "${_f001_traj:-}" ] && grep -Eq '"action": "DONE"|"done": true' "$_f001_traj"; then
+  f001_base_done=1
+fi
+if [ "${STAGE4_SKIP_VISION_GATE:-0}" = "1" ] || [ "$f001_base_done" = "1" ]; then
+  echo "skip vision gate (STAGE4_SKIP_VISION_GATE=${STAGE4_SKIP_VISION_GATE:-0} f001_base_done=$f001_base_done model=$AGENT_MODEL)"
+else
+  python3 "$A/scripts/qwen_vision_gate.py"
+fi
 
 exec > >(tee -a "$LOG") 2>&1
-echo "===== Stage 4 Qwen3.5-35B-A3B OpenRouter start $(date -Is) ====="
+echo "===== Stage 4 OpenRouter start $(date -Is) ====="
 echo "python3=$(which python3) agent=$AGENT_TYPE model=$AGENT_MODEL"
 echo "OPENAI_BASE_URL=$OPENAI_BASE_URL"
 echo "OPENAI_API_KEY=sk-proj? no (OpenRouter process override)"
 echo "STAGE4_TAG=$STAGE4_TAG STAGE4_QWEN_TASKS=$STAGE4_QWEN_TASKS"
-echo "dirs ${PREFIX}* ; NOT Claude/OpenAI/HPC-27B/35B-A3B overwrite unless TAG matches"
+echo "dirs ${PREFIX}* ; NOT Claude/OpenAI/HPC-27B overwrite; 35B-A3B only if TAG=qwen35a3b"
 
 pin_task() {
   local task_id="$1"
@@ -131,6 +178,16 @@ pair_complete() {
     && cell_has_done "$H/results/${PREFIX}${task_id}/cf"
 }
 
+stash_incomplete() {
+  local dir="$1"
+  local stamp="$2"
+  if [ -d "$dir" ] && cell_has_step "$dir" && ! cell_has_done "$dir"; then
+    local bak="${dir}-incomplete-${stamp}"
+    echo "incomplete $dir -> $bak"
+    mv "$dir" "$bak"
+  fi
+}
+
 run_pair() {
   local task_id="$1"
   local src="$2"
@@ -140,25 +197,44 @@ run_pair() {
   local cf_h="$H/results/${PREFIX}${task_id}/cf"
   local base_a="$A/results/${PREFIX}${task_id}/base"
   local cf_a="$A/results/${PREFIX}${task_id}/cf"
+  local stamp
+  stamp="$(date +%Y%m%dT%H%M%S)"
 
-  unset MYPCBENCH_CF_PROBE_ONLY
-  export MYPCBENCH_CF_TASK="$task_id"
-  export MYPCBENCH_CF_PROBE_ONLY=1
-  export MYPCBENCH_CF_OUT="$base_a"
-  run_agent "$base_h"
-  if ! cell_has_step "$base_h"; then
-    echo "FAIL: $task_id base has no traj step. Not a Stage 4 cell." >&2
-    exit 1
+  if cell_has_done "$base_h"; then
+    echo "skip $task_id base (already DONE)"
+  else
+    stash_incomplete "$base_h" "$stamp"
+    stash_incomplete "$base_a" "$stamp"
+    unset MYPCBENCH_CF_PROBE_ONLY
+    export MYPCBENCH_CF_TASK="$task_id"
+    export MYPCBENCH_CF_PROBE_ONLY=1
+    export MYPCBENCH_CF_OUT="$base_a"
+    run_agent "$base_h"
+    if ! cell_has_step "$base_h"; then
+      echo "FAIL: $task_id base has no traj step. Not a Stage 4 cell." >&2
+      exit 1
+    fi
+    judge_dir "$base_h"
+    archive_cell "$base_h" "$base_a"
   fi
-  judge_dir "$base_h"
-  archive_cell "$base_h" "$base_a"
 
-  unset MYPCBENCH_CF_PROBE_ONLY
-  export MYPCBENCH_CF_TASK="$task_id"
-  export MYPCBENCH_CF_OUT="$cf_a"
-  run_agent "$cf_h"
-  judge_dir "$cf_h"
-  archive_cell "$cf_h" "$cf_a"
+  if cell_has_done "$cf_h"; then
+    echo "skip $task_id cf (already DONE)"
+  else
+    stash_incomplete "$cf_h" "$stamp"
+    stash_incomplete "$cf_a" "$stamp"
+    # Agent copy may only have sql-patch/guest.json (no traj yet).
+    if [ -d "$cf_a" ] && ! cell_has_done "$cf_a"; then
+      echo "incomplete $cf_a -> ${cf_a}-incomplete-${stamp}"
+      mv "$cf_a" "${cf_a}-incomplete-${stamp}"
+    fi
+    unset MYPCBENCH_CF_PROBE_ONLY
+    export MYPCBENCH_CF_TASK="$task_id"
+    export MYPCBENCH_CF_OUT="$cf_a"
+    run_agent "$cf_h"
+    judge_dir "$cf_h"
+    archive_cell "$cf_h" "$cf_a"
+  fi
 }
 
 run_pair retrieval-f001 "$FINAL/dinoco_airlines/dinoco_airlines.rubrics.json"
