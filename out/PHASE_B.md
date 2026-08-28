@@ -1,6 +1,6 @@
 # Phase B — frozen task expansion
 
-**Status: FROZEN. Do not rewrite I. Do not run B.2 until guest validation of all 10 interventions succeeds.**
+**Status: FROZEN. B.1 guest validation 10/10 (2026-08-28). Do not rewrite I.**
 
 Frozen statement:
 
@@ -18,9 +18,9 @@ specified_not_frozen
         ↓
 implementation         ← file_patches + f004_hd_rank_flip (this commit/session)
         ↓
-validation of I        ← guest inject, no agent. pending
+validation of I        ← 10/10 (out/phase_b_validate.md). f030 gold_moved=False is Type B.
         ↓
-RUN                    ← B.2 Claude / GPT / Qwen 35B-A3B × 10
+RUN                    ← B.2 Claude / GPT / Qwen 35B-A3B on the six unrun tasks; reuse Stage 4 for the four already-run IDs
         ↓
 NO CHANGES TO I
 ```
