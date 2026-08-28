@@ -1,0 +1,338 @@
+{
+  "_status": "frozen",
+  "_frozen_at": "2026-08-28T04:33:00Z",
+  "_freeze_statement": "Eligibility → intervention → expected determining set → scoring interpretation are frozen before any Phase-B trajectory is observed. The universe is the complete A–E eligible set (n=10). Do not add/remove IDs or rewrite I because an episode failed or ΔS moved the wrong way. A QEMU/tooling failure is a failed execution, not a reason to change I and retry to rescue the task.",
+  "_protocol": "out/PHASE_B.md",
+  "_ledger": "cf/phase_b_freeze.json",
+  "_do_not_edit": ["cf/stage4_locked.json", "out/evidence_eligible.json", "out/evidence_funnel.md"],
+  "_universe": "All 10 A–E eligible tasks. Not 15. Expanding past this set requires a new pre-registered eligibility rule.",
+  "_models": "B.1 validate 10 interventions. B.2 Claude / GPT / Qwen3.5-35B-A3B on the same 10. B.3 9B/Flash ablation only. Do not require 30/30 DONE.",
+  "_n_tasks": 10,
+  "tasks": [
+    {
+      "task_id": "retrieval-f001",
+      "domain": "Dinoco Airlines",
+      "task_type": "retrieval",
+      "coverage_labels": ["retrieval", "personal_data"],
+      "stage4_status": "observed_type_A",
+      "identifiable": true,
+      "run_status": "observed_do_not_redesign",
+      "instruction": "What's my current FlyMiles loyalty tier on Dinoco and how many miles do I have in the bank?",
+      "rubric": "Live Dinoco profile: tier (0.4) + miles (0.4) + report both (0.2). Does not name Gold or 38450.",
+      "determining_set": ["loyalty.status", "loyalty.miles"],
+      "base_state": "Gold Voyager / 38450 miles / 14280 ytd",
+      "counterfactual_state": "Silver Voyager / 8620 miles / 8620 ytd",
+      "intervention": {
+        "source": "cf/stage4_locked.json",
+        "db": "dinoco-airlines.sqlite",
+        "patch": ["UPDATE loyalty SET status = 'Silver Voyager', miles = 8620, miles_ytd = 8620 WHERE user_email = :email"],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["tier", "miles"],
+      "score_dependency": "expected_invariant_if_judge_does_not_pin_Gold — Stage 4: 100→100 on 3 primary agents",
+      "primary_type_A_candidate": true,
+      "type_B_candidate": false,
+      "do_not_touch": [],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "retrieval-f003",
+      "domain": "SpeedTax",
+      "task_type": "retrieval",
+      "coverage_labels": ["retrieval", "financial", "temporal"],
+      "stage4_status": "identifiable_reserve_unrun",
+      "identifiable": true,
+      "run_status": "queued",
+      "instruction": "On SpeedTax, find my W-2 from last year's filed return — the most recent prior-year one — and tell me the wages amount on it. Just the number from the W-2, not the refund.",
+      "rubric": "Pick most-recent filed prior year (0.3); read W-2 not refund (0.35); report wages as a dollar figure (0.35). Does not name 136320.",
+      "determining_set": ["tax_year=2024 filed W-2 wages"],
+      "base_state": "TY2024 filed W-2 wages=136320.0 (refund 2555.78 left alone)",
+      "counterfactual_state": "TY2024 filed W-2 wages=80000 (refund unchanged)",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "speedtax.sqlite",
+        "patch": [
+          "UPDATE tax_data SET field_value = '80000' WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')",
+          "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\": \"136320.0\"', '\"wages\": \"80000\"'), '\"wages\": \"136320\"', '\"wages\": \"80000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')"
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["w2_wages_2024"],
+      "score_dependency": "unknown_a_priori — rubric does not pin 136320; Type A if tracks and ΔS=0",
+      "primary_type_A_candidate": true,
+      "type_B_candidate": false,
+      "do_not_touch": ["federal_refund_amount", "2025 in_progress W-2", "2023 W-2"],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "retrieval-f016",
+      "domain": "BatBucks",
+      "task_type": "retrieval",
+      "coverage_labels": ["financial", "multi_field", "aggregation"],
+      "stage4_status": "identifiable_reserve_unrun",
+      "identifiable": true,
+      "run_status": "queued",
+      "instruction": "What's my total BatBucks portfolio worth at cost basis across everything I'm holding, and how much cash is sitting in the account?",
+      "rubric": "Cost-basis sum shares×avg_cost (0.4) + cash separately (0.3) + cost-basis framing (0.15) + reconcile rows (0.15). Does not name 8213.25 or 420.",
+      "determining_set": ["sum(shares*avg_cost)", "portfolio.cash"],
+      "base_state": "cost_basis=8213.25 cash=420 (DIS 896, GME 3580.20, RIVN 1462, SBUX 1176, VTI 1099.05)",
+      "counterfactual_state": "VTI shares=0 so cost_basis=7114.20; cash=50. GME unchanged.",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "batbucks.sqlite",
+        "patch": [
+          "UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'VTI'",
+          "UPDATE portfolio SET cash = 50 WHERE user_email = :email"
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["cost_basis_total", "cash"],
+      "score_dependency": "unknown_a_priori — rubric does not pin the numbers; Type A if tracks and ΔS=0",
+      "primary_type_A_candidate": true,
+      "type_B_candidate": false,
+      "do_not_touch": ["GME shares or avg_cost (entangled with preference_inference-f018)"],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "retrieval-f029",
+      "domain": "SpeedTax|Files",
+      "task_type": "retrieval",
+      "coverage_labels": ["retrieval", "financial", "multi_app"],
+      "stage4_status": "confounded_unrun",
+      "identifiable": false,
+      "identifiable_if": "dual_channel_inject_writes_matching_file",
+      "run_status": "queued",
+      "instruction": "What was my gross income on my most-recent W-2, who was the employer, and how much federal tax got withheld? Double-check the numbers against ~/Documents/Tax_2025/w2_summary.txt and SpeedTax. I need the numbers for a thing.",
+      "rubric": "Open SpeedTax W-2 (0.33); report gross wages AND Dunder Mifflin as employer (0.33, value-class pin); report federal withholding and cross-check w2_summary.txt (0.33).",
+      "determining_set": ["TY2025 W-2 wages", "TY2025 federal_withholding", "employer name", "w2_summary.txt wages+withholding"],
+      "base_state": "TY2025 wages=142000 fed_wh=28400 employer=Dunder Mifflin; file matches",
+      "counterfactual_state": "wages=90000 fed_wh=18000 in sqlite AND w2_summary.txt; employer still Dunder Mifflin",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "speedtax.sqlite",
+        "requires_file_write": true,
+        "patch": [
+          "UPDATE tax_data SET field_value = '90000' WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+          "UPDATE tax_data SET field_value = '18000' WHERE field_name = 'w2_federal_withheld' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+          "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\": \"142000\"', '\"wages\": \"90000\"'), '\"federal_tax_withheld\": \"28400\"', '\"federal_tax_withheld\": \"18000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+        ],
+        "file_patches": [
+          {
+            "path": "~/Documents/Tax_2025/w2_summary.txt",
+            "replace": [
+              ["$142,000.00", "$90,000.00"],
+              ["$28,400.00", "$18,000.00"]
+            ],
+            "hold_constant": "Employer: Dunder Mifflin"
+          }
+        ]
+      },
+      "expected_tracking_fields": ["wages", "federal_withholding", "employer"],
+      "score_dependency": "mixed — employer pin may keep partial credit; wages/withholding criteria should move if tracking. Contrast class vs f001, not a reason to drop.",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": false,
+      "do_not_touch": ["employer_name", "TY2023/2024 W-2"],
+      "inject_blocker": null,
+      "note": "cf_inject.py writes file_patches. sqlite-only I is still forbidden. Guest validation of the dual-channel write is required before B.2."
+    },
+    {
+      "task_id": "retrieval-f030",
+      "domain": "SpeedTax|Files",
+      "task_type": "retrieval",
+      "coverage_labels": ["retrieval", "financial", "multi_field", "joint_evidence"],
+      "stage4_status": "confounded_unrun",
+      "identifiable": false,
+      "identifiable_if": "I_moves_sqlite_only_subset_of_D",
+      "run_status": "queued_type_B_designed",
+      "instruction": "What was my 1099 income on the most-recent return, who paid it, and how much did I claim for charitable contributions? Cross-check the 1099 payer and amount against ~/Documents/Tax_2025/1099s.txt. This is for my accountant.",
+      "rubric": "Find 1099 (0.27); report 1099 amount from Scranton Improv Academy AND charitable total (0.27, value pin on payer); cross-check 1099s.txt payer+amount (0.27); surface charitable line (0.20).",
+      "determining_set": ["TY2025 1099 amount+payer (sqlite AND 1099s.txt)", "TY2025 charitable (sqlite-only)"],
+      "base_state": "1099=1200 payer=Scranton Improv Academy (file matches); charitable=950 (no matching file line)",
+      "counterfactual_state": "1099+file unchanged; charitable=100",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "speedtax.sqlite",
+        "type_b_design": "Move only the sqlite-only conjunct. Leave dual-channel 1099 matching the file.",
+        "patch": [
+          "UPDATE tax_data SET field_value = '100' WHERE field_name IN ('charitable_contributions', 'charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["1099_amount", "1099_payer", "charitable"],
+      "score_dependency": "designed_partial — 1099+payer pin+file can still look like success if charitable is missed. That is the Type B hypothesis, not a post-hoc story.",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": true,
+      "do_not_touch": ["1099_amount_0", "1099_payer_0", "tax_documents 1099 JSON", "~/Documents/Tax_2025/1099s.txt"],
+      "inject_blocker": null,
+      "note": "Do not later add a joint 1099+file patch because this I 'did not move enough'. That would be a second registered row, not a rewrite."
+    },
+    {
+      "task_id": "aggregation-f003",
+      "domain": "SpeedTax",
+      "task_type": "aggregation",
+      "coverage_labels": ["aggregation", "financial", "temporal"],
+      "stage4_status": "observed_type_A",
+      "identifiable": true,
+      "run_status": "observed_do_not_redesign",
+      "instruction": "Pull up my prior-year tax returns on SpeedTax and tell me my combined federal + state refund across the most recent filed years. I want one number that says 'over the last few years you've gotten back X total.'",
+      "rubric": "Filed prior years only (0.25); both federal and state (0.25); single combined total + year count (0.30); relative-year framing (0.20). Does not name 4871.70.",
+      "determining_set": ["sum(federal_refund+state_refund) over filed tax_year < current"],
+      "base_state": "n_filed=2 combined=4871.70 years=[2023,2024]",
+      "counterfactual_state": "n_filed=2 combined=400.00 years=[2023,2024]",
+      "intervention": {
+        "source": "cf/stage4_locked.json",
+        "db": "speedtax.sqlite",
+        "patch": [
+          "UPDATE tax_returns SET federal_refund_amount = 100.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2023 AND lower(status) = 'filed'",
+          "UPDATE tax_returns SET federal_refund_amount = 200.00, state_refund_amount = 50.00 WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed'"
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["combined_refund", "n_filed"],
+      "score_dependency": "expected_invariant_if_judge_does_not_pin_4871 — Stage 4 Claude/GPT Type A; 35B CF invalid; 9B/Flash score-sensitive (ablation only)",
+      "primary_type_A_candidate": true,
+      "type_B_candidate": false,
+      "do_not_touch": ["2025 in_progress row", "n_filed must stay 2"],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "aggregation-f018",
+      "domain": "SpeedTax|Files",
+      "task_type": "aggregation",
+      "coverage_labels": ["aggregation", "multi_field", "financial", "multi_app", "joint_evidence"],
+      "stage4_status": "confounded_unrun",
+      "identifiable": false,
+      "identifiable_if": "I_moves_sqlite_only_subset_of_D",
+      "run_status": "queued_type_B_designed",
+      "instruction": "Roll up my tax deductions for my accountant. Pull the line items (charitable, home-office days, 1099 income, W-2 gross/withholdings) from my in-progress Tax Year 2025 return in SpeedTax, and cross-check each line against my matching Tax_2025 source docs in ~/Documents (w2_summary.txt, 1099s.txt) to see whether the numbers in the in-progress return reconcile with the source docs. Don't guess the final refund on the in-progress return — that one isn't done yet.",
+      "rubric": "Seven value-class criteria (~0.15 each): charitable, home-office days, 1099+payer, W-2 totals, file cross-check, no final refund, complete rollup. Criteria name the fields, not the seed numbers, except the file names.",
+      "determining_set": ["TY2025 charitable (sqlite-only)", "TY2025 home_office_days (sqlite-only)", "TY2025 W-2 (sqlite AND w2_summary.txt)", "TY2025 1099 (sqlite AND 1099s.txt)"],
+      "base_state": "charitable=950 home_office_days=104 W-2=142000/28400 1099=1200; files match W-2/1099; no file for charitable/home-office",
+      "counterfactual_state": "charitable=0 home_office_days=0; W-2/1099 and files unchanged",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "speedtax.sqlite",
+        "type_b_design": "Move only sqlite-only conjuncts. Leave dual-channel W-2/1099 matching files so a file-reading agent can still look complete.",
+        "patch": [
+          "UPDATE tax_data SET field_value = '0' WHERE field_name IN ('charitable_contributions', 'charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+          "UPDATE tax_data SET field_value = '0' WHERE field_name IN ('home_office_days', 'home_office_days_claimed_raw') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["charitable", "home_office_days", "w2_gross", "w2_fed_wh", "1099_amount"],
+      "score_dependency": "designed_partial — W-2/1099+files (~0.45) plus completeness/no-refund (~0.25) can still look like success if charitable+home-office (~0.30) are missed.",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": true,
+      "do_not_touch": ["w2_* fields", "1099_* fields", "tax_documents", "w2_summary.txt", "1099s.txt", "vaultbank"],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "preference_inference-f004",
+      "domain": "TableFind|HangryDash",
+      "task_type": "comparison",
+      "coverage_labels": ["comparison", "filtering", "multi_app"],
+      "stage4_status": "confounded_unrun",
+      "identifiable": false,
+      "identifiable_if": "HD_rank_flips_and_TF_rank_held",
+      "run_status": "queued_score_sensitive_contrast",
+      "instruction": "Am I more of a dine-out guy or a delivery guy? Look at where I make reservations vs where I order delivery from, top 5 each, and tell me how I split.",
+      "rubric": "TF top from live counts (0.21); Cooper's Seafood House as HD top (0.21, value pin); top-5 overlap (0.21); dine vs delivery split (0.16); cite both apps (0.11); report both top-5s (0.11).",
+      "determining_set": ["TableFind reservation counts top-5", "HangryDash order counts top-5"],
+      "base_state": "TF top Cooper's n=12; HD top Cooper's n=88 (Backyard 28, Northern Light 28). Delivery-heavy split.",
+      "counterfactual_state": "HD top is no longer Cooper's (Backyard or Northern Light wins); TF ranking unchanged (Cooper's still TF top).",
+      "intervention": {
+        "source": "cf/phase_b_interventions.json",
+        "db": "hangrydash.sqlite",
+        "dynamic_patch": "f004_hd_rank_flip",
+        "constraints": [
+          "HangryDash count winner must change",
+          "TableFind ranking must not change",
+          "Built at inject time from live counts, same pattern as f009_A",
+          "Do not edit the rubric"
+        ],
+        "patch": [],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["tf_top", "hd_top", "dine_vs_delivery_split"],
+      "score_dependency": "expected_sensitive — rubric names Cooper's as HD top. If the agent tracks the new HD winner, that criterion should fail. Keep as contrast class vs f001 (score-invariant Type A), not a Type A hunt.",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": false,
+      "do_not_touch": ["tablefind.sqlite reservations", "restaurant names in the rubric"],
+      "inject_blocker": null,
+      "note": "f004_hd_rank_flip is scripts/f004_dynamic.py. k from live HD counts. Do not hand-write SQL after seeing a ranking. Guest validation required before B.2."
+    },
+    {
+      "task_id": "preference_inference-f018",
+      "domain": "BatBucks|OddsMarket",
+      "task_type": "joint_evidence",
+      "coverage_labels": ["joint_evidence", "financial", "multi_app", "multi_field"],
+      "stage4_status": "observed_type_B",
+      "identifiable": true,
+      "run_status": "observed_do_not_redesign",
+      "instruction": "I'm clearly a GameStop believer: I've got shares AND a prediction-market bet on it. If I wanted to lean INTO that conviction instead of fighting it, what would a rebalance look like? Cost basis only, no live prices.",
+      "rubric": "Surface GME shares+basis (0.21); surface OM GameStop-above-$100 YES (0.21, value); cost basis only (0.16); lean-INTO rebalance (0.21); cite both (0.11); specific lean-in proposal (0.11). Advice-shaped: a plausible lean-in can still score high if one conjunct is missed.",
+      "determining_set": ["BatBucks GME shares", "OddsMarket WILL-GME-100-YEAREND YES active"],
+      "base_state": "GME 85@42.12 AND OM YES 200 active",
+      "counterfactual_state": "GME shares=0 AND OM YES shares=0 status=settled",
+      "intervention": {
+        "source": "cf/stage4_locked.json",
+        "db": "batbucks.sqlite",
+        "extra_db": "oddsmarket.sqlite",
+        "type_b_design": "One joint I on the whole D. Not a 2×2. Do not split after seeing Claude track GME but still assert YES.",
+        "patch": ["UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'GME'"],
+        "extra_patches": [
+          {
+            "db": "oddsmarket.sqlite",
+            "sql": "UPDATE positions SET shares = 0, status = 'settled' WHERE user_email = :email AND market_ticker = 'WILL-GME-100-YEAREND'"
+          }
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["gme_shares", "om_yes_status"],
+      "score_dependency": "designed_joint — Stage 4 Claude: GME 0 tracked, YES still asserted, 100→100. GPT/Qwen CF not DONE (technical, not track=0).",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": true,
+      "do_not_touch": ["non-GME holdings", "do not add a 2×2"],
+      "inject_blocker": null
+    },
+    {
+      "task_id": "counterfactual-f004",
+      "domain": "Gringotts|SpeedTax|HooliCalendar|HooliMail",
+      "task_type": "contradiction",
+      "coverage_labels": ["multi_app", "financial", "filtering"],
+      "stage4_status": "observed_mostly_not_DONE",
+      "identifiable": true,
+      "run_status": "observed_do_not_redesign",
+      "instruction": "What if I quit improv class? I pay them each month but I also got a 1099 from the same place, so am I a student or am I teaching? Figure out which, then tell me the real net annual savings if I walk away. Also how much calendar time do I get back, and flag any HooliMail threads where I'd need to send a cancellation notice.",
+      "rubric": "Cross-source student-vs-teacher contradiction plus net savings, calendar time, mail. Judge score is expected to drop on CF if the agent correctly stops flagging a contradiction that no longer exists — that drop is not the attribution DV.",
+      "determining_set": ["Gringotts improv income transactions", "SpeedTax 1099 amount from same payer"],
+      "base_state": "pays tuition AND receives 1099 (contradiction present)",
+      "counterfactual_state": "pays tuition; improv income/1099 amount = 0 (contradiction absent)",
+      "intervention": {
+        "source": "cf/stage4_locked.json",
+        "db": "vaultbank.sqlite",
+        "extra_db": "speedtax.sqlite",
+        "patch": [
+          "UPDATE transactions SET amount = 0 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount > 0 AND lower(t.description) LIKE '%improv%')"
+        ],
+        "extra_patches": [
+          {
+            "db": "speedtax.sqlite",
+            "sql": "UPDATE tax_data SET field_value = '0' WHERE field_name = '1099_amount_0' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email)"
+          },
+          {
+            "db": "speedtax.sqlite",
+            "sql": "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"nonemployee_compensation\": \"1200\"', '\"nonemployee_compensation\": \"0\"'), '\"nonemployee_compensation\": \"1200.0\"', '\"nonemployee_compensation\": \"0\"') WHERE lower(doc_type) LIKE '%1099%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email)"
+          }
+        ],
+        "file_patches": []
+      },
+      "expected_tracking_fields": ["contradiction_flag", "1099_amount", "improv_income"],
+      "score_dependency": "expected_sensitive_if_tracking — CF removes the contradiction the rubric rewards flagging. Keep as contradiction cell, not a Type A hunt. Stage 4: mostly not DONE.",
+      "primary_type_A_candidate": false,
+      "type_B_candidate": false,
+      "do_not_touch": ["tuition charges (negative amounts)", "calendar events", "mail"],
+      "inject_blocker": null
+    }
+  ]
+}
