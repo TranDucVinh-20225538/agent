@@ -1,0 +1,40 @@
+{
+  "id": "retrieval-f003",
+  "role": "phase_b",
+  "db": "speedtax.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-28T17:13:31.886514+00:00",
+  "patch": [
+    "UPDATE tax_data SET field_value = '80000' WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')",
+    "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\": \"136320.0\"', '\"wages\": \"80000\"'), '\"wages\": \"136320\"', '\"wages\": \"80000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')"
+  ],
+  "applied_sql": [
+    "UPDATE tax_data SET field_value = '80000' WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')",
+    "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\": \"136320.0\"', '\"wages\": \"80000\"'), '\"wages\": \"136320\"', '\"wages\": \"80000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')",
+    "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\":\"136320.0\"', '\"wages\":\"80000\"'), '\"wages\":\"136320\"', '\"wages\":\"80000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2024 AND lower(status) = 'filed')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT tr.id, tr.tax_year, tr.status, tr.federal_refund_amount, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id AND lower(td.doc_type) LIKE '%w2%' WHERE tr.user_email = :email AND lower(tr.status) = 'filed' ORDER BY tr.tax_year DESC",
+  "probe_before": "[{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"federal_refund_amount\":2555.7800000000002,\"doc_type\":\"w2\",\"data_json\":\"{\\\"id\\\": \\\"seed-w2-2024-michael\\\", \\\"docType\\\": \\\"w2\\\", \\\"employer_name\\\": \\\"Dunder Mifflin\\\", \\\"employer_ein\\\": \\\"12-3456789\\\", \\\"wages\\\": \\\"136320.0\\\", \\\"federal_tax_withheld\\\": \\\"27264.0\\\", \\\"social_security_wages\\\": \\\"136320.0\\\", \\\"medicare_wages\\\": \\\"136320.0\\\", \\\"state_name\\\": \\\"Pennsylvania\\\", \\\"state_wages\\\": \\\"136320.0\\\", \\\"state_tax_withheld\\\": \\\"4184.64\\\"}\"},\n{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"federal_refund_amount\":1258.75999999999999,\"doc_type\":\"w2\",\"data_json\":\"{\\\"id\\\": \\\"seed-w2-2023-michael\\\", \\\"docType\\\": \\\"w2\\\", \\\"employer_name\\\": \\\"Dunder Mifflin\\\", \\\"employer_ein\\\": \\\"12-3456789\\\", \\\"wages\\\": \\\"130867.2\\\", \\\"federal_tax_withheld\\\": \\\"26173.44\\\", \\\"social_security_wages\\\": \\\"130867.2\\\", \\\"medicare_wages\\\": \\\"130867.2\\\", \\\"state_name\\\": \\\"Pennsylvania\\\", \\\"state_wages\\\": \\\"130867.2\\\", \\\"state_tax_withheld\\\": \\\"4017.25\\\"}\"}]",
+  "probe_after": "[{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"federal_refund_amount\":2555.7800000000002,\"doc_type\":\"w2\",\"data_json\":\"{\\\"id\\\": \\\"seed-w2-2024-michael\\\", \\\"docType\\\": \\\"w2\\\", \\\"employer_name\\\": \\\"Dunder Mifflin\\\", \\\"employer_ein\\\": \\\"12-3456789\\\", \\\"wages\\\": \\\"80000\\\", \\\"federal_tax_withheld\\\": \\\"27264.0\\\", \\\"social_security_wages\\\": \\\"136320.0\\\", \\\"medicare_wages\\\": \\\"136320.0\\\", \\\"state_name\\\": \\\"Pennsylvania\\\", \\\"state_wages\\\": \\\"136320.0\\\", \\\"state_tax_withheld\\\": \\\"4184.64\\\"}\"},\n{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"federal_refund_amount\":1258.75999999999999,\"doc_type\":\"w2\",\"data_json\":\"{\\\"id\\\": \\\"seed-w2-2023-michael\\\", \\\"docType\\\": \\\"w2\\\", \\\"employer_name\\\": \\\"Dunder Mifflin\\\", \\\"employer_ein\\\": \\\"12-3456789\\\", \\\"wages\\\": \\\"130867.2\\\", \\\"federal_tax_withheld\\\": \\\"26173.44\\\", \\\"social_security_wages\\\": \\\"130867.2\\\", \\\"medicare_wages\\\": \\\"130867.2\\\", \\\"state_name\\\": \\\"Pennsylvania\\\", \\\"state_wages\\\": \\\"130867.2\\\", \\\"state_tax_withheld\\\": \\\"4017.25\\\"}\"}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND lower(tr.status) = 'filed' AND (lower(d.field_name) LIKE '%wage%' OR lower(d.field_name) LIKE '%w2%') ORDER BY tr.tax_year DESC, d.field_name",
+      "result": "[{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_employer\",\"field_value\":\"Dunder Mifflin\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_federal_withheld\",\"field_value\":\"27264.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_gross_wages\",\"field_value\":\"136320.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_pretax_401k\",\"field_value\":\"5760.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_pretax_health\",\"field_value\":\"2304.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_state_withheld\",\"field_value\":\"4184.64\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_employer\",\"field_value\":\"Dunder Mifflin\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_federal_withheld\",\"field_value\":\"26173.44\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_gross_wages\",\"field_value\":\"130867.2\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_pretax_401k\",\"field_value\":\"5529.6\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_pretax_health\",\"field_value\":\"2211.84\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_state_withheld\",\"field_value\":\"4017.25\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND lower(tr.status) = 'filed' AND (lower(d.field_name) LIKE '%wage%' OR lower(d.field_name) LIKE '%w2%') ORDER BY tr.tax_year DESC, d.field_name",
+      "result": "[{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_employer\",\"field_value\":\"Dunder Mifflin\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_federal_withheld\",\"field_value\":\"27264.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_gross_wages\",\"field_value\":\"80000\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_pretax_401k\",\"field_value\":\"5760.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_pretax_health\",\"field_value\":\"2304.0\"},\n{\"tax_year\":2024,\"status\":\"filed\",\"field_name\":\"w2_state_withheld\",\"field_value\":\"4184.64\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_employer\",\"field_value\":\"Dunder Mifflin\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_federal_withheld\",\"field_value\":\"26173.44\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_gross_wages\",\"field_value\":\"130867.2\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_pretax_401k\",\"field_value\":\"5529.6\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_pretax_health\",\"field_value\":\"2211.84\"},\n{\"tax_year\":2023,\"status\":\"filed\",\"field_name\":\"w2_state_withheld\",\"field_value\":\"4017.25\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}
