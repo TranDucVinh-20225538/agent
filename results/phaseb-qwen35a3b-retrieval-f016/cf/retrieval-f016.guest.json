@@ -1,0 +1,49 @@
+{
+  "id": "retrieval-f016",
+  "role": "phase_b",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-28T07:22:43.047590+00:00",
+  "patch": [
+    "UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'VTI'",
+    "UPDATE portfolio SET cash = 50 WHERE user_email = :email"
+  ],
+  "applied_sql": [
+    "UPDATE holdings SET shares = 0 WHERE user_email = :email AND upper(ticker) = 'VTI'",
+    "UPDATE portfolio SET cash = 50 WHERE user_email = :email"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ticker, shares, avg_cost, (shares * avg_cost) AS cost_basis FROM holdings WHERE user_email = :email ORDER BY ticker",
+  "probe_before": "[{\"ticker\":\"DIS\",\"shares\":8.0,\"avg_cost\":112.0,\"cost_basis\":896.0},\n{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974,\"cost_basis\":3580.19999999999981},\n{\"ticker\":\"RIVN\",\"shares\":200.0,\"avg_cost\":7.3099999999999996,\"cost_basis\":1462.0},\n{\"ticker\":\"SBUX\",\"shares\":12.0,\"avg_cost\":98.0,\"cost_basis\":1176.0},\n{\"ticker\":\"VTI\",\"shares\":5.0,\"avg_cost\":219.810000000000002,\"cost_basis\":1099.04999999999995}]",
+  "probe_after": "[{\"ticker\":\"DIS\",\"shares\":8.0,\"avg_cost\":112.0,\"cost_basis\":896.0},\n{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974,\"cost_basis\":3580.19999999999981},\n{\"ticker\":\"RIVN\",\"shares\":200.0,\"avg_cost\":7.3099999999999996,\"cost_basis\":1462.0},\n{\"ticker\":\"SBUX\",\"shares\":12.0,\"avg_cost\":98.0,\"cost_basis\":1176.0},\n{\"ticker\":\"VTI\",\"shares\":0.0,\"avg_cost\":219.810000000000002,\"cost_basis\":0.0}]",
+  "extra_probes_before": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT SUM(shares * avg_cost) AS cost_basis_total FROM holdings WHERE user_email = :email",
+      "result": "[{\"cost_basis_total\":8213.25}]"
+    },
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT cash FROM portfolio WHERE user_email = :email",
+      "result": "[{\"cash\":420.0}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT SUM(shares * avg_cost) AS cost_basis_total FROM holdings WHERE user_email = :email",
+      "result": "[{\"cost_basis_total\":7114.19999999999981}]"
+    },
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT cash FROM portfolio WHERE user_email = :email",
+      "result": "[{\"cash\":50.0}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

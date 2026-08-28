@@ -1,0 +1,89 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 2
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "EMPTY_XML",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "The previous attempt to access the tax application failed because the server at localhost:3005 was unavailable. Clicking 'Try Again' would retry the same connection that just failed, which is unlikely to succeed if the service isn't running. A more effective approach is to directly check whether the SpeedTax service is active and determine its correct port by inspecting running processes or network listeners. I'll use a terminal command to list any listening ports related to SpeedTax or web services, verify if the service is up, and confirm the proper URL before attempting to load the page again.\n",
+        "screenshot": "step_1_20260828@090026848411.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "EMPTY_XML",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "The previous attempt to access the tax application failed because the server at localhost:3005 was unavailable. Clicking 'Try Again' would retry the same connection that just failed, which is unlikely to succeed if the service isn't running. A more effective approach is to directly check whether the SpeedTax service is active and determine its correct port by inspecting running processes or network listeners. I'll use a terminal command to list any listening ports related to SpeedTax or web services, verify if the service is up, and confirm the proper URL before attempting to load the page again.",
+        "screenshot": "step_2_20260828@090030258956.png",
+        "step_num": 2
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "retrieval",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent opens SpeedTax and finds the most-recent 1099 entry showing the income amount and payer for the accountant summary",
+        "type": "llm_judge",
+        "weight": 0.266666
+      },
+      {
+        "criterion": "Agent reports the most-recent SpeedTax 1099 income amount from Scranton Improv Academy and the charitable-contribution total from the deductions section",
+        "type": "llm_judge",
+        "weight": 0.266666
+      },
+      {
+        "criterion": "Agent opens ~/Documents/Tax_2025/1099s.txt and cross-checks the 1099 income payer (Scranton Improv Academy) and amount against the SpeedTax value",
+        "type": "llm_judge",
+        "weight": 0.266668
+      },
+      {
+        "criterion": "Agent navigates to the most-recent SpeedTax return's deductions section and surfaces the charitable contributions line for the accountant summary",
+        "type": "llm_judge",
+        "weight": 0.2
+      }
+    ],
+    "task_id": "retrieval-f030"
+  },
+  "task": {
+    "apps_involved": [
+      "SpeedTax",
+      "Files"
+    ],
+    "category": "retrieval",
+    "difficulty": "hard",
+    "id": "retrieval-f030",
+    "instruction": "What was my 1099 income on the most-recent return, who paid it, and how much did I claim for charitable contributions? Cross-check the 1099 payer and amount against ~/Documents/Tax_2025/1099s.txt. This is for my accountant.",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}

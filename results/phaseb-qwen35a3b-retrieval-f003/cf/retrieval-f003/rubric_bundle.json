@@ -1,0 +1,83 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 2
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "EMPTY_XML",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "<think>\nThe previous action was a wait command, which allowed the browser to fully load. Now I can see the SpeedTax application is ready with all navigation elements visible. To find the W-2 from last year's filed return, I need to navigate through the SpeedTax interface. The most logical first step would be to click on \"SpeedTax\" in the left sidebar to ensure I'm in the correct application context, then look for options related to tax returns or documents where W-2 forms would be stored.\n\n</think>\n\nAction: Click on the SpeedTax icon in the left sidebar to ensure the application is properly focused and loaded.\n\n",
+        "screenshot": "step_1_20260828@065606451374.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "EMPTY_XML",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "<think>\n\n\n\n</think>\n\nAction: Click the \"Try Again\" button to attempt reloading the SpeedTax page.\n\n",
+        "screenshot": "step_2_20260828@065615636578.png",
+        "step_num": 2
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "retrieval",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent picks the most recent prior-year filed return on SpeedTax (status='filed' and tax_year strictly less than the current tax year, choosing the highest such tax_year) and not the in-progress current-year return",
+        "type": "llm_judge",
+        "weight": 0.3
+      },
+      {
+        "criterion": "Agent reads the W-2 document on the prior-year return \u2014 either by opening the wages step UI, navigating to the filed-return overview page, or via /api/returns/<id> documents \u2014 instead of inferring wages from the refund amount",
+        "type": "llm_judge",
+        "weight": 0.35
+      },
+      {
+        "criterion": "Agent reports the W-2 wages amount as a single dollar figure for that prior-year W-2 and does not return the refund amount instead",
+        "type": "llm_judge",
+        "weight": 0.35
+      }
+    ],
+    "task_id": "retrieval-f003"
+  },
+  "task": {
+    "apps_involved": [
+      "SpeedTax"
+    ],
+    "category": "retrieval",
+    "difficulty": "easy",
+    "id": "retrieval-f003",
+    "instruction": "On SpeedTax, find my W-2 from last year's filed return \u2014 the most recent prior-year one \u2014 and tell me the wages amount on it. Just the number from the W-2, not the refund.",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}
