@@ -20,7 +20,7 @@ implementation         ← file_patches + f004_hd_rank_flip (this commit/session
         ↓
 validation of I        ← 10/10 (out/phase_b_validate.md). f030 gold_moved=False is Type B.
         ↓
-RUN                    ← B.2 Claude / GPT / Qwen 35B-A3B on the six unrun tasks; reuse Stage 4 for the four already-run IDs
+RUN                    ← B.2: Qwen 35B → GPT → 9B/Flash ablation → Claude last (unbilled). Six unrun tasks; reuse Stage 4 for the four already-run IDs
         ↓
 NO CHANGES TO I
 ```

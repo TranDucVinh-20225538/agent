@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Phase B.2: Claude / GPT / Qwen 35B-A3B on the six tasks that Stage 4 did not run.
-# Reuses Stage 4 dirs for f001 / aggregation-f003 / preference_inference-f018 /
-# counterfactual-f004. Does not overwrite those dirs. Does not rewrite I.
+# Phase B.2: six unrun tasks. Default order is Qwen 35B → GPT → 9B → Flash.
+# Claude is last (not billed yet). Reuses Stage 4 dirs for the four already-run IDs.
+# Does not overwrite those dirs. Does not rewrite I.
 set -euo pipefail
 
 A="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,16 +11,16 @@ ONE_DIR="$H/tasks/cf_one"
 LANE="${PHASEB_LANE:-}"
 
 usage() {
-  echo "usage: PHASEB_LANE=claude|openai|qwen35a3b bash scripts/phase_b_run.sh" >&2
+  echo "usage: PHASEB_LANE=qwen35a3b|openai|qwen359b|qwen38flash|claude bash scripts/phase_b_run.sh" >&2
   exit 2
 }
 
 case "$LANE" in
-  claude) ;;
-  openai) ;;
-  qwen35a3b) ;;
+  claude|openai|qwen35a3b|qwen359b|qwen38flash) ;;
   *) usage ;;
 esac
+
+_SAVE_QWEN_MODEL="${MYPCBENCH_QWEN_MODEL:-}"
 
 mkdir -p "$A/results" "$H/results" "$ONE_DIR" "$A/out"
 cd "$H"
@@ -34,6 +34,7 @@ if [ -f ./mypcbench-vm/env.sh ]; then
   source ./mypcbench-vm/env.sh
 fi
 set +a
+[ -n "$_SAVE_QWEN_MODEL" ] && export MYPCBENCH_QWEN_MODEL="$_SAVE_QWEN_MODEL"
 
 if [ -z "${MYPCBENCH_QCOW2:-}" ]; then
   echo "FAIL: MYPCBENCH_QCOW2 unset" >&2
@@ -43,8 +44,23 @@ fi
 PREFIX="phaseb-${LANE}-"
 LOG="$A/results/phase_b_${LANE}_run.log"
 
+setup_openrouter() {
+  if [ -z "${OPENROUTER_API_KEY:-}" ]; then
+    echo "FAIL: OPENROUTER_API_KEY unset. Export it in this process; do not put it in .env." >&2
+    exit 1
+  fi
+  if [[ "${OPENROUTER_API_KEY}" == sk-proj-* ]]; then
+    echo "FAIL: OPENROUTER_API_KEY looks like the GPT key" >&2
+    exit 1
+  fi
+  export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}"
+  export OPENAI_API_KEY="$OPENROUTER_API_KEY"
+  AGENT_TYPE="${MYPCBENCH_QWEN_AGENT:-qwen_cuabash}"
+}
+
 case "$LANE" in
   claude)
+    echo "WARN: Claude lane. Only run if Anthropic is billed." >&2
     AGENT_TYPE="${MYPCBENCH_CLAUDE_AGENT:-claude_cuabash}"
     AGENT_MODEL="${MYPCBENCH_CLAUDE_MODEL:-claude-opus-4-6}"
     if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
@@ -62,18 +78,42 @@ case "$LANE" in
     fi
     ;;
   qwen35a3b)
-    if [ -z "${OPENROUTER_API_KEY:-}" ]; then
-      echo "FAIL: OPENROUTER_API_KEY unset. Export it in this process; do not put it in .env." >&2
-      exit 1
+    setup_openrouter
+    if [ -n "$_SAVE_QWEN_MODEL" ]; then
+      AGENT_MODEL="$_SAVE_QWEN_MODEL"
+    else
+      AGENT_MODEL="qwen/qwen3.5-35b-a3b"
     fi
-    if [[ "${OPENROUTER_API_KEY}" == sk-proj-* ]]; then
-      echo "FAIL: OPENROUTER_API_KEY looks like the GPT key" >&2
-      exit 1
+    if [[ "$AGENT_MODEL" != *qwen3.5-35b-a3b* ]]; then
+      echo "FAIL: LANE=qwen35a3b but model=$AGENT_MODEL" >&2
+      exit 2
     fi
-    export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}"
-    export OPENAI_API_KEY="$OPENROUTER_API_KEY"
-    AGENT_TYPE="${MYPCBENCH_QWEN_AGENT:-qwen_cuabash}"
-    AGENT_MODEL="${MYPCBENCH_QWEN_MODEL:-qwen/qwen3.5-35b-a3b}"
+    export MYPCBENCH_QWEN_MODEL="$AGENT_MODEL"
+    ;;
+  qwen359b)
+    setup_openrouter
+    if [ -n "$_SAVE_QWEN_MODEL" ]; then
+      AGENT_MODEL="$_SAVE_QWEN_MODEL"
+    else
+      AGENT_MODEL="qwen/qwen3.5-9b"
+    fi
+    if [[ "$AGENT_MODEL" != *qwen3.5-9b* ]]; then
+      echo "FAIL: LANE=qwen359b but model=$AGENT_MODEL" >&2
+      exit 2
+    fi
+    export MYPCBENCH_QWEN_MODEL="$AGENT_MODEL"
+    ;;
+  qwen38flash)
+    setup_openrouter
+    if [ -n "$_SAVE_QWEN_MODEL" ]; then
+      AGENT_MODEL="$_SAVE_QWEN_MODEL"
+    else
+      AGENT_MODEL="qwen/qwen3.8-flash"
+    fi
+    if [[ "$AGENT_MODEL" != *qwen3.8-flash* ]]; then
+      echo "FAIL: LANE=qwen38flash but model=$AGENT_MODEL" >&2
+      exit 2
+    fi
     export MYPCBENCH_QWEN_MODEL="$AGENT_MODEL"
     ;;
 esac
@@ -230,4 +270,4 @@ done
 
 echo "===== Phase B.2 $LANE stop $(date -Is) ====="
 echo "wrote $LOG"
-echo "STOP: Stage 4 dirs untouched. 9B/Flash not this script. Not-DONE cells stay in the table."
+echo "STOP: Stage 4 dirs untouched. Claude not required this session. Not-DONE cells stay in the table."
