@@ -1,0 +1,41 @@
+{
+  "id": "retrieval-f030",
+  "role": "phase_b_type_B",
+  "db": "speedtax.sqlite",
+  "where": "guest",
+  "applied_at": "2026-08-29T09:14:07.018033+00:00",
+  "patch": [
+    "UPDATE tax_data SET field_value = '100' WHERE field_name IN ('charitable_contributions', 'charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "applied_sql": [
+    "UPDATE tax_data SET field_value = '100' WHERE field_name IN ('charitable_contributions', 'charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT tr.id, tr.tax_year, tr.status, td.doc_type, td.data_json FROM tax_returns tr LEFT JOIN tax_documents td ON td.return_id = tr.id AND (lower(td.doc_type) LIKE '%1099%' OR lower(td.doc_type) LIKE '%nec%') WHERE tr.user_email = :email ORDER BY tr.tax_year DESC",
+  "probe_before": "[{\"id\":3,\"tax_year\":2025,\"status\":\"in_progress\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\":\\\"seed-1099-nec-2025-0\\\",\\\"docType\\\":\\\"1099-nec\\\",\\\"payer_name\\\":\\\"Scranton Improv Academy\\\",\\\"payer_tin\\\":\\\"XX-XXX3847\\\",\\\"nonemployee_compensation\\\":\\\"1200\\\",\\\"federal_tax_withheld\\\":\\\"0\\\",\\\"state_tax_withheld\\\":\\\"0\\\"}\"},\n{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\": \\\"seed-1099-nec-2024-michael\\\", \\\"docType\\\": \\\"1099-nec\\\", \\\"payer_name\\\": \\\"Scranton Improv Academy\\\", \\\"payer_tin\\\": \\\"XX-XXX3847\\\", \\\"nonemployee_compensation\\\": \\\"1080.0\\\", \\\"federal_tax_withheld\\\": \\\"0\\\", \\\"state_tax_withheld\\\": \\\"0\\\"}\"},\n{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\": \\\"seed-1099-nec-2023-michael\\\", \\\"docType\\\": \\\"1099-nec\\\", \\\"payer_name\\\": \\\"Scranton Improv Academy\\\", \\\"payer_tin\\\": \\\"XX-XXX3847\\\", \\\"nonemployee_compensation\\\": \\\"972.0\\\", \\\"federal_tax_withheld\\\": \\\"0\\\", \\\"state_tax_withheld\\\": \\\"0\\\"}\"}]",
+  "probe_after": "[{\"id\":3,\"tax_year\":2025,\"status\":\"in_progress\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\":\\\"seed-1099-nec-2025-0\\\",\\\"docType\\\":\\\"1099-nec\\\",\\\"payer_name\\\":\\\"Scranton Improv Academy\\\",\\\"payer_tin\\\":\\\"XX-XXX3847\\\",\\\"nonemployee_compensation\\\":\\\"1200\\\",\\\"federal_tax_withheld\\\":\\\"0\\\",\\\"state_tax_withheld\\\":\\\"0\\\"}\"},\n{\"id\":2,\"tax_year\":2024,\"status\":\"filed\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\": \\\"seed-1099-nec-2024-michael\\\", \\\"docType\\\": \\\"1099-nec\\\", \\\"payer_name\\\": \\\"Scranton Improv Academy\\\", \\\"payer_tin\\\": \\\"XX-XXX3847\\\", \\\"nonemployee_compensation\\\": \\\"1080.0\\\", \\\"federal_tax_withheld\\\": \\\"0\\\", \\\"state_tax_withheld\\\": \\\"0\\\"}\"},\n{\"id\":1,\"tax_year\":2023,\"status\":\"filed\",\"doc_type\":\"1099-nec\",\"data_json\":\"{\\\"id\\\": \\\"seed-1099-nec-2023-michael\\\", \\\"docType\\\": \\\"1099-nec\\\", \\\"payer_name\\\": \\\"Scranton Improv Academy\\\", \\\"payer_tin\\\": \\\"XX-XXX3847\\\", \\\"nonemployee_compensation\\\": \\\"972.0\\\", \\\"federal_tax_withheld\\\": \\\"0\\\", \\\"state_tax_withheld\\\": \\\"0\\\"}\"}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND (lower(d.field_name) LIKE '%1099%' OR lower(d.field_name) LIKE '%charit%' OR lower(d.field_name) LIKE '%payer%') ORDER BY d.field_name",
+      "result": "[{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"1099_amount_0\",\"field_value\":\"1200\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"1099_payer_0\",\"field_value\":\"Scranton Improv Academy\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"charitable_total\",\"field_value\":\"950\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT tr.tax_year, tr.status, d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND (lower(d.field_name) LIKE '%1099%' OR lower(d.field_name) LIKE '%charit%' OR lower(d.field_name) LIKE '%payer%') ORDER BY d.field_name",
+      "result": "[{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"1099_amount_0\",\"field_value\":\"1200\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"1099_payer_0\",\"field_value\":\"Scranton Improv Academy\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"charitable_contributions\",\"field_value\":\"100\"},\n{\"tax_year\":2025,\"status\":\"in_progress\",\"field_name\":\"charitable_total\",\"field_value\":\"100\"}]"
+    }
+  ],
+  "files_before": {
+    "~/Documents/Tax_2025/1099s.txt": "1099 SUMMARY (Tax Year 2025)\n================================\n\n1099-NEC from Scranton Improv Academy (Guest Instructor Stipend)\n  Payer EIN:  23-4471902\n  Box 1 - Nonemployee compensation: $1,200.00\n  Notes: Guest-instructor stipend, paid via Venmo. Same payer that Michael also pays monthly improv-class tuition to (see Gringotts). Payer role: both student and (claimed) guest instructor.\n\nNo other 1099s (no 1099-DIV, 1099-INT, 1099-MISC) issued for 2025."
+  },
+  "files_after": {
+    "~/Documents/Tax_2025/1099s.txt": "1099 SUMMARY (Tax Year 2025)\n================================\n\n1099-NEC from Scranton Improv Academy (Guest Instructor Stipend)\n  Payer EIN:  23-4471902\n  Box 1 - Nonemployee compensation: $1,200.00\n  Notes: Guest-instructor stipend, paid via Venmo. Same payer that Michael also pays monthly improv-class tuition to (see Gringotts). Payer role: both student and (claimed) guest instructor.\n\nNo other 1099s (no 1099-DIV, 1099-INT, 1099-MISC) issued for 2025."
+  },
+  "gold_moved": false,
+  "ok": true,
+  "fails": []
+}

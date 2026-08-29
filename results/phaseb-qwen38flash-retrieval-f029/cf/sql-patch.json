@@ -1,0 +1,25 @@
+{
+  "condition": "retrieval-f029",
+  "id": "retrieval-f029",
+  "patch": [
+    "UPDATE tax_data SET field_value = '90000' WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+    "UPDATE tax_data SET field_value = '18000' WHERE field_name = 'w2_federal_withheld' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+    "UPDATE tax_documents SET data_json = replace(replace(data_json, '\"wages\": \"142000\"', '\"wages\": \"90000\"'), '\"federal_tax_withheld\": \"28400\"', '\"federal_tax_withheld\": \"18000\"') WHERE lower(doc_type) LIKE '%w2%' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "file_patches": [
+    {
+      "path": "~/Documents/Tax_2025/w2_summary.txt",
+      "replace": [
+        [
+          "$142,000.00",
+          "$90,000.00"
+        ],
+        [
+          "$28,400.00",
+          "$18,000.00"
+        ]
+      ],
+      "hold_constant": "Employer: Dunder Mifflin"
+    }
+  ]
+}

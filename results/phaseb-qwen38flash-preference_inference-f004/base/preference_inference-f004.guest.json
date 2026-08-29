@@ -1,0 +1,17 @@
+{
+  "id": "preference_inference-f004",
+  "role": "phase_b_score_sensitive_contrast",
+  "db": "hangrydash.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT r.name, COUNT(*) AS n FROM orders o JOIN restaurants r ON r.id = o.restaurant_id WHERE o.user_email = :email GROUP BY r.id, r.name ORDER BY n DESC, r.name",
+  "probe_before": "[{\"name\":\"Cooper's Seafood House\",\"n\":88},\n{\"name\":\"Backyard Ale House\",\"n\":28},\n{\"name\":\"Northern Light Espresso Bar\",\"n\":28},\n{\"name\":\"Big Wangs Sports Bar\",\"n\":24},\n{\"name\":\"Zuma Sushi & Grill\",\"n\":22},\n{\"name\":\"Super Duper Burgers\",\"n\":13},\n{\"name\":\"Bella Trattoria\",\"n\":12},\n{\"name\":\"POSH at The Scranton Club\",\"n\":12},\n{\"name\":\"Thai House Express\",\"n\":12},\n{\"name\":\"Abe's Place\",\"n\":11},\n{\"name\":\"Coney Island Texas Weiners\",\"n\":11},\n{\"name\":\"Lavish Bar & Grill\",\"n\":11},\n{\"name\":\"Mansour's Market Caf\u00e9\",\"n\":11},\n{\"name\":\"State Street Grill\",\"n\":11},\n{\"name\":\"Popeyes\",\"n\":10},\n{\"name\":\"Sweetgreen\",\"n\":10},\n{\"name\":\"Asia Hooters Grille\",\"n\":9},\n{\"name\":\"Pizza by Alfredo\",\"n\":9},\n{\"name\":\"Cactus Grill\",\"n\":8},\n{\"name\":\"Carl von Luger Steak & Seafood\",\"n\":8},\n{\"name\":\"Chipotle\",\"n\":8},\n{\"name\":\"La Trattoria\",\"n\":8},\n{\"name\":\"Revello's Pizza\",\"n\":8},\n{\"name\":\"Alfredo's Pizza Cafe\",\"n\":7},\n{\"name\":\"Five Guys\",\"n\":7},\n{\"name\":\"Chili's Grill & Bar\",\"n\":6},\n{\"name\":\"Panda Express\",\"n\":6},\n{\"name\":\"Tony Baloney Pizza\",\"n\":6},\n{\"name\":\"Saru Sushi Bar\",\"n\":5}]",
+  "extra_probes": [
+    {
+      "db": "tablefind.sqlite",
+      "sql": "SELECT r.name, COUNT(*) AS n FROM reservations rv JOIN restaurants r ON r.id = rv.restaurant_id WHERE rv.user_email = :email AND lower(COALESCE(rv.status,'')) NOT IN ('cancelled','canceled') GROUP BY r.id, r.name ORDER BY n DESC, r.name",
+      "result": "[{\"name\":\"Cooper's Seafood House\",\"n\":12},\n{\"name\":\"Backyard Ale House\",\"n\":6},\n{\"name\":\"Abe's Place\",\"n\":3},\n{\"name\":\"Coney Island Texas Weiners\",\"n\":3},\n{\"name\":\"Cotogna\",\"n\":3},\n{\"name\":\"Cara Mia Trattoria\",\"n\":2},\n{\"name\":\"Northern Light Espresso Bar\",\"n\":2},\n{\"name\":\"Pizza by Alfredo\",\"n\":2},\n{\"name\":\"Posh @ The Scranton Club\",\"n\":2},\n{\"name\":\"State Street Grill\",\"n\":2},\n{\"name\":\"Zuma Sushi & Grill\",\"n\":2},\n{\"name\":\"Andy Gavin's\",\"n\":1},\n{\"name\":\"Benihana\",\"n\":1},\n{\"name\":\"La Trattoria\",\"n\":1},\n{\"name\":\"The Neighborhood Bistro\",\"n\":1}]"
+    }
+  ],
+  "files": {}
+}

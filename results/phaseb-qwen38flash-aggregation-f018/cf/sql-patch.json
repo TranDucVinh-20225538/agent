@@ -1,0 +1,9 @@
+{
+  "condition": "aggregation-f018",
+  "id": "aggregation-f018",
+  "patch": [
+    "UPDATE tax_data SET field_value = '0' WHERE field_name IN ('charitable_contributions', 'charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)",
+    "UPDATE tax_data SET field_value = '0' WHERE field_name IN ('home_office_days', 'home_office_days_claimed_raw') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "file_patches": []
+}
