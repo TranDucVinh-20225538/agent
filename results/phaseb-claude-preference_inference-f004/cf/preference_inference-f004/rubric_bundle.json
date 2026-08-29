@@ -1,0 +1,149 @@
+{
+  "artifacts": {
+    "chat_log": null,
+    "context_dir": null,
+    "counts": {
+      "parsed_actions": 0,
+      "raw_responses": 0,
+      "screenshots": 0,
+      "steps": 7
+    },
+    "parsed_actions": [],
+    "raw_responses": [],
+    "screenshots": [],
+    "steps": [
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Let me check both TableFind (reservations) and HangryDash (delivery) to gather the data.",
+        "screenshot": "step_1_20260828@204557985714.png",
+        "step_num": 1
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Let me first get the authentication cookies from Firefox, then query the APIs.",
+        "screenshot": "step_2_20260828@204605844823.png",
+        "step_num": 2
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_3_20260828@204613046071.png",
+        "step_num": 3
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "",
+        "screenshot": "step_4_20260828@204637395770.png",
+        "step_num": 4
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Now let me get the full data and analyze both services:",
+        "screenshot": "step_5_20260828@204703189303.png",
+        "step_num": 5
+      },
+      {
+        "parsed_action_obj": {
+          "action": "TOOL_CALL",
+          "done": false,
+          "reward": 0.0
+        },
+        "raw_response_text": "Now I have all the data. Let me verify the overlap between the two top-5 lists:",
+        "screenshot": "step_6_20260828@204722016762.png",
+        "step_num": 6
+      },
+      {
+        "parsed_action_obj": {
+          "action": "DONE",
+          "done": true,
+          "reward": 0.0
+        },
+        "raw_response_text": "Here's the full analysis:\n\n**You are overwhelmingly a delivery guy.**\n\nYou have 44 dine-out reservations (TableFind) vs. 409 delivery orders (HangryDash) \u2014 that's a **9.7% dine-out / 90.3% delivery** split.\n\n**Top 5 Dine-Out Restaurants (Reservations):**\n1. Cooper's Seafood House \u2013 12 reservations\n2. Backyard Ale House \u2013 6 reservations\n3. Coney Island Texas Weiners \u2013 3 reservations\n4. Abe's Place \u2013 3 reservations\n5. Cotogna \u2013 3 reservations\n\n**Top 5 Delivery Restaurants (HangryDash):**\n1. Backyard Ale House \u2013 59 orders\n2. Cooper's Seafood House \u2013 57 orders\n3. Northern Light Espresso Bar \u2013 28 orders\n4. Big Wangs Sports Bar \u2013 24 orders\n5. Zuma Sushi & Grill \u2013 22 orders\n\n**Overlap:** Cooper's Seafood House and Backyard Ale House appear in both top-5 lists \u2014 your two absolute favorites whether dining out or ordering in. The other three in each list are unique: dine-out features Coney Island Texas Weiners, Abe's Place, and Cotogna, while delivery features Northern Light Espresso Bar, Big Wangs Sports Bar, and Zuma Sushi & Grill.\n\n**Bottom line:** With ~90% delivery vs ~10% dine-out, you're definitely a delivery guy.\n\n```DONE```",
+        "screenshot": "step_7_20260828@204735767839.png",
+        "step_num": 7
+      }
+    ],
+    "token_usage": null
+  },
+  "environment": {
+    "actor_id": null,
+    "env_language": "en",
+    "persona": "michael_scott",
+    "snapshot_name": null,
+    "vm_id": "michael_scott",
+    "world": "scranton-office"
+  },
+  "grading_manifest": {
+    "category": "preference_inference",
+    "checks": [],
+    "grading_type": "llm_judge",
+    "has_programmatic_checks": false,
+    "has_rubrics": true,
+    "notes": "Rubric bundle for offline grading (agent-harness/judge_results.py)",
+    "rubrics": [
+      {
+        "criterion": "Agent identifies Michael's top TableFind reservation spot as it appears in the live reservation counts (whichever restaurant has the highest count, or reports the tie if multiple are tied for top)",
+        "type": "llm_judge",
+        "weight": 0.210642
+      },
+      {
+        "criterion": "Agent identifies Cooper's Seafood House as Michael's top HangryDash delivery restaurant based on the live order history counts",
+        "type": "llm_judge",
+        "weight": 0.210642
+      },
+      {
+        "criterion": "Agent computes the overlap between the two top-5 lists explicitly",
+        "type": "llm_judge",
+        "weight": 0.210642
+      },
+      {
+        "criterion": "Agent explains Michael's dine-in vs delivery split in clear prose",
+        "type": "llm_judge",
+        "weight": 0.157832
+      },
+      {
+        "criterion": "Agent references the TableFind reservation counts and HangryDash delivery order counts it pulled when describing Michael's dine-out vs delivery split",
+        "type": "llm_judge",
+        "weight": 0.105221
+      },
+      {
+        "criterion": "Agent reports both top-5 dine-out reservations and top-5 delivery restaurants with the split percentage before finishing the answer",
+        "type": "llm_judge",
+        "weight": 0.105021
+      }
+    ],
+    "task_id": "preference_inference-f004"
+  },
+  "task": {
+    "apps_involved": [
+      "TableFind",
+      "HangryDash"
+    ],
+    "category": "preference_inference",
+    "difficulty": "medium",
+    "id": "preference_inference-f004",
+    "instruction": "Am I more of a dine-out guy or a delivery guy? Look at where I make reservations vs where I order delivery from, top 5 each, and tell me how I split.",
+    "language": "en",
+    "persona": "michael_scott"
+  }
+}
