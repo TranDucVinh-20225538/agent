@@ -21,19 +21,38 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("AGENT_ROOT", Path(__file__).resolve().parents[1]))
 HARNESS = ROOT / "external/MyPCBench-main/agent-harness"
-RESULTS = ROOT / "results" / "paper2_tier1_probe"
 OUT = ROOT / "out"
-SNAP = "/tmp/paper2_tier1_snap"
 SPEC_PATH = ROOT / "cf" / "paper2_interventions.json"
+
+# PAPER2_INVENTORY_TIER=1 (default) or 2 — selects READY_RELATIVE rows + output paths.
+INVENTORY_TIER = int(os.environ.get("PAPER2_INVENTORY_TIER", "1"))
+RESULTS = ROOT / "results" / (
+    "paper2_tier1_probe" if INVENTORY_TIER == 1 else f"paper2_tier{INVENTORY_TIER}_probe"
+)
+SNAP = f"/tmp/paper2_tier{INVENTORY_TIER}_snap"
+REPORT_STEM = f"paper2_tier{INVENTORY_TIER}_probe_gate"
+# Expected counts (abort if file disagrees). Tier 1: 18+5; Tier 2: 5+1.
+EXPECTED = {
+    1: (18, 5),
+    2: (5, 1),
+}
 
 
 def load_ready_groups() -> tuple[list[str], list[str]]:
     doc = json.loads(SPEC_PATH.read_text())
-    ready = [
-        e["id"]
-        for e in doc.get("interventions") or []
-        if e.get("_sql_status") == "READY_RELATIVE" and e.get("id")
-    ]
+    ready = []
+    for e in doc.get("interventions") or []:
+        if e.get("_sql_status") != "READY_RELATIVE" or not e.get("id"):
+            continue
+        tier = e.get("_inventory_tier")
+        if INVENTORY_TIER == 1:
+            # Tier 1 rows predate the _inventory_tier field.
+            if tier not in (None, 1):
+                continue
+        else:
+            if tier != INVENTORY_TIER:
+                continue
+        ready.append(e["id"])
     group1 = sorted(i for i in ready if not str(i).endswith("-I2"))
     group2 = sorted(i for i in ready if str(i).endswith("-I2"))
     return group1, group2
@@ -261,11 +280,12 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
     OUT.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(parents=True, exist_ok=True)
 
-    json_path = OUT / "paper2_tier1_probe_gate.json"
+    json_path = OUT / f"{REPORT_STEM}.json"
     json_path.write_text(
         json.dumps(
             {
                 "written_at": datetime.now(timezone.utc).isoformat(),
+                "inventory_tier": INVENTORY_TIER,
                 "spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md §7",
                 "interventions": str(SPEC_PATH),
                 "group1": group1,
@@ -288,7 +308,7 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
         "guest_json",
         "error",
     ]
-    csv_path = OUT / "paper2_tier1_probe_gate.csv"
+    csv_path = OUT / f"{REPORT_STEM}.csv"
     with csv_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
         w.writeheader()
@@ -306,15 +326,18 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
     n_hold = count(lambda r: r["verdict"] == "REJECT_held_leak")
     n_tech = count(lambda r: r["verdict"] == "technical_failure")
 
+    pair_id = "contradiction-f011" if INVENTORY_TIER == 1 else "preference_inference-f014"
     md = [
-        "# Paper 2 — Tier 1 inject-probe gate",
+        f"# Paper 2 — Tier {INVENTORY_TIER} inject-probe gate",
         "",
         f"Written {datetime.now(timezone.utc).isoformat()}.",
         "Live apply via `cf_inject.py` (not `--probe-only`). Snapshot restore between units.",
         "No agent. No judge. Sealed registry / D untouched.",
         "",
-        f"Group 1 (non-`-I2`): **{len(group1)}** `{group1[0]}` … `{group1[-1]}`",
-        f"Group 2 (`-I2`): **{len(group2)}** `{group2[0]}` … `{group2[-1]}`",
+        f"Group 1 (non-`-I2`): **{len(group1)}**"
+        + (f" `{group1[0]}` … `{group1[-1]}`" if group1 else ""),
+        f"Group 2 (`-I2`): **{len(group2)}**"
+        + (f" `{group2[0]}` … `{group2[-1]}`" if group2 else ""),
         "",
         f"**Total: {n_pass} PASS / {n_id} REJECT (identifiability) / "
         f"{n_hold} REJECT (held-leak) / {n_tech} technical-failure** "
@@ -333,15 +356,15 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
             f"{count(lambda r: r['verdict']=='technical_failure', gname)} |"
         )
 
-    i1 = next((r for r in rows if r["task_id"] == "contradiction-f011"), None)
-    i2 = next((r for r in rows if r["task_id"] == "contradiction-f011-I2"), None)
+    i1 = next((r for r in rows if r["task_id"] == pair_id), None)
+    i2 = next((r for r in rows if r["task_id"] == f"{pair_id}-I2"), None)
     md.extend(
         [
             "",
-            "### `contradiction-f011` pair (partial multi-I failure clause)",
+            f"### `{pair_id}` pair (partial multi-I failure clause)",
             "",
-            f"- I1 (`contradiction-f011`): **{(i1 or {}).get('verdict', 'missing')}**",
-            f"- I2 (`contradiction-f011-I2`): **{(i2 or {}).get('verdict', 'missing')}**",
+            f"- I1 (`{pair_id}`): **{(i1 or {}).get('verdict', 'missing')}**",
+            f"- I2 (`{pair_id}-I2`): **{(i2 or {}).get('verdict', 'missing')}**",
             "",
             "Each variant is its own unit; a reject does not relabel the task as single-I.",
             "",
@@ -356,10 +379,11 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
             f"{r.get('gold_moved')} | {fails} |"
         )
     md.append("")
-    (OUT / "paper2_tier1_probe_gate.md").write_text("\n".join(md) + "\n")
+    md_path = OUT / f"{REPORT_STEM}.md"
+    md_path.write_text("\n".join(md) + "\n")
     print(f"wrote {json_path}", flush=True)
     print(f"wrote {csv_path}", flush=True)
-    print(f"wrote {OUT / 'paper2_tier1_probe_gate.md'}", flush=True)
+    print(f"wrote {md_path}", flush=True)
     print(
         f"summary PASS={n_pass} REJECT_id={n_id} REJECT_held={n_hold} tech={n_tech}",
         flush=True,
@@ -378,16 +402,20 @@ def main() -> int:
         raise SystemExit(f"missing {SPEC_PATH}; pull abfc00c+ first")
 
     group1, group2 = load_ready_groups()
+    print(f"INVENTORY_TIER={INVENTORY_TIER} RESULTS={RESULTS} SNAP={SNAP}", flush=True)
     print(f"READY_RELATIVE total={len(group1)+len(group2)}", flush=True)
     print(f"group1 count={len(group1)} first={group1[0]!r} last={group1[-1]!r}", flush=True)
-    print(f"group2 count={len(group2)} first={group2[0]!r} last={group2[-1]!r}", flush=True)
+    g2_first = group2[0] if group2 else None
+    g2_last = group2[-1] if group2 else None
+    print(f"group2 count={len(group2)} first={g2_first!r} last={g2_last!r}", flush=True)
     print("group1 ids:", " ".join(group1), flush=True)
     print("group2 ids:", " ".join(group2), flush=True)
 
-    if len(group1) != 18 or len(group2) != 5 or len(group1) + len(group2) != 23:
+    exp1, exp2 = EXPECTED.get(INVENTORY_TIER, (None, None))
+    if exp1 is not None and (len(group1) != exp1 or len(group2) != exp2):
         print(
-            f"STOP: expected group1=18 group2=5 total=23; "
-            f"got {len(group1)}/{len(group2)}/{len(group1)+len(group2)}. "
+            f"STOP: expected group1={exp1} group2={exp2} for inventory tier "
+            f"{INVENTORY_TIER}; got {len(group1)}/{len(group2)}. "
             "Do not guess grouping.",
             flush=True,
         )

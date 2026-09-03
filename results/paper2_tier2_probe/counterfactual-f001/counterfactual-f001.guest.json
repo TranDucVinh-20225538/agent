@@ -1,0 +1,37 @@
+{
+  "id": "counterfactual-f001",
+  "role": "paper2_tier2",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T21:28:47.765521+00:00",
+  "patch": [
+    "UPDATE bookings SET total_price = total_price * 1.35 WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET total_price = total_price * 1.35 WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, property_name, location, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+  "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"location\":\"Montego Bay, Jamaica\",\"total_price\":1975.0}]",
+  "probe_after": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"location\":\"Montego Bay, Jamaica\",\"total_price\":2666.25}]",
+  "extra_probes_before": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT id, flight_number, destination, destination_city, fare_paid, confirmation_code FROM flights WHERE user_email = :email AND (upper(destination) = 'MBJ' OR lower(destination_city) LIKE '%jamaica%' OR upper(ifnull(flight_number,'')) = 'DN1562')",
+      "result": "[{\"id\":2,\"flight_number\":\"DN1562\",\"destination\":\"MBJ\",\"destination_city\":\"Montego Bay\",\"fare_paid\":512,\"confirmation_code\":\"DN-83823\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT id, flight_number, destination, destination_city, fare_paid, confirmation_code FROM flights WHERE user_email = :email AND (upper(destination) = 'MBJ' OR lower(destination_city) LIKE '%jamaica%' OR upper(ifnull(flight_number,'')) = 'DN1562')",
+      "result": "[{\"id\":2,\"flight_number\":\"DN1562\",\"destination\":\"MBJ\",\"destination_city\":\"Montego Bay\",\"fare_paid\":512,\"confirmation_code\":\"DN-83823\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

@@ -1,0 +1,37 @@
+{
+  "id": "preference_inference-f014-I2",
+  "role": "paper2_tier2",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T21:28:58.572283+00:00",
+  "patch": [
+    "UPDATE bookings SET total_price = total_price * 1.5 WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET total_price = total_price * 1.5 WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, property_name, total_price, confirmation_code FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+  "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"total_price\":129.0,\"confirmation_code\":\"RB-11283\"}]",
+  "probe_after": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"total_price\":193.5,\"confirmation_code\":\"RB-11283\"}]",
+  "extra_probes_before": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT property_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+      "result": "[{\"property_name\":\"Radisson Blu Warwick Hotel\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT property_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+      "result": "[{\"property_name\":\"Radisson Blu Warwick Hotel\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

@@ -1,0 +1,37 @@
+{
+  "id": "contradiction-f014",
+  "role": "paper2_tier2",
+  "db": "speedtax.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T21:28:45.534389+00:00",
+  "patch": [
+    "UPDATE tax_data SET field_value = CAST(CAST(field_value AS REAL) * 0.75 AS TEXT) WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "applied_sql": [
+    "UPDATE tax_data SET field_value = CAST(CAST(field_value AS REAL) * 0.75 AS TEXT) WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND field_name = 'w2_gross_wages'",
+  "probe_before": "[{\"field_name\":\"w2_gross_wages\",\"field_value\":\"142000\"}]",
+  "probe_after": "[{\"field_name\":\"w2_gross_wages\",\"field_value\":\"106500.0\"}]",
+  "extra_probes_before": [
+    {
+      "db": "lockedin.sqlite",
+      "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1",
+      "result": "[{\"title\":\"Regional Manager, Scranton Branch\",\"company\":\"Dunder Mifflin\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "lockedin.sqlite",
+      "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1",
+      "result": "[{\"title\":\"Regional Manager, Scranton Branch\",\"company\":\"Dunder Mifflin\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

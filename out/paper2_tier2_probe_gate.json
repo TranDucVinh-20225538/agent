@@ -1,0 +1,196 @@
+{
+  "written_at": "2026-09-03T21:28:59.454484+00:00",
+  "inventory_tier": 2,
+  "spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md \u00a77",
+  "interventions": "/mnt/data2/Vinh/agent/cf/paper2_interventions.json",
+  "group1": [
+    "contradiction-f014",
+    "counterfactual-f001",
+    "preference_inference-f014",
+    "retrieval-f009",
+    "retrieval-f010"
+  ],
+  "group2": [
+    "preference_inference-f014-I2"
+  ],
+  "rows": [
+    {
+      "task_id": "contradiction-f014",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/contradiction-f014/contradiction-f014.guest.json",
+      "probe_before": "[{\"field_name\":\"w2_gross_wages\",\"field_value\":\"142000\"}]",
+      "probe_after": "[{\"field_name\":\"w2_gross_wages\",\"field_value\":\"106500.0\"}]",
+      "extra_probes_before": [
+        {
+          "db": "lockedin.sqlite",
+          "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1",
+          "result": "[{\"title\":\"Regional Manager, Scranton Branch\",\"company\":\"Dunder Mifflin\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "lockedin.sqlite",
+          "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1",
+          "result": "[{\"title\":\"Regional Manager, Scranton Branch\",\"company\":\"Dunder Mifflin\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f001",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/counterfactual-f001/counterfactual-f001.guest.json",
+      "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"location\":\"Montego Bay, Jamaica\",\"total_price\":1975.0}]",
+      "probe_after": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"location\":\"Montego Bay, Jamaica\",\"total_price\":2666.25}]",
+      "extra_probes_before": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT id, flight_number, destination, destination_city, fare_paid, confirmation_code FROM flights WHERE user_email = :email AND (upper(destination) = 'MBJ' OR lower(destination_city) LIKE '%jamaica%' OR upper(ifnull(flight_number,'')) = 'DN1562')",
+          "result": "[{\"id\":2,\"flight_number\":\"DN1562\",\"destination\":\"MBJ\",\"destination_city\":\"Montego Bay\",\"fare_paid\":512,\"confirmation_code\":\"DN-83823\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT id, flight_number, destination, destination_city, fare_paid, confirmation_code FROM flights WHERE user_email = :email AND (upper(destination) = 'MBJ' OR lower(destination_city) LIKE '%jamaica%' OR upper(ifnull(flight_number,'')) = 'DN1562')",
+          "result": "[{\"id\":2,\"flight_number\":\"DN1562\",\"destination\":\"MBJ\",\"destination_city\":\"Montego Bay\",\"fare_paid\":512,\"confirmation_code\":\"DN-83823\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "preference_inference-f014",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/preference_inference-f014/preference_inference-f014.guest.json",
+      "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"total_price\":129.0,\"confirmation_code\":\"RB-11283\"}]",
+      "probe_after": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel (Budget Reflag)\",\"total_price\":129.0,\"confirmation_code\":\"RB-11283\"}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+          "result": "[{\"total_price\":129.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+          "result": "[{\"total_price\":129.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f009",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/retrieval-f009/retrieval-f009.guest.json",
+      "probe_before": "[{\"confirmation_code\":\"GH-29481\",\"property_name\":\"The Greenwich Hotel\",\"check_in\":\"2026-04-30\"}]",
+      "probe_after": "[{\"confirmation_code\":\"GH-29481-CF\",\"property_name\":\"The Greenwich Hotel\",\"check_in\":\"2026-04-30\"}]",
+      "extra_probes_before": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')",
+          "result": "[{\"confirmation_code\":\"DN-87856\",\"flight_number\":\"DN6769\",\"destination\":\"JFK\",\"departure_date\":\"2026-04-30\"},\n{\"confirmation_code\":\"DN-EVE001\",\"flight_number\":\"DN-EVE001\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-22\"}]"
+        },
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+          "result": "[{\"check_in\":\"2026-04-30\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')",
+          "result": "[{\"confirmation_code\":\"DN-87856\",\"flight_number\":\"DN6769\",\"destination\":\"JFK\",\"departure_date\":\"2026-04-30\"},\n{\"confirmation_code\":\"DN-EVE001\",\"flight_number\":\"DN-EVE001\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-22\"}]"
+        },
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+          "result": "[{\"check_in\":\"2026-04-30\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f010",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/retrieval-f010/retrieval-f010.guest.json",
+      "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0,\"host_name\":\"Sandals Resorts Concierge\"}]",
+      "probe_after": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":2468.75,\"host_name\":\"Sandals Resorts Concierge\"}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+          "result": "[{\"host_name\":\"Sandals Resorts Concierge\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+          "result": "[{\"host_name\":\"Sandals Resorts Concierge\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "preference_inference-f014-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier2_probe/preference_inference-f014-I2/preference_inference-f014-I2.guest.json",
+      "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"total_price\":129.0,\"confirmation_code\":\"RB-11283\"}]",
+      "probe_after": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"total_price\":193.5,\"confirmation_code\":\"RB-11283\"}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+          "result": "[{\"property_name\":\"Radisson Blu Warwick Hotel\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+          "result": "[{\"property_name\":\"Radisson Blu Warwick Hotel\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    }
+  ]
+}

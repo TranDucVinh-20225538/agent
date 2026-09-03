@@ -1,5 +1,5 @@
 {
-  "_note": "Tier 1 SQL is READY_RELATIVE (schema columns, no invented G0/G1). Run --probe-only only on READY_RELATIVE. I1 uses task id; I2 uses {id}-I2. Multi-I PASS/REJECT per variant; fail I2 does not relabel as single-I. Reject does not rewrite D (PAPER2_SPEC §7).",
+  "_note": "Tier 1 SQL is READY_RELATIVE (schema columns, no invented G0/G1). Run --probe-only only on READY_RELATIVE. I1 uses task id; I2 uses {id}-I2. Multi-I PASS/REJECT per variant; fail I2 does not relabel as single-I. Reject does not rewrite D (PAPER2_SPEC \u00a77).",
   "_email": "michael.scott@dundermifflin.com",
   "_semantic": "paper/paper2_counterfactual_eval/registry/registry_semantic_frozen.json",
   "interventions": [
@@ -146,7 +146,9 @@
       "expect": {
         "probe_changes": true,
         "note": "Fill after schema dump; do not invent G0/G1."
-      }
+      },
+      "_inventory_tier": 3,
+      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
     },
     {
       "id": "aggregation-f040",
@@ -464,8 +466,8 @@
       "id": "contradiction-f014",
       "task_id": "contradiction-f014",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "w2_gross_wages",
         "claimed_salary_dm"
@@ -475,15 +477,32 @@
       ],
       "review_decision": "W-2 + claimed DM; LockedIn held. Paycheck sum omitted. Verdict omitted.",
       "identifiability": "pending_probe",
-      "db": "lockedin.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "db": "speedtax.sqlite",
+      "probe": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND field_name = 'w2_gross_wages'",
+      "patch": [
+        "UPDATE tax_data SET field_value = CAST(CAST(field_value AS REAL) * 0.75 AS TEXT) WHERE field_name = 'w2_gross_wages' AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+      ],
+      "extra_probes": [
+        {
+          "db": "lockedin.sqlite",
+          "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1"
+        }
+      ],
+      "do_not_touch": "lockedin experience; buzzchat/hoolichat salary DM; paycheck deposits",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "I moves w2_gross_wages only. lockedin_title_company probed held. claimed_salary_dm held by do_not_touch (no buzzchat patch this I)."
+      },
+      "moves": [
+        "w2_gross_wages"
+      ],
+      "holds_this_I": [
+        "lockedin_title_company",
+        "claimed_salary_dm"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "contradiction-f017",
@@ -582,14 +601,16 @@
       "expect": {
         "probe_changes": true,
         "note": "Fill after schema dump; do not invent G0/G1."
-      }
+      },
+      "_inventory_tier": 3,
+      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
     },
     {
       "id": "counterfactual-f001",
       "task_id": "counterfactual-f001",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "jamaica_flight_cost",
         "jamaica_hotel_total"
@@ -597,15 +618,31 @@
       "semantic_held": [],
       "review_decision": "Flight cost + hotel total. Action-plan / confirmation omitted.",
       "identifiability": "pending_probe",
-      "db": "dinoco-airlines.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "db": "cheskepdia.sqlite",
+      "probe": "SELECT id, property_name, location, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price * 1.35 WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT id, flight_number, destination, destination_city, fare_paid, confirmation_code FROM flights WHERE user_email = :email AND (upper(destination) = 'MBJ' OR lower(destination_city) LIKE '%jamaica%' OR upper(ifnull(flight_number,'')) = 'DN1562')"
+        }
+      ],
+      "do_not_touch": "dinoco jamaica fare_paid; calendar/mail/etaxi",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "I1 jamaica_hotel_total (Montego Bay); jamaica_flight_cost held this I."
+      },
+      "moves": [
+        "jamaica_hotel_total"
+      ],
+      "holds_this_I": [
+        "jamaica_flight_cost"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "counterfactual-f002",
@@ -893,14 +930,16 @@
       "expect": {
         "probe_changes": true,
         "note": "Fill after schema dump; do not invent G0/G1."
-      }
+      },
+      "_inventory_tier": 3,
+      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
     },
     {
       "id": "preference_inference-f014",
       "task_id": "preference_inference-f014",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "designated_booking_property",
         "designated_booking_total"
@@ -909,21 +948,37 @@
       "review_decision": "Property + total on designated row. Pattern verdict omitted. Other bookings not extra D unless I requires held.",
       "identifiability": "pending_probe",
       "db": "cheskepdia.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT id, property_name, total_price, confirmation_code FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+      "patch": [
+        "UPDATE bookings SET property_name = property_name || ' (Budget Reflag)' WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+        }
+      ],
+      "do_not_touch": "designated total; other bookings",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "I1 designated_booking_property; total held."
+      },
+      "moves": [
+        "designated_booking_property"
+      ],
+      "holds_this_I": [
+        "designated_booking_total"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "preference_inference-f014-I2",
       "task_id": "preference_inference-f014",
       "variant": "I2",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "designated_booking_property",
         "designated_booking_total"
@@ -932,14 +987,30 @@
       "review_decision": "Property + total on designated row. Pattern verdict omitted. Other bookings not extra D unless I requires held.",
       "identifiability": "pending_probe",
       "db": "cheskepdia.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT id, property_name, total_price, confirmation_code FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price * 1.5 WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%radisson%')"
+        }
+      ],
+      "do_not_touch": "designated property_name; other bookings",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "I2 designated_booking_total; property held."
+      },
+      "moves": [
+        "designated_booking_total"
+      ],
+      "holds_this_I": [
+        "designated_booking_property"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "retrieval-f002",
@@ -1015,8 +1086,8 @@
       "id": "retrieval-f009",
       "task_id": "retrieval-f009",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "nyc_hotel_confirmation",
         "nyc_flight_confirmation",
@@ -1026,21 +1097,42 @@
       "review_decision": "Accept 3. Do not collapse D to the I axis.",
       "identifiability": "pending_probe",
       "db": "cheskepdia.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT confirmation_code, property_name, check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+      "patch": [
+        "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')"
+        },
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')"
+        }
+      ],
+      "do_not_touch": "dinoco NYC confirmation; greenwich check_in",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "Moves nyc_hotel_confirmation; flight conf + check_in held in D."
+      },
+      "moves": [
+        "nyc_hotel_confirmation"
+      ],
+      "holds_this_I": [
+        "nyc_flight_confirmation",
+        "nyc_checkin_date"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "retrieval-f010",
       "task_id": "retrieval-f010",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier2",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "jamaica_trip_total",
         "host_name"
@@ -1049,14 +1141,30 @@
       "review_decision": "Total + host. Amenities omitted.",
       "identifiability": "pending_probe",
       "db": "cheskepdia.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT id, property_name, total_price, host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price * 1.25 WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')"
+        }
+      ],
+      "do_not_touch": "host_name; amenities",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
-      }
+        "extra_probes_must_not_change": true,
+        "note": "Moves jamaica_trip_total; host_name held."
+      },
+      "moves": [
+        "jamaica_trip_total"
+      ],
+      "holds_this_I": [
+        "host_name"
+      ],
+      "_sql_note": "Tier 2 relative patch from guest schema dump (out/paper2_tier2_schema_dump.json). G0/G1 from live inject-probe. Zero-row UPDATE is identifiability reject, not a D rewrite.",
+      "_inventory_tier": 2
     },
     {
       "id": "retrieval-f017",
@@ -1152,7 +1260,9 @@
       "expect": {
         "probe_changes": true,
         "note": "Fill after schema dump; do not invent G0/G1."
-      }
+      },
+      "_inventory_tier": 3,
+      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
     }
   ]
 }

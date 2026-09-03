@@ -1,0 +1,47 @@
+{
+  "id": "retrieval-f009",
+  "role": "paper2_tier2",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T21:28:53.482118+00:00",
+  "patch": [
+    "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT confirmation_code, property_name, check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+  "probe_before": "[{\"confirmation_code\":\"GH-29481\",\"property_name\":\"The Greenwich Hotel\",\"check_in\":\"2026-04-30\"}]",
+  "probe_after": "[{\"confirmation_code\":\"GH-29481-CF\",\"property_name\":\"The Greenwich Hotel\",\"check_in\":\"2026-04-30\"}]",
+  "extra_probes_before": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')",
+      "result": "[{\"confirmation_code\":\"DN-87856\",\"flight_number\":\"DN6769\",\"destination\":\"JFK\",\"departure_date\":\"2026-04-30\"},\n{\"confirmation_code\":\"DN-EVE001\",\"flight_number\":\"DN-EVE001\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-22\"}]"
+    },
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+      "result": "[{\"check_in\":\"2026-04-30\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')",
+      "result": "[{\"confirmation_code\":\"DN-87856\",\"flight_number\":\"DN6769\",\"destination\":\"JFK\",\"departure_date\":\"2026-04-30\"},\n{\"confirmation_code\":\"DN-EVE001\",\"flight_number\":\"DN-EVE001\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-22\"}]"
+    },
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+      "result": "[{\"check_in\":\"2026-04-30\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}
