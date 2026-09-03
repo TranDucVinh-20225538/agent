@@ -1,0 +1,37 @@
+{
+  "id": "contradiction-f006-I2",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:39.506575+00:00",
+  "patch": [
+    "UPDATE accounts SET balance = balance + 800 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+  ],
+  "applied_sql": [
+    "UPDATE accounts SET balance = balance + 800 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+  "probe_before": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+  "probe_after": "[{\"balance\":-551.0,\"credit_limit\":3000.0,\"headroom\":3551.0}]",
+  "extra_probes_before": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT property_name, total_price FROM bookings WHERE user_email = :email AND ((lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')) OR (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%'))",
+      "result": "[{\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0},\n{\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT property_name, total_price FROM bookings WHERE user_email = :email AND ((lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')) OR (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%'))",
+      "result": "[{\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0},\n{\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

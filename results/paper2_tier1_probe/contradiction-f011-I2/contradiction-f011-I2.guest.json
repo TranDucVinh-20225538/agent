@@ -1,0 +1,37 @@
+{
+  "id": "contradiction-f011-I2",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:47.913331+00:00",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 1.6 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%'))"
+  ],
+  "applied_sql": [
+    "UPDATE transactions SET amount = amount * 1.6 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%'))"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ifnull(sum(t.amount),0) AS don FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%')",
+  "probe_before": "[{\"don\":-950.0}]",
+  "probe_after": "[{\"don\":-1520.0}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "result": "[{\"field_value\":\"950\"},\n{\"field_value\":\"950\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "result": "[{\"field_value\":\"950\"},\n{\"field_value\":\"950\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

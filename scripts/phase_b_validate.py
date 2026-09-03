@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -55,19 +56,30 @@ ls -ld {SNAP}/data {SNAP}/Tax_2025 2>/dev/null || true
 
 
 def restore(env) -> None:
+    # /data is a mount: `rm -rf /data` deletes the contents, then fails to
+    # remove the mountpoint, and `set -e` skips the copy. Replace in place.
     script = f"""
 set -e
-rm -rf /data
-cp -a {SNAP}/data /data
+if [ ! -d {SNAP}/data ]; then
+  echo "SNAPSHOT_MISSING:{SNAP}/data" >&2
+  exit 1
+fi
+find /data -mindepth 1 -maxdepth 1 -exec rm -rf {{}} +
+cp -a {SNAP}/data/. /data/
 if [ -d {SNAP}/Tax_2025 ]; then
   rm -rf /home/user/Documents/Tax_2025
   mkdir -p /home/user/Documents
   cp -a {SNAP}/Tax_2025 /home/user/Documents/Tax_2025
 fi
+test -f /data/dinoco-airlines.sqlite
+sqlite3 /data/dinoco-airlines.sqlite "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='loyalty';"
 """
     out = guest_text(env, script)
     if out:
-        print(out[:500], flush=True)
+        print(out[:2000], flush=True)
+    last = out.strip().splitlines()[-1] if out.strip() else ""
+    if last != "1":
+        raise RuntimeError(f"restore did not bring back loyalty table: {out!r}")
 
 
 def boot_env():
@@ -122,7 +134,7 @@ def summarize_record(task_id: str, dest: Path, proc: subprocess.CompletedProcess
         "error": "",
     }
     if proc.returncode != 0 and not path.exists():
-        row["error"] = (proc.stderr or proc.stdout or "")[-1500]
+        row["error"] = (proc.stderr or proc.stdout or "")[-1500:]
         row["fails"] = "inject_process_failed"
         return row
     if not path.exists():
@@ -137,7 +149,7 @@ def summarize_record(task_id: str, dest: Path, proc: subprocess.CompletedProcess
     row["probe_after"] = str(rec.get("probe_after") or "")[:240]
     if not row["ok"] and not row["fails"]:
         row["fails"] = "ok_false"
-        row["error"] = (proc.stderr or proc.stdout or "")[-1500]
+        row["error"] = (proc.stderr or proc.stdout or "")[-1500:]
     return row
 
 
@@ -223,6 +235,7 @@ def main() -> int:
             )
     except Exception as exc:
         print(f"TECHNICAL FAILURE during boot/validate: {exc!r}", flush=True)
+        traceback.print_exc()
         have = {r["task_id"] for r in rows}
         for task_id in TASKS:
             if task_id in have:

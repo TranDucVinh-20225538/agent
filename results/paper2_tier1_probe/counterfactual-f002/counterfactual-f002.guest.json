@@ -1,0 +1,37 @@
+{
+  "id": "counterfactual-f002",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:23:23.529967+00:00",
+  "patch": [
+    "UPDATE accounts SET balance = balance * 0.5 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+  ],
+  "applied_sql": [
+    "UPDATE accounts SET balance = balance * 0.5 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+  "probe_before": "[{\"type\":\"checking\",\"name\":\"Gringotts Checking\",\"balance\":50680.3099999999903},\n{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+  "probe_after": "[{\"type\":\"checking\",\"name\":\"Gringotts Checking\",\"balance\":25340.1549999999951},\n{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":8206.63999999999941}]",
+  "extra_probes_before": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+      "result": "[{\"total_price\":2250.0,\"property_name\":\"Sandals Royal Barbados\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+      "result": "[{\"total_price\":2250.0,\"property_name\":\"Sandals Royal Barbados\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

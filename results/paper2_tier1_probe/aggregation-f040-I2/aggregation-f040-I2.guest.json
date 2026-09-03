@@ -1,0 +1,37 @@
+{
+  "id": "aggregation-f040-I2",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:30.864814+00:00",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%'))"
+  ],
+  "applied_sql": [
+    "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%'))"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+  "probe_before": "[{\"improv\":-6610.25}]",
+  "probe_after": "[{\"improv\":-9915.375}]",
+  "extra_probes_before": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(amount),0) AS billpay FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'",
+      "result": "[{\"billpay\":1503.68000000000006}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(amount),0) AS billpay FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'",
+      "result": "[{\"billpay\":1503.68000000000006}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

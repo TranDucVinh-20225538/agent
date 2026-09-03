@@ -85,6 +85,23 @@ def test_f030_expect() -> None:
     assert fails_bad
 
 
+def test_json_compact_replace_sql() -> None:
+    spaced = (
+        'UPDATE tax_documents SET data_json = replace(replace(data_json, '
+        '\'"wages": "142000"\', \'"wages": "90000"\'), '
+        '\'"federal_tax_withheld": "28400"\', \'"federal_tax_withheld": "18000"\')'
+    )
+    compact = cf_inject.json_compact_replace_sql(spaced)
+    assert compact is not None
+    assert '"wages":"142000"' in compact
+    assert '"wages":"90000"' in compact
+    assert '"federal_tax_withheld":"28400"' in compact
+    assert cf_inject.json_compact_replace_sql("UPDATE loyalty SET miles = 1") is None
+    applied = cf_inject.statements_to_apply([spaced])
+    assert applied[0] == spaced
+    assert applied[1] == compact
+
+
 def test_f004_expect_tf_held() -> None:
     spec = cf_inject.load_spec("preference_inference-f004")[0]
     extra = [{"db": "tablefind.sqlite", "result": "Cooper 12"}]
@@ -116,6 +133,7 @@ def main() -> int:
     test_load_all_ten()
     test_f029_file_from_probe()
     test_f030_expect()
+    test_json_compact_replace_sql()
     test_f004_expect_tf_held()
     print("test_phase_b_inject ok")
     return 0

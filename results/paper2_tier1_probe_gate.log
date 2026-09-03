@@ -1,0 +1,280 @@
+===== Paper 2 Tier 1 probe gate start 2026-09-03T20:10:44+00:00 =====
+python3=/mnt/data2/Vinh/agent/external/MyPCBench-main/.venv/bin/python3
+AGENT_ROOT=/mnt/data2/Vinh/agent
+MYPCBENCH_QCOW2=/mnt/data2/Vinh/agent/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2
+HEAD_hint=b7b4203
+READY_RELATIVE total=23
+group1 count=18 first='aggregation-f004' last='retrieval-f017'
+group2 count=5 first='aggregation-f040-I2' last='retrieval-f017-I2'
+group1 ids: aggregation-f004 aggregation-f020 aggregation-f036 aggregation-f040 contradiction-f003 contradiction-f004 contradiction-f006 contradiction-f011 contradiction-f017 contradiction-f022 counterfactual-f002 counterfactual-f003 counterfactual-f005 counterfactual-f010 counterfactual-f013 retrieval-f002 retrieval-f005 retrieval-f017
+group2 ids: aggregation-f040-I2 contradiction-f006-I2 contradiction-f011-I2 counterfactual-f002-I2 retrieval-f017-I2
+reset() starting; qcow2=/mnt/data2/Vinh/agent/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2
+No usable /dev/kvm — VM will be very slow (TCG emulation)
+Execute failed (attempt 1/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Execute failed (attempt 2/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+Execute failed (attempt 3/3): ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+VM image is 327h old — NOT the current daily build. Docker runs and the managed qemu cache auto-refresh, but a pinned --qcow2_path does not; re-fetch with scripts/get-eval-image.sh (or unset the pin) for the daily image. Intentionally pinned runs can ignore this or set MYPCBENCH_MAX_IMAGE_AGE_HOURS=0.
+guest ready at http://127.0.0.1:5000
+drwxrwxr-x 4 user user 4096 Sep  3 16:21 /tmp/paper2_tier1_snap/data
+drwxr-xr-x 2 user user 4096 Aug 21 01:00 /tmp/paper2_tier1_snap/Tax_2025
+----- restore + inject aggregation-f004 (group 1) -----
+1
+probe before: [{"id":4,"property_name":"Radisson Blu Warwick Hotel","location":"Philadelphia, PA","check_in":"2026-03-21","total_price":129.0}]
+probe after:  [{"id":4,"property_name":"Radisson Blu Warwick Hotel","location":"Philadelphia, PA","check_in":"2026-03-21","total_price":379.0}]
+extra probe after [vaultbank.sqlite]: ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings
+
+description dump (after): [{"id":4,"property_name":"Radisson Blu Warwick Hotel","location":"Philadelphia, PA","check_in":"2026-03-21","total_price":379.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f004/aggregation-f004.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f004/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject aggregation-f020 (group 1) -----
+1
+probe before: [{"id":3,"type":"credit_card","name":"Gringotts Sapphire Preferred","balance":-1351.0,"credit_limit":3000.0}]
+probe after:  [{"id":3,"type":"credit_card","name":"Gringotts Sapphire Preferred","balance":-951.0,"credit_limit":3000.0}]
+extra probe after [vaultbank.sqlite]: ERROR: guest sqlite3 failed (5): Error: in prepare, database is locked (5)
+
+extra probe after [batbucks.sqlite]: [{"cash":420.0}]
+FAILED: extra probes moved but must not
+description dump (after): [{"id":3,"type":"credit_card","name":"Gringotts Sapphire Preferred","balance":-951.0,"credit_limit":3000.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f020/aggregation-f020.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f020/sql-patch.json
+
+
+  verdict=REJECT_held_leak gold_moved=True fails='extra probes moved but must not'
+----- restore + inject aggregation-f036 (group 1) -----
+1
+probe before: [{"improv_spend":-4679.18000000000029,"n":39}]
+probe after:  [{"improv_spend":-6550.85199999999986,"n":39}]
+extra probe after [vaultbank.sqlite]: [{"n":39}]
+description dump (after): [{"improv_spend":-6550.85199999999986,"n":39}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f036/aggregation-f036.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f036/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject aggregation-f040 (group 1) -----
+rm: cannot remove '/data/worlds/scranton-office': Directory not empty
+TECHNICAL FAILURE on restore before aggregation-f040: RuntimeError('restore did not bring back loyalty table: "rm: cannot remove \'/data/worlds/scranton-office\': Directory not empty"')
+Traceback (most recent call last):
+  File "/mnt/data2/Vinh/agent/scripts/paper2_tier1_probe_gate.py", line 364, in main
+    restore(env)
+  File "/mnt/data2/Vinh/agent/scripts/paper2_tier1_probe_gate.py", line 88, in restore
+    raise RuntimeError(f"restore did not bring back loyalty table: {out!r}")
+RuntimeError: restore did not bring back loyalty table: "rm: cannot remove '/data/worlds/scranton-office': Directory not empty"
+----- restore + inject contradiction-f003 (group 1) -----
+1
+probe before: [{"status":"Gold Voyager","miles":38450,"miles_ytd":14280}]
+probe after:  [{"status":"Silver Voyager","miles":19225,"miles_ytd":7140}]
+description dump (after): [{"status":"Silver Voyager","miles":19225,"miles_ytd":7140}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f003/contradiction-f003.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f003/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f004 (group 1) -----
+1
+probe before: [{"ticker":"GME","shares":85.0,"avg_cost":42.1199999999999974}]
+probe after:  [{"ticker":"GME","shares":125.0,"avg_cost":42.1199999999999974}]
+extra probe after [batbucks.sqlite]: [{"avg_cost":42.1199999999999974}]
+extra probe after [oddsmarket.sqlite]: [{"shares":200,"status":"active","market_ticker":"WILL-GME-100-YEAREND"}]
+description dump (after): [{"ticker":"GME","shares":125.0,"avg_cost":42.1199999999999974}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f004/contradiction-f004.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f004/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f006 (group 1) -----
+1
+probe before: [{"id":2,"property_name":"Sandals Montego Bay","total_price":1975.0},
+{"id":9,"property_name":"Sandals Royal Caribbean Suite","total_price":4635.0}]
+probe after:  [{"id":2,"property_name":"Sandals Montego Bay","total_price":2475.0},
+{"id":9,"property_name":"Sandals Royal Caribbean Suite","total_price":5135.0}]
+extra probe after [cheskepdia.sqlite]: [{"total_price":2250.0}]
+extra probe after [vaultbank.sqlite]: [{"balance":-1351.0,"credit_limit":3000.0,"headroom":4351.0}]
+description dump (after): [{"id":2,"property_name":"Sandals Montego Bay","total_price":2475.0},
+{"id":9,"property_name":"Sandals Royal Caribbean Suite","total_price":5135.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006/contradiction-f006.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f011 (group 1) -----
+1
+probe before: [{"field_name":"charitable_total","field_value":"950"},
+{"field_name":"charitable_contributions","field_value":"950"}]
+probe after:  [{"field_name":"charitable_total","field_value":"1350.0"},
+{"field_name":"charitable_contributions","field_value":"1350.0"}]
+extra probe after [vaultbank.sqlite]: [{"don":-950.0}]
+description dump (after): [{"field_name":"charitable_total","field_value":"1350.0"},
+{"field_name":"charitable_contributions","field_value":"1350.0"}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011/contradiction-f011.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f017 (group 1) -----
+1
+probe before: [{"id":1603,"date":"2026-04-15","description":"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]","amount":-4896.0}]
+probe after:  [{"id":1603,"date":"2026-04-15","description":"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]","amount":-9792.0}]
+extra probe after [batbucks.sqlite]: [{"ticker":"RIVN","shares":100.0,"side":"buy","status":"filled"}]
+description dump (after): [{"id":1603,"date":"2026-04-15","description":"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]","amount":-9792.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f017/contradiction-f017.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f017/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f022 (group 1) -----
+1
+probe before: [{"zelle_ytd":34047.0400000000008}]
+probe after:  [{"zelle_ytd":44261.1520000000018}]
+extra probe after [speedtax.sqlite]: [{"field_name":"charitable_total","field_value":"950"},
+{"field_name":"charitable_contributions","field_value":"950"},
+{"field_name":"charitable_total","field_value":"950"},
+{"field_name":"charitable_contributions","field_value":"950"},
+{"field_name":"charitable_total","field_value":"950"},
+{"field_name":"charitable_contributions","field_value":"950"}]
+description dump (after): [{"zelle_ytd":44261.1520000000018}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f022/contradiction-f022.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f022/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f002 (group 1) -----
+1
+probe before: [{"type":"checking","name":"Gringotts Checking","balance":50680.3099999999903},
+{"type":"savings","name":"Gringotts Savings","balance":16413.2799999999988}]
+probe after:  [{"type":"checking","name":"Gringotts Checking","balance":25340.1549999999951},
+{"type":"savings","name":"Gringotts Savings","balance":8206.63999999999941}]
+extra probe after [cheskepdia.sqlite]: [{"total_price":2250.0,"property_name":"Sandals Royal Barbados"}]
+description dump (after): [{"type":"checking","name":"Gringotts Checking","balance":25340.1549999999951},
+{"type":"savings","name":"Gringotts Savings","balance":8206.63999999999941}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002/counterfactual-f002.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f003 (group 1) -----
+1
+probe before: [{"balance":-1351.0,"credit_limit":3000.0,"headroom":4351.0}]
+probe after:  [{"balance":-1351.0,"credit_limit":2500.0,"headroom":3851.0}]
+description dump (after): [{"balance":-1351.0,"credit_limit":2500.0,"headroom":3851.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f003/counterfactual-f003.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f003/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f005 (group 1) -----
+1
+probe before: [{"ticker":"GME","shares":85.0,"avg_cost":42.1199999999999974}]
+probe after:  [{"ticker":"GME","shares":170.0,"avg_cost":42.1199999999999974}]
+extra probe after [batbucks.sqlite]: [{"avg_cost":42.1199999999999974}]
+extra probe after [vaultbank.sqlite]: [{"type":"checking","balance":50680.3099999999903}]
+description dump (after): [{"ticker":"GME","shares":170.0,"avg_cost":42.1199999999999974}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f005/counterfactual-f005.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f005/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f010 (group 1) -----
+1
+probe before: [{"liquid":67093.5899999999965}]
+probe after:  [{"liquid":26837.4359999999942}]
+extra probe after [dinoco-airlines.sqlite]: [{"n_upcoming":6}]
+description dump (after): [{"liquid":26837.4359999999942}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f010/counterfactual-f010.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f010/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f013 (group 1) -----
+1
+probe before: [{"type":"savings","name":"Gringotts Savings","balance":16413.2799999999988}]
+probe after:  [{"type":"savings","name":"Gringotts Savings","balance":3282.65599999999994}]
+extra probe after [batbucks.sqlite]: [{"divs":64.8799999999999954}]
+extra probe after [oddsmarket.sqlite]: [{"balance":320.0}]
+description dump (after): [{"type":"savings","name":"Gringotts Savings","balance":3282.65599999999994}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f013/counterfactual-f013.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f013/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject retrieval-f002 (group 1) -----
+1
+probe before: [{"confirmation_code":"SM-88431","property_name":"Sandals Montego Bay"},
+{"confirmation_code":"CHK-JM2026","property_name":"Sandals Royal Caribbean Suite"}]
+probe after:  [{"confirmation_code":"SM-88431-CF","property_name":"Sandals Montego Bay"},
+{"confirmation_code":"CHK-JM2026-CF","property_name":"Sandals Royal Caribbean Suite"}]
+description dump (after): [{"confirmation_code":"SM-88431-CF","property_name":"Sandals Montego Bay"},
+{"confirmation_code":"CHK-JM2026-CF","property_name":"Sandals Royal Caribbean Suite"}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f002/retrieval-f002.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f002/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject retrieval-f005 (group 1) -----
+1
+probe before: [{"id":4,"payee":"Comcast Xfinity Internet","amount":89.9899999999999948}]
+probe after:  [{"id":4,"payee":"Comcast Xfinity Internet","amount":104.989999999999994}]
+extra probe after [vaultbank.sqlite]: [{"n":12}]
+description dump (after): [{"id":4,"payee":"Comcast Xfinity Internet","amount":104.989999999999994}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f005/retrieval-f005.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f005/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject retrieval-f017 (group 1) -----
+1
+probe before: [{"total_invested":318.5,"balance":320.0}]
+probe after:  [{"total_invested":477.75,"balance":320.0}]
+extra probe after [oddsmarket.sqlite]: [{"n":5}]
+description dump (after): [{"total_invested":477.75,"balance":320.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017/retrieval-f017.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject aggregation-f040-I2 (group 2) -----
+1
+probe before: [{"improv":-6610.25}]
+probe after:  [{"improv":-9915.375}]
+extra probe after [vaultbank.sqlite]: [{"billpay":1503.68000000000006}]
+description dump (after): [{"improv":-9915.375}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f040-I2/aggregation-f040-I2.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f040-I2/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f006-I2 (group 2) -----
+1
+probe before: [{"balance":-1351.0,"credit_limit":3000.0,"headroom":4351.0}]
+probe after:  [{"balance":-551.0,"credit_limit":3000.0,"headroom":3551.0}]
+extra probe after [cheskepdia.sqlite]: [{"property_name":"Sandals Montego Bay","total_price":1975.0},
+{"property_name":"Sandals Royal Barbados","total_price":2250.0},
+{"property_name":"Sandals Royal Caribbean Suite","total_price":4635.0}]
+description dump (after): [{"balance":-551.0,"credit_limit":3000.0,"headroom":3551.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006-I2/contradiction-f006-I2.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006-I2/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject contradiction-f011-I2 (group 2) -----
+1
+probe before: [{"don":-950.0}]
+probe after:  [{"don":-1520.0}]
+extra probe after [speedtax.sqlite]: [{"field_value":"950"},
+{"field_value":"950"}]
+description dump (after): [{"don":-1520.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011-I2/contradiction-f011-I2.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011-I2/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject counterfactual-f002-I2 (group 2) -----
+1
+probe before: [{"id":3,"property_name":"Sandals Royal Barbados","total_price":2250.0}]
+probe after:  [{"id":3,"property_name":"Sandals Royal Barbados","total_price":2950.0}]
+extra probe after [vaultbank.sqlite]: [{"liquid":67093.5899999999965}]
+description dump (after): [{"id":3,"property_name":"Sandals Royal Barbados","total_price":2950.0}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002-I2/counterfactual-f002-I2.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002-I2/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+----- restore + inject retrieval-f017-I2 (group 2) -----
+1
+probe before: [{"n":5}]
+probe after:  [{"n":4}]
+extra probe after [oddsmarket.sqlite]: [{"total_invested":318.5}]
+description dump (after): [{"n":4}]
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017-I2/retrieval-f017-I2.guest.json
+wrote /mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017-I2/sql-patch.json
+
+  verdict=PASS gold_moved=True fails=''
+wrote /mnt/data2/Vinh/agent/out/paper2_tier1_probe_gate.json
+wrote /mnt/data2/Vinh/agent/out/paper2_tier1_probe_gate.csv
+wrote /mnt/data2/Vinh/agent/out/paper2_tier1_probe_gate.md
+summary PASS=21 REJECT_id=0 REJECT_held=1 tech=1
+===== Paper 2 Tier 1 probe gate stop 2026-09-03T20:25:07+00:00 =====
+see /mnt/data2/Vinh/agent/out/paper2_tier1_probe_gate.md

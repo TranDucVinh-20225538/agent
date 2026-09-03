@@ -1,0 +1,37 @@
+{
+  "id": "contradiction-f022",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:23:15.135525+00:00",
+  "patch": [
+    "UPDATE zelle_transfers SET amount = amount * 1.3 WHERE user_email = :email AND lower(direction) LIKE '%sent%'"
+  ],
+  "applied_sql": [
+    "UPDATE zelle_transfers SET amount = amount * 1.3 WHERE user_email = :email AND lower(direction) LIKE '%sent%'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ifnull(sum(amount),0) AS zelle_ytd FROM zelle_transfers WHERE user_email = :email AND lower(direction) LIKE '%sent%'",
+  "probe_before": "[{\"zelle_ytd\":34047.0400000000008}]",
+  "probe_after": "[{\"zelle_ytd\":44261.1520000000018}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "result": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "result": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

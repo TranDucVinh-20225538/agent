@@ -1,0 +1,37 @@
+{
+  "id": "counterfactual-f002-I2",
+  "role": "paper2_tier1",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:56.620756+00:00",
+  "patch": [
+    "UPDATE bookings SET total_price = total_price + 700 WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET total_price = total_price + 700 WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, property_name, total_price FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+  "probe_before": "[{\"id\":3,\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0}]",
+  "probe_after": "[{\"id\":3,\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2950.0}]",
+  "extra_probes_before": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+      "result": "[{\"liquid\":67093.5899999999965}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+      "result": "[{\"liquid\":67093.5899999999965}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

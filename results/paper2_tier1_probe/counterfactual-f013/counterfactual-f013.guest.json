@@ -1,0 +1,47 @@
+{
+  "id": "counterfactual-f013",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:23:58.200944+00:00",
+  "patch": [
+    "UPDATE accounts SET balance = balance * 0.2 WHERE user_email = :email AND lower(type) LIKE '%sav%'"
+  ],
+  "applied_sql": [
+    "UPDATE accounts SET balance = balance * 0.2 WHERE user_email = :email AND lower(type) LIKE '%sav%'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%sav%'",
+  "probe_before": "[{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+  "probe_after": "[{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":3282.65599999999994}]",
+  "extra_probes_before": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email",
+      "result": "[{\"divs\":64.8799999999999954}]"
+    },
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT balance FROM account WHERE user_email = :email",
+      "result": "[{\"balance\":320.0}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email",
+      "result": "[{\"divs\":64.8799999999999954}]"
+    },
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT balance FROM account WHERE user_email = :email",
+      "result": "[{\"balance\":320.0}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

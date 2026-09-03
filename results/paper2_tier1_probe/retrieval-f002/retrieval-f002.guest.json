@@ -1,0 +1,25 @@
+{
+  "id": "retrieval-f002",
+  "role": "paper2_tier1",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:05.751901+00:00",
+  "patch": [
+    "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT confirmation_code, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')",
+  "probe_before": "[{\"confirmation_code\":\"SM-88431\",\"property_name\":\"Sandals Montego Bay\"},\n{\"confirmation_code\":\"CHK-JM2026\",\"property_name\":\"Sandals Royal Caribbean Suite\"}]",
+  "probe_after": "[{\"confirmation_code\":\"SM-88431-CF\",\"property_name\":\"Sandals Montego Bay\"},\n{\"confirmation_code\":\"CHK-JM2026-CF\",\"property_name\":\"Sandals Royal Caribbean Suite\"}]",
+  "extra_probes_before": [],
+  "extra_probes_after": [],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

@@ -1,0 +1,47 @@
+{
+  "id": "contradiction-f006",
+  "role": "paper2_tier1",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:22:48.598853+00:00",
+  "patch": [
+    "UPDATE bookings SET total_price = total_price + 500 WHERE user_email = :email AND (lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%'))"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET total_price = total_price + 500 WHERE user_email = :email AND (lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%'))"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, property_name, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%'))",
+  "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"id\":9,\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]",
+  "probe_after": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":2475.0},\n{\"id\":9,\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":5135.0}]",
+  "extra_probes_before": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')",
+      "result": "[{\"total_price\":2250.0}]"
+    },
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+      "result": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')",
+      "result": "[{\"total_price\":2250.0}]"
+    },
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+      "result": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

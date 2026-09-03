@@ -22,6 +22,7 @@ import argparse
 import base64
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -127,6 +128,35 @@ def guest_write_text(api: str, rel: str, text: str) -> None:
                 f"guest file write failed ({result.get('returncode')}): "
                 f"{result.get('error') or result.get('output')}"
             )
+
+
+def json_compact_replace_sql(sql: str) -> str | None:
+    """Compact-JSON variant of a frozen replace() statement, or None if identical.
+
+    TY2025 SpeedTax seed JSON is compact (`"wages":"142000"`). Several frozen
+    patches were written against spaced JSON (`"wages": "142000"`). SQLite
+    replace() is exact, so the spaced needle is a no-op on compact blobs.
+    Expand at apply time; do not edit the frozen I.
+    """
+
+    def lit(match: re.Match) -> str:
+        inner = match.group(1)
+        compact = inner.replace(": ", ":").replace(", ", ",")
+        return "'" + compact + "'"
+
+    nxt = re.sub(r"'((?:\\'|[^'])*)'", lit, sql)
+    return nxt if nxt != sql else None
+
+
+def statements_to_apply(statements: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for statement in statements:
+        for variant in (statement, json_compact_replace_sql(statement)):
+            if variant and variant not in seen:
+                seen.add(variant)
+                out.append(variant)
+    return out
 
 
 def build_statements(spec: dict, sqlite_bound, email: str) -> list[str]:
@@ -246,7 +276,8 @@ def main() -> int:
     if spec.get("dynamic_patch") and not statements:
         raise SystemExit(f"{args.task}: dynamic_patch produced no SQL")
 
-    for statement in statements:
+    applied = statements_to_apply(statements)
+    for statement in applied:
         sqlite_bound(statement)
 
     extra_patch_sql = []
@@ -291,6 +322,7 @@ def main() -> int:
         "where": "guest",
         "applied_at": datetime.now(timezone.utc).isoformat(),
         "patch": statements,
+        "applied_sql": applied,
         "extra_patches": extra_patch_sql,
         "file_patches": planned_files,
         "probe": spec["probe"],

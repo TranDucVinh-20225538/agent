@@ -1,0 +1,37 @@
+{
+  "id": "retrieval-f017",
+  "role": "paper2_tier1",
+  "db": "oddsmarket.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:22.258763+00:00",
+  "patch": [
+    "UPDATE account SET total_invested = total_invested * 1.5 WHERE user_email = :email"
+  ],
+  "applied_sql": [
+    "UPDATE account SET total_invested = total_invested * 1.5 WHERE user_email = :email"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT total_invested, balance FROM account WHERE user_email = :email",
+  "probe_before": "[{\"total_invested\":318.5,\"balance\":320.0}]",
+  "probe_after": "[{\"total_invested\":477.75,\"balance\":320.0}]",
+  "extra_probes_before": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'",
+      "result": "[{\"n\":5}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'",
+      "result": "[{\"n\":5}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

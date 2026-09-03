@@ -1,0 +1,47 @@
+{
+  "id": "counterfactual-f005",
+  "role": "paper2_tier1",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:23:40.658129+00:00",
+  "patch": [
+    "UPDATE holdings SET shares = shares * 2 WHERE user_email = :email AND upper(ticker)='GME'"
+  ],
+  "applied_sql": [
+    "UPDATE holdings SET shares = shares * 2 WHERE user_email = :email AND upper(ticker)='GME'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+  "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+  "probe_after": "[{\"ticker\":\"GME\",\"shares\":170.0,\"avg_cost\":42.1199999999999974}]",
+  "extra_probes_before": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "result": "[{\"avg_cost\":42.1199999999999974}]"
+    },
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'",
+      "result": "[{\"type\":\"checking\",\"balance\":50680.3099999999903}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "result": "[{\"avg_cost\":42.1199999999999974}]"
+    },
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'",
+      "result": "[{\"type\":\"checking\",\"balance\":50680.3099999999903}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

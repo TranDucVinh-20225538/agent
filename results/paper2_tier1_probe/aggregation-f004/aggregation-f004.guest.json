@@ -1,0 +1,37 @@
+{
+  "id": "aggregation-f004",
+  "role": "paper2_tier1",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:22:03.212782+00:00",
+  "patch": [
+    "UPDATE bookings SET total_price = total_price + 250 WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')"
+  ],
+  "applied_sql": [
+    "UPDATE bookings SET total_price = total_price + 250 WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, property_name, location, check_in, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')",
+  "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"location\":\"Philadelphia, PA\",\"check_in\":\"2026-03-21\",\"total_price\":129.0}]",
+  "probe_after": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"location\":\"Philadelphia, PA\",\"check_in\":\"2026-03-21\",\"total_price\":379.0}]",
+  "extra_probes_before": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))",
+      "result": "ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings\n"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))",
+      "result": "ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings\n"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

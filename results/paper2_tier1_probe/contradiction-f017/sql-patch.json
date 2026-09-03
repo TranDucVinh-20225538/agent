@@ -1,0 +1,8 @@
+{
+  "condition": "contradiction-f017",
+  "id": "contradiction-f017",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 2 WHERE id = (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND lower(t.description) NOT LIKE '%transfer%' AND lower(t.description) NOT LIKE '%payment%' ORDER BY t.amount ASC LIMIT 1)"
+  ],
+  "file_patches": []
+}

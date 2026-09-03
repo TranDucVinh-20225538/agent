@@ -1,0 +1,37 @@
+{
+  "id": "counterfactual-f010",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:23:49.171489+00:00",
+  "patch": [
+    "UPDATE accounts SET balance = balance * 0.4 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+  ],
+  "applied_sql": [
+    "UPDATE accounts SET balance = balance * 0.4 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+  "probe_before": "[{\"liquid\":67093.5899999999965}]",
+  "probe_after": "[{\"liquid\":26837.4359999999942}]",
+  "extra_probes_before": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT count(*) AS n_upcoming FROM flights WHERE user_email = :email AND date(departure_date) >= date('now')",
+      "result": "[{\"n_upcoming\":6}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT count(*) AS n_upcoming FROM flights WHERE user_email = :email AND date(departure_date) >= date('now')",
+      "result": "[{\"n_upcoming\":6}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

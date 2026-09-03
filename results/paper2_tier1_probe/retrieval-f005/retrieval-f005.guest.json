@@ -1,0 +1,37 @@
+{
+  "id": "retrieval-f005",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:24:14.101016+00:00",
+  "patch": [
+    "UPDATE bill_pay SET amount = amount + 15 WHERE id = (SELECT id FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1)"
+  ],
+  "applied_sql": [
+    "UPDATE bill_pay SET amount = amount + 15 WHERE id = (SELECT id FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1)"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, payee, amount FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1",
+  "probe_before": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":89.9899999999999948}]",
+  "probe_after": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":104.989999999999994}]",
+  "extra_probes_before": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'",
+      "result": "[{\"n\":12}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'",
+      "result": "[{\"n\":12}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

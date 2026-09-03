@@ -1,0 +1,680 @@
+{
+  "written_at": "2026-09-03T20:25:07.204313+00:00",
+  "spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md \u00a77",
+  "interventions": "/mnt/data2/Vinh/agent/cf/paper2_interventions.json",
+  "group1": [
+    "aggregation-f004",
+    "aggregation-f020",
+    "aggregation-f036",
+    "aggregation-f040",
+    "contradiction-f003",
+    "contradiction-f004",
+    "contradiction-f006",
+    "contradiction-f011",
+    "contradiction-f017",
+    "contradiction-f022",
+    "counterfactual-f002",
+    "counterfactual-f003",
+    "counterfactual-f005",
+    "counterfactual-f010",
+    "counterfactual-f013",
+    "retrieval-f002",
+    "retrieval-f005",
+    "retrieval-f017"
+  ],
+  "group2": [
+    "aggregation-f040-I2",
+    "contradiction-f006-I2",
+    "contradiction-f011-I2",
+    "counterfactual-f002-I2",
+    "retrieval-f017-I2"
+  ],
+  "rows": [
+    {
+      "task_id": "aggregation-f004",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f004/aggregation-f004.guest.json",
+      "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"location\":\"Philadelphia, PA\",\"check_in\":\"2026-03-21\",\"total_price\":129.0}]",
+      "probe_after": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"location\":\"Philadelphia, PA\",\"check_in\":\"2026-03-21\",\"total_price\":379.0}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))",
+          "result": "ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings\n"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))",
+          "result": "ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings\n"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "aggregation-f020",
+      "group": "1",
+      "ok": false,
+      "gold_moved": true,
+      "fails": "extra probes moved but must not",
+      "returncode": 1,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f020/aggregation-f020.guest.json",
+      "probe_before": "[{\"id\":3,\"type\":\"credit_card\",\"name\":\"Gringotts Sapphire Preferred\",\"balance\":-1351.0,\"credit_limit\":3000.0}]",
+      "probe_after": "[{\"id\":3,\"type\":\"credit_card\",\"name\":\"Gringotts Sapphire Preferred\",\"balance\":-951.0,\"credit_limit\":3000.0}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+          "result": "[{\"credit_limit\":3000.0}]"
+        },
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT cash FROM portfolio WHERE user_email = :email",
+          "result": "[{\"cash\":420.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+          "result": "ERROR: guest sqlite3 failed (5): Error: in prepare, database is locked (5)\n"
+        },
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT cash FROM portfolio WHERE user_email = :email",
+          "result": "[{\"cash\":420.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "REJECT_held_leak",
+      "verdict_detail": "extra probes moved but must not"
+    },
+    {
+      "task_id": "aggregation-f036",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f036/aggregation-f036.guest.json",
+      "probe_before": "[{\"improv_spend\":-4679.18000000000029,\"n\":39}]",
+      "probe_after": "[{\"improv_spend\":-6550.85199999999986,\"n\":39}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT)",
+          "result": "[{\"n\":39}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT)",
+          "result": "[{\"n\":39}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "aggregation-f040",
+      "group": "1",
+      "ok": false,
+      "gold_moved": null,
+      "fails": "restore_failed",
+      "returncode": 1,
+      "guest_json": "",
+      "probe_before": "",
+      "probe_after": "",
+      "extra_probes_before": [],
+      "extra_probes_after": [],
+      "error": "RuntimeError('restore did not bring back loyalty table: \"rm: cannot remove \\'/data/worlds/scranton-office\\': Directory not empty\"')",
+      "verdict": "technical_failure",
+      "verdict_detail": "restore_failed"
+    },
+    {
+      "task_id": "contradiction-f003",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f003/contradiction-f003.guest.json",
+      "probe_before": "[{\"status\":\"Gold Voyager\",\"miles\":38450,\"miles_ytd\":14280}]",
+      "probe_after": "[{\"status\":\"Silver Voyager\",\"miles\":19225,\"miles_ytd\":7140}]",
+      "extra_probes_before": [],
+      "extra_probes_after": [],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f004",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f004/contradiction-f004.guest.json",
+      "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+      "probe_after": "[{\"ticker\":\"GME\",\"shares\":125.0,\"avg_cost\":42.1199999999999974}]",
+      "extra_probes_before": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+          "result": "[{\"avg_cost\":42.1199999999999974}]"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT shares, status, market_ticker FROM positions WHERE user_email = :email AND (upper(market_ticker) LIKE '%GME%' OR lower(title) LIKE '%gamestop%')",
+          "result": "[{\"shares\":200,\"status\":\"active\",\"market_ticker\":\"WILL-GME-100-YEAREND\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+          "result": "[{\"avg_cost\":42.1199999999999974}]"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT shares, status, market_ticker FROM positions WHERE user_email = :email AND (upper(market_ticker) LIKE '%GME%' OR lower(title) LIKE '%gamestop%')",
+          "result": "[{\"shares\":200,\"status\":\"active\",\"market_ticker\":\"WILL-GME-100-YEAREND\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f006",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006/contradiction-f006.guest.json",
+      "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"id\":9,\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]",
+      "probe_after": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":2475.0},\n{\"id\":9,\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":5135.0}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')",
+          "result": "[{\"total_price\":2250.0}]"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+          "result": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')",
+          "result": "[{\"total_price\":2250.0}]"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+          "result": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f011",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011/contradiction-f011.guest.json",
+      "probe_before": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]",
+      "probe_after": "[{\"field_name\":\"charitable_total\",\"field_value\":\"1350.0\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"1350.0\"}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS don FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%')",
+          "result": "[{\"don\":-950.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS don FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%')",
+          "result": "[{\"don\":-950.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f017",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f017/contradiction-f017.guest.json",
+      "probe_before": "[{\"id\":1603,\"date\":\"2026-04-15\",\"description\":\"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]\",\"amount\":-4896.0}]",
+      "probe_after": "[{\"id\":1603,\"date\":\"2026-04-15\",\"description\":\"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]\",\"amount\":-9792.0}]",
+      "extra_probes_before": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ticker, shares, side, status FROM orders WHERE user_email = :email AND lower(side) LIKE '%buy%' ORDER BY shares DESC LIMIT 1",
+          "result": "[{\"ticker\":\"RIVN\",\"shares\":100.0,\"side\":\"buy\",\"status\":\"filled\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ticker, shares, side, status FROM orders WHERE user_email = :email AND lower(side) LIKE '%buy%' ORDER BY shares DESC LIMIT 1",
+          "result": "[{\"ticker\":\"RIVN\",\"shares\":100.0,\"side\":\"buy\",\"status\":\"filled\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f022",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f022/contradiction-f022.guest.json",
+      "probe_before": "[{\"zelle_ytd\":34047.0400000000008}]",
+      "probe_after": "[{\"zelle_ytd\":44261.1520000000018}]",
+      "extra_probes_before": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')",
+          "result": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')",
+          "result": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f002",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002/counterfactual-f002.guest.json",
+      "probe_before": "[{\"type\":\"checking\",\"name\":\"Gringotts Checking\",\"balance\":50680.3099999999903},\n{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+      "probe_after": "[{\"type\":\"checking\",\"name\":\"Gringotts Checking\",\"balance\":25340.1549999999951},\n{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":8206.63999999999941}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+          "result": "[{\"total_price\":2250.0,\"property_name\":\"Sandals Royal Barbados\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+          "result": "[{\"total_price\":2250.0,\"property_name\":\"Sandals Royal Barbados\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f003",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f003/counterfactual-f003.guest.json",
+      "probe_before": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+      "probe_after": "[{\"balance\":-1351.0,\"credit_limit\":2500.0,\"headroom\":3851.0}]",
+      "extra_probes_before": [],
+      "extra_probes_after": [],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f005",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f005/counterfactual-f005.guest.json",
+      "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+      "probe_after": "[{\"ticker\":\"GME\",\"shares\":170.0,\"avg_cost\":42.1199999999999974}]",
+      "extra_probes_before": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+          "result": "[{\"avg_cost\":42.1199999999999974}]"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'",
+          "result": "[{\"type\":\"checking\",\"balance\":50680.3099999999903}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+          "result": "[{\"avg_cost\":42.1199999999999974}]"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'",
+          "result": "[{\"type\":\"checking\",\"balance\":50680.3099999999903}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f010",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f010/counterfactual-f010.guest.json",
+      "probe_before": "[{\"liquid\":67093.5899999999965}]",
+      "probe_after": "[{\"liquid\":26837.4359999999942}]",
+      "extra_probes_before": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT count(*) AS n_upcoming FROM flights WHERE user_email = :email AND date(departure_date) >= date('now')",
+          "result": "[{\"n_upcoming\":6}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT count(*) AS n_upcoming FROM flights WHERE user_email = :email AND date(departure_date) >= date('now')",
+          "result": "[{\"n_upcoming\":6}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f013",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f013/counterfactual-f013.guest.json",
+      "probe_before": "[{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+      "probe_after": "[{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":3282.65599999999994}]",
+      "extra_probes_before": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email",
+          "result": "[{\"divs\":64.8799999999999954}]"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT balance FROM account WHERE user_email = :email",
+          "result": "[{\"balance\":320.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email",
+          "result": "[{\"divs\":64.8799999999999954}]"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT balance FROM account WHERE user_email = :email",
+          "result": "[{\"balance\":320.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f002",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f002/retrieval-f002.guest.json",
+      "probe_before": "[{\"confirmation_code\":\"SM-88431\",\"property_name\":\"Sandals Montego Bay\"},\n{\"confirmation_code\":\"CHK-JM2026\",\"property_name\":\"Sandals Royal Caribbean Suite\"}]",
+      "probe_after": "[{\"confirmation_code\":\"SM-88431-CF\",\"property_name\":\"Sandals Montego Bay\"},\n{\"confirmation_code\":\"CHK-JM2026-CF\",\"property_name\":\"Sandals Royal Caribbean Suite\"}]",
+      "extra_probes_before": [],
+      "extra_probes_after": [],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f005",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f005/retrieval-f005.guest.json",
+      "probe_before": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":89.9899999999999948}]",
+      "probe_after": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":104.989999999999994}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'",
+          "result": "[{\"n\":12}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'",
+          "result": "[{\"n\":12}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f017",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017/retrieval-f017.guest.json",
+      "probe_before": "[{\"total_invested\":318.5,\"balance\":320.0}]",
+      "probe_after": "[{\"total_invested\":477.75,\"balance\":320.0}]",
+      "extra_probes_before": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'",
+          "result": "[{\"n\":5}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'",
+          "result": "[{\"n\":5}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "aggregation-f040-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f040-I2/aggregation-f040-I2.guest.json",
+      "probe_before": "[{\"improv\":-6610.25}]",
+      "probe_after": "[{\"improv\":-9915.375}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS billpay FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'",
+          "result": "[{\"billpay\":1503.68000000000006}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS billpay FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'",
+          "result": "[{\"billpay\":1503.68000000000006}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f006-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f006-I2/contradiction-f006-I2.guest.json",
+      "probe_before": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+      "probe_after": "[{\"balance\":-551.0,\"credit_limit\":3000.0,\"headroom\":3551.0}]",
+      "extra_probes_before": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name, total_price FROM bookings WHERE user_email = :email AND ((lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')) OR (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%'))",
+          "result": "[{\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0},\n{\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name, total_price FROM bookings WHERE user_email = :email AND ((lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')) OR (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%'))",
+          "result": "[{\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0},\n{\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0},\n{\"property_name\":\"Sandals Royal Caribbean Suite\",\"total_price\":4635.0}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f011-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/contradiction-f011-I2/contradiction-f011-I2.guest.json",
+      "probe_before": "[{\"don\":-950.0}]",
+      "probe_after": "[{\"don\":-1520.0}]",
+      "extra_probes_before": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')",
+          "result": "[{\"field_value\":\"950\"},\n{\"field_value\":\"950\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')",
+          "result": "[{\"field_value\":\"950\"},\n{\"field_value\":\"950\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "counterfactual-f002-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/counterfactual-f002-I2/counterfactual-f002-I2.guest.json",
+      "probe_before": "[{\"id\":3,\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2250.0}]",
+      "probe_after": "[{\"id\":3,\"property_name\":\"Sandals Royal Barbados\",\"total_price\":2950.0}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+          "result": "[{\"liquid\":67093.5899999999965}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+          "result": "[{\"liquid\":67093.5899999999965}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "retrieval-f017-I2",
+      "group": "2",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/retrieval-f017-I2/retrieval-f017-I2.guest.json",
+      "probe_before": "[{\"n\":5}]",
+      "probe_after": "[{\"n\":4}]",
+      "extra_probes_before": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT total_invested FROM account WHERE user_email = :email",
+          "result": "[{\"total_invested\":318.5}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT total_invested FROM account WHERE user_email = :email",
+          "result": "[{\"total_invested\":318.5}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    }
+  ]
+}
