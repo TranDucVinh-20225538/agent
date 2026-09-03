@@ -64,21 +64,40 @@ ls -ld {SNAP}/data {SNAP}/Tax_2025 2>/dev/null || true
 
 
 def restore(env) -> None:
+    # /data is a mount: wipe contents (retry on busy dirs), then copy snapshot back.
+    # Prefer rsync --delete when available; fall back to rm -rf + cp -a.
     script = f"""
 set -e
 if [ ! -d {SNAP}/data ]; then
   echo "SNAPSHOT_MISSING:{SNAP}/data" >&2
   exit 1
 fi
-find /data -mindepth 1 -maxdepth 1 -exec rm -rf {{}} +
-cp -a {SNAP}/data/. /data/
-if [ -d {SNAP}/Tax_2025 ]; then
-  rm -rf /home/user/Documents/Tax_2025
-  mkdir -p /home/user/Documents
-  cp -a {SNAP}/Tax_2025 /home/user/Documents/Tax_2025
-fi
-test -f /data/dinoco-airlines.sqlite
-sqlite3 /data/dinoco-airlines.sqlite "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='loyalty';"
+restore_once() {{
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete {SNAP}/data/ /data/
+  else
+    # Busy guest apps can leave dirs non-empty under find+rm; force wipe.
+    for _try in 1 2 3; do
+      find /data -mindepth 1 -maxdepth 1 -exec rm -rf {{}} + 2>/dev/null || true
+      # leftover mount/busy paths
+      rm -rf /data/* /data/.[!.]* /data/..?* 2>/dev/null || true
+      if [ -z "$(ls -A /data 2>/dev/null)" ]; then
+        break
+      fi
+      sleep 1
+    done
+    cp -a {SNAP}/data/. /data/
+  fi
+  if [ -d {SNAP}/Tax_2025 ]; then
+    rm -rf /home/user/Documents/Tax_2025
+    mkdir -p /home/user/Documents
+    cp -a {SNAP}/Tax_2025 /home/user/Documents/Tax_2025
+  fi
+  test -f /data/dinoco-airlines.sqlite
+  sqlite3 /data/dinoco-airlines.sqlite "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='loyalty';"
+}}
+out=$(restore_once)
+echo "$out"
 """
     out = guest_text(env, script)
     if out:
@@ -126,6 +145,20 @@ def inject(env, task_id: str, dest: Path) -> subprocess.CompletedProcess:
     )
 
 
+def _probe_blob_has_infra_error(blobs) -> bool:
+    """True if any probe string looks like guest sqlite / control infra failure."""
+    text = json.dumps(blobs)
+    needles = (
+        "ERROR:",
+        "database is locked",
+        "Connection refused",
+        "Connection reset",
+        "Timeout",
+        "Control API",
+    )
+    return any(n.lower() in text.lower() for n in needles)
+
+
 def classify(row_base: dict, rec: dict | None) -> dict:
     """Map cf_inject record → PASS / REJECT_* / technical_failure."""
     out = dict(row_base)
@@ -143,6 +176,18 @@ def classify(row_base: dict, rec: dict | None) -> dict:
     out["probe_after"] = str(rec.get("probe_after") or "")
     out["extra_probes_before"] = rec.get("extra_probes_before") or []
     out["extra_probes_after"] = rec.get("extra_probes_after") or []
+
+    # Infra noise (locked DB, control errors) is technical_failure, not REJECT.
+    probe_blobs = [
+        out["probe_before"],
+        out["probe_after"],
+        out["extra_probes_before"],
+        out["extra_probes_after"],
+    ]
+    if _probe_blob_has_infra_error(probe_blobs):
+        out["verdict"] = "technical_failure"
+        out["verdict_detail"] = "guest_sqlite_or_control_error"
+        return out
 
     if not fails and moved:
         out["verdict"] = "PASS"

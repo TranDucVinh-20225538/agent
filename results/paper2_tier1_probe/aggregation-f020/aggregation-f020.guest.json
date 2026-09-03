@@ -3,7 +3,7 @@
   "role": "paper2_tier1",
   "db": "vaultbank.sqlite",
   "where": "guest",
-  "applied_at": "2026-09-03T20:22:13.038509+00:00",
+  "applied_at": "2026-09-03T20:44:16.028239+00:00",
   "patch": [
     "UPDATE accounts SET balance = balance + 400 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
   ],
@@ -31,7 +31,7 @@
     {
       "db": "vaultbank.sqlite",
       "sql": "SELECT credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
-      "result": "ERROR: guest sqlite3 failed (5): Error: in prepare, database is locked (5)\n"
+      "result": "[{\"credit_limit\":3000.0}]"
     },
     {
       "db": "batbucks.sqlite",
@@ -42,8 +42,6 @@
   "files_before": {},
   "files_after": {},
   "gold_moved": true,
-  "ok": false,
-  "fails": [
-    "extra probes moved but must not"
-  ]
+  "ok": true,
+  "fails": []
 }

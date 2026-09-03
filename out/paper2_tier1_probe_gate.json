@@ -1,5 +1,5 @@
 {
-  "written_at": "2026-09-03T20:25:07.204313+00:00",
+  "written_at": "2026-09-03T20:44:19.113777+00:00",
   "spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md \u00a77",
   "interventions": "/mnt/data2/Vinh/agent/cf/paper2_interventions.json",
   "group1": [
@@ -61,10 +61,10 @@
     {
       "task_id": "aggregation-f020",
       "group": "1",
-      "ok": false,
+      "ok": true,
       "gold_moved": true,
-      "fails": "extra probes moved but must not",
-      "returncode": 1,
+      "fails": "",
+      "returncode": 0,
       "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f020/aggregation-f020.guest.json",
       "probe_before": "[{\"id\":3,\"type\":\"credit_card\",\"name\":\"Gringotts Sapphire Preferred\",\"balance\":-1351.0,\"credit_limit\":3000.0}]",
       "probe_after": "[{\"id\":3,\"type\":\"credit_card\",\"name\":\"Gringotts Sapphire Preferred\",\"balance\":-951.0,\"credit_limit\":3000.0}]",
@@ -84,7 +84,7 @@
         {
           "db": "vaultbank.sqlite",
           "sql": "SELECT credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
-          "result": "ERROR: guest sqlite3 failed (5): Error: in prepare, database is locked (5)\n"
+          "result": "[{\"credit_limit\":3000.0}]"
         },
         {
           "db": "batbucks.sqlite",
@@ -93,8 +93,8 @@
         }
       ],
       "error": "",
-      "verdict": "REJECT_held_leak",
-      "verdict_detail": "extra probes moved but must not"
+      "verdict": "PASS",
+      "verdict_detail": ""
     },
     {
       "task_id": "aggregation-f036",
@@ -127,18 +127,30 @@
     {
       "task_id": "aggregation-f040",
       "group": "1",
-      "ok": false,
-      "gold_moved": null,
-      "fails": "restore_failed",
-      "returncode": 1,
-      "guest_json": "",
-      "probe_before": "",
-      "probe_after": "",
-      "extra_probes_before": [],
-      "extra_probes_after": [],
-      "error": "RuntimeError('restore did not bring back loyalty table: \"rm: cannot remove \\'/data/worlds/scranton-office\\': Directory not empty\"')",
-      "verdict": "technical_failure",
-      "verdict_detail": "restore_failed"
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier1_probe/aggregation-f040/aggregation-f040.guest.json",
+      "probe_before": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":89.9899999999999948,\"frequency\":\"monthly\"},\n{\"id\":9,\"payee\":\"Magic Monthly Subscription Box\",\"amount\":34.9900000000000019,\"frequency\":\"monthly\"},\n{\"id\":19,\"payee\":\"MasterClass\",\"amount\":15.9900000000000002,\"frequency\":\"monthly\"},\n{\"id\":8,\"payee\":\"MasterClass Annual\",\"amount\":15.9900000000000002,\"frequency\":\"monthly\"},\n{\"id\":18,\"payee\":\"Netflix\",\"amount\":22.9899999999999984,\"frequency\":\"monthly\"},\n{\"id\":7,\"payee\":\"Netflix Premium\",\"amount\":22.9899999999999984,\"frequency\":\"monthly\"},\n{\"id\":5,\"payee\":\"PA Dept of Revenue\",\"amount\":412.5,\"frequency\":\"quarterly\"},\n{\"id\":1,\"payee\":\"PPL Electric Utilities\",\"amount\":131.840000000000003,\"frequency\":\"monthly\"},\n{\"id\":6,\"payee\":\"Sandals Vacation Club Membership\",\"amount\":49.9900000000000019,\"frequency\":\"monthly\"},\n{\"id\":23,\"payee\":\"Sandals Vacation Club Quarterly Deposit\",\"amount\":349.990000000000009,\"frequency\":\"quarterly\"},\n{\"id\":21,\"payee\":\"Scranton Improv\",\"amount\":189.0,\"frequency\":\"monthly\"},\n{\"id\":20,\"payee\":\"Spectrum Internet\",\"amount\":79.9899999999999948,\"frequency\":\"monthly\"},\n{\"id\":2,\"payee\":\"Verizon Wireless\",\"amount\":87.4300000000000068,\"frequency\":\"monthly\"}]",
+      "probe_after": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":112.487499999999997,\"frequency\":\"monthly\"},\n{\"id\":9,\"payee\":\"Magic Monthly Subscription Box\",\"amount\":43.7375000000000042,\"frequency\":\"monthly\"},\n{\"id\":19,\"payee\":\"MasterClass\",\"amount\":19.9875000000000007,\"frequency\":\"monthly\"},\n{\"id\":8,\"payee\":\"MasterClass Annual\",\"amount\":19.9875000000000007,\"frequency\":\"monthly\"},\n{\"id\":18,\"payee\":\"Netflix\",\"amount\":28.7374999999999971,\"frequency\":\"monthly\"},\n{\"id\":7,\"payee\":\"Netflix Premium\",\"amount\":28.7374999999999971,\"frequency\":\"monthly\"},\n{\"id\":5,\"payee\":\"PA Dept of Revenue\",\"amount\":515.625,\"frequency\":\"quarterly\"},\n{\"id\":1,\"payee\":\"PPL Electric Utilities\",\"amount\":164.800000000000011,\"frequency\":\"monthly\"},\n{\"id\":6,\"payee\":\"Sandals Vacation Club Membership\",\"amount\":62.4875000000000042,\"frequency\":\"monthly\"},\n{\"id\":23,\"payee\":\"Sandals Vacation Club Quarterly Deposit\",\"amount\":437.487500000000011,\"frequency\":\"quarterly\"},\n{\"id\":21,\"payee\":\"Scranton Improv\",\"amount\":236.25,\"frequency\":\"monthly\"},\n{\"id\":20,\"payee\":\"Spectrum Internet\",\"amount\":99.9874999999999971,\"frequency\":\"monthly\"},\n{\"id\":2,\"payee\":\"Verizon Wireless\",\"amount\":109.287500000000008,\"frequency\":\"monthly\"}]",
+      "extra_probes_before": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+          "result": "[{\"improv\":-6610.25}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+          "result": "[{\"improv\":-6610.25}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
     },
     {
       "task_id": "contradiction-f003",
@@ -676,5 +688,10 @@
       "verdict": "PASS",
       "verdict_detail": ""
     }
+  ],
+  "rerun_at": "2026-09-03T20:44:19.119596+00:00",
+  "rerun_units": [
+    "aggregation-f020",
+    "aggregation-f040"
   ]
 }

@@ -1,0 +1,37 @@
+{
+  "id": "aggregation-f040",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-03T20:44:18.310210+00:00",
+  "patch": [
+    "UPDATE bill_pay SET amount = amount * 1.25 WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'"
+  ],
+  "applied_sql": [
+    "UPDATE bill_pay SET amount = amount * 1.25 WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, payee, amount, frequency FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%' ORDER BY payee",
+  "probe_before": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":89.9899999999999948,\"frequency\":\"monthly\"},\n{\"id\":9,\"payee\":\"Magic Monthly Subscription Box\",\"amount\":34.9900000000000019,\"frequency\":\"monthly\"},\n{\"id\":19,\"payee\":\"MasterClass\",\"amount\":15.9900000000000002,\"frequency\":\"monthly\"},\n{\"id\":8,\"payee\":\"MasterClass Annual\",\"amount\":15.9900000000000002,\"frequency\":\"monthly\"},\n{\"id\":18,\"payee\":\"Netflix\",\"amount\":22.9899999999999984,\"frequency\":\"monthly\"},\n{\"id\":7,\"payee\":\"Netflix Premium\",\"amount\":22.9899999999999984,\"frequency\":\"monthly\"},\n{\"id\":5,\"payee\":\"PA Dept of Revenue\",\"amount\":412.5,\"frequency\":\"quarterly\"},\n{\"id\":1,\"payee\":\"PPL Electric Utilities\",\"amount\":131.840000000000003,\"frequency\":\"monthly\"},\n{\"id\":6,\"payee\":\"Sandals Vacation Club Membership\",\"amount\":49.9900000000000019,\"frequency\":\"monthly\"},\n{\"id\":23,\"payee\":\"Sandals Vacation Club Quarterly Deposit\",\"amount\":349.990000000000009,\"frequency\":\"quarterly\"},\n{\"id\":21,\"payee\":\"Scranton Improv\",\"amount\":189.0,\"frequency\":\"monthly\"},\n{\"id\":20,\"payee\":\"Spectrum Internet\",\"amount\":79.9899999999999948,\"frequency\":\"monthly\"},\n{\"id\":2,\"payee\":\"Verizon Wireless\",\"amount\":87.4300000000000068,\"frequency\":\"monthly\"}]",
+  "probe_after": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":112.487499999999997,\"frequency\":\"monthly\"},\n{\"id\":9,\"payee\":\"Magic Monthly Subscription Box\",\"amount\":43.7375000000000042,\"frequency\":\"monthly\"},\n{\"id\":19,\"payee\":\"MasterClass\",\"amount\":19.9875000000000007,\"frequency\":\"monthly\"},\n{\"id\":8,\"payee\":\"MasterClass Annual\",\"amount\":19.9875000000000007,\"frequency\":\"monthly\"},\n{\"id\":18,\"payee\":\"Netflix\",\"amount\":28.7374999999999971,\"frequency\":\"monthly\"},\n{\"id\":7,\"payee\":\"Netflix Premium\",\"amount\":28.7374999999999971,\"frequency\":\"monthly\"},\n{\"id\":5,\"payee\":\"PA Dept of Revenue\",\"amount\":515.625,\"frequency\":\"quarterly\"},\n{\"id\":1,\"payee\":\"PPL Electric Utilities\",\"amount\":164.800000000000011,\"frequency\":\"monthly\"},\n{\"id\":6,\"payee\":\"Sandals Vacation Club Membership\",\"amount\":62.4875000000000042,\"frequency\":\"monthly\"},\n{\"id\":23,\"payee\":\"Sandals Vacation Club Quarterly Deposit\",\"amount\":437.487500000000011,\"frequency\":\"quarterly\"},\n{\"id\":21,\"payee\":\"Scranton Improv\",\"amount\":236.25,\"frequency\":\"monthly\"},\n{\"id\":20,\"payee\":\"Spectrum Internet\",\"amount\":99.9874999999999971,\"frequency\":\"monthly\"},\n{\"id\":2,\"payee\":\"Verizon Wireless\",\"amount\":109.287500000000008,\"frequency\":\"monthly\"}]",
+  "extra_probes_before": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+      "result": "[{\"improv\":-6610.25}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+      "result": "[{\"improv\":-6610.25}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}
