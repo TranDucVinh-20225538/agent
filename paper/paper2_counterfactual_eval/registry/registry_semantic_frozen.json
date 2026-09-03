@@ -1,0 +1,928 @@
+{
+  "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN",
+  "_semantic_frozen_at": "2026-09-03T19:12:04Z",
+  "_source": "registry_rows_draft.json after 9+18 human review",
+  "_models": "sealed_models.json \u2014 claude-opus-4-6, gpt-5.5, qwen/qwen3.8-flash, qwen/qwen3.5-9b (A3B\u2192Flash amendment applied, PAPER2_SPEC.md \u00a73, 2026-09-03T19:14:00Z)",
+  "_next": "inject-probe; fill gold_path; do not edit D on probe fail",
+  "n_tasks": 27,
+  "rows": [
+    {
+      "id": "aggregation-f004",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Cheskepdia|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "philly_hotel_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia Philadelphia overnight hotel total."
+        },
+        {
+          "id": "philly_card_incidentals",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Gringotts on-trip card charges around those dates."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 2. All-in derived omitted. Property locator omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "aggregation-f020",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts|BatBucks",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "determining": [
+        {
+          "id": "card_balance",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Gringotts credit-card current balance."
+        },
+        {
+          "id": "batbucks_cash",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "BatBucks cash available for paydown."
+        }
+      ],
+      "held": [
+        {
+          "id": "card_limit",
+          "kind": "money_usd",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "I designed to move balance not limit."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "card_balance + batbucks_cash; card_limit held. Burn/runway omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "aggregation-f036",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts",
+      "mapped_dbs": "vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "improv_spend_last_full_year",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Sum qualifying Scranton Improv class debits, last full calendar year."
+        }
+      ],
+      "held": [
+        {
+          "id": "improv_txn_count_last_full_year",
+          "kind": "integer",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Held ONLY if I modifies amounts without add/remove qualifying txns."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "1 determining (total). Count held iff I is amount-only (no add/remove txns).",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "aggregation-f037",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "determining": [
+        {
+          "id": "top_sender",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Top inbox sender email."
+        },
+        {
+          "id": "top_sender_count",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Message count for that sender."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "probe_gate",
+      "review_decision": "Accept 2. Probe gate: unstable mail gold \u2192 rejected_not_identifiable. Do not rewrite D to rescue.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "aggregation-f040",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "billpay_monthly_subtotal",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Gringotts bill_pay monthly subtotal. Multi-I I1."
+        },
+        {
+          "id": "improv_recurring_amount",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Improv recurring per-session/cadence amount. Multi-I I2."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 2. Annual derived. Mail renewals omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f003",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Dinoco Airlines|Gringotts|HooliMail",
+      "mapped_dbs": "dinoco-airlines.sqlite|vaultbank.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "loyalty_tier",
+          "kind": "categorical",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Dinoco profile loyalty tier."
+        },
+        {
+          "id": "loyalty_miles",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Dinoco profile miles balance."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "tier+miles. miles-from-flights omitted (not default held).",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f004",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "BatBucks|OddsMarket|HooliChat|HooliWork",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite",
+      "determining": [
+        {
+          "id": "batbucks_gme_shares",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "BatBucks GME share count."
+        },
+        {
+          "id": "oddsmarket_gme_yes",
+          "kind": "state",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "OddsMarket GameStop-above-$100 YES.",
+          "key_kinds": {
+            "shares": "integer",
+            "status": "categorical"
+          }
+        }
+      ],
+      "held": [
+        {
+          "id": "gme_avg_cost",
+          "kind": "money_usd",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "I designed not to move avg_cost."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "shares + OM YES state; avg_cost held. Combined exposure omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f006",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Cheskepdia|Dinoco Airlines|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "jamaica_hotel_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia Jamaica hotel total. Multi-I axis."
+        },
+        {
+          "id": "barbados_hotel_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia Barbados hotel total. Multi-I axis."
+        },
+        {
+          "id": "credit_headroom",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Gringotts card headroom. Multi-I axis."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 3. Flights omitted. Affordability verdict omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f011",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "SpeedTax|Gringotts|HooliMail",
+      "mapped_dbs": "speedtax.sqlite|vaultbank.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "claimed_charitable_2025",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "SpeedTax TY2025 charitable claimed. Multi-I I1 moves this, I2 holds it."
+        },
+        {
+          "id": "gringotts_donation_sum_2025",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Sum Gringotts 2025 charity debits. Multi-I I2 moves this, I1 holds it."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 2 determining. Verdict omitted (derived). No held.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f014",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "LockedIn|SpeedTax|HooliChat|Gringotts",
+      "mapped_dbs": "lockedin.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "w2_gross_wages",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "SpeedTax 2025 W-2 gross wages."
+        },
+        {
+          "id": "claimed_salary_dm",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "HooliChat claimed base salary (world state, not instruction pin)."
+        }
+      ],
+      "held": [
+        {
+          "id": "lockedin_title_company",
+          "kind": "entity",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Identity; I does not move LockedIn."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "W-2 + claimed DM; LockedIn held. Paycheck sum omitted. Verdict omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f017",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "Gringotts|BatBucks|HooliChat",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "determining": [
+        {
+          "id": "largest_gringotts_spend",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Largest ordinary Gringotts spend (ex transfers/CC payments)."
+        },
+        {
+          "id": "largest_batbucks_buy",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Largest discretionary BatBucks buy dollar size."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 2. Pam claim and assessment omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f022",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Gringotts|HooliChat|HooliMail|SpeedTax",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite|speedtax.sqlite",
+      "determining": [
+        {
+          "id": "zelle_sent_ytd",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "YTD Zelle sent total from Gringotts."
+        },
+        {
+          "id": "speedtax_charitable",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "SpeedTax charitable (aggregate OK)."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Zelle YTD + SpeedTax charitable. Overlap/inconclusive omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "contradiction-f024",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "HooliMail|SpeedTax|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "chilis_receipt_amount",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Chili's line on receipt / rejected item. File+sqlite guest gold required."
+        },
+        {
+          "id": "speedtax_overlap",
+          "kind": "categorical",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "overlap vs none vs SpeedTax live deductions."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe_or_reject",
+      "review_decision": "Accept 2 determining. If probe cannot stabilize file+sqlite guest gold \u2192 rejected_not_identifiable. Do not rescue.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f001",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Dinoco Airlines|Cheskepdia|Gringotts|HooliCalendar|HooliMail|eTaxi",
+      "mapped_dbs": "dinoco-airlines.sqlite|cheskepdia.sqlite|vaultbank.sqlite|hoolicalendar.sqlite|mail.sqlite|etaxi.sqlite",
+      "determining": [
+        {
+          "id": "jamaica_flight_cost",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Dinoco Jamaica flight cost basis."
+        },
+        {
+          "id": "jamaica_hotel_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia Sandals Montego Bay total."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Flight cost + hotel total. Action-plan / confirmation omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f002",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Gringotts|BatBucks|OddsMarket|Cheskepdia|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite|oddsmarket.sqlite|cheskepdia.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "liquid_cash",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Checking+savings (define gold_path on probe). Multi-I I1 moves this."
+        },
+        {
+          "id": "hotel_settle",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Cheskepdia Barbados settle. Multi-I I2 moves this."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "liquid_cash + hotel_settle. Card headroom omitted unless I explicitly locks card.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f003",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "apps": "HooliMail|HooliShop|HangryDash|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|hoolishop.sqlite|hangrydash.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "venue_planned",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Planned venue cost from doc/email. Multi-I axis 1."
+        },
+        {
+          "id": "credit_headroom",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Card limit minus owed. Multi-I axis 2."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "venue + headroom (not venue-only). Trophy qty omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f005",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "BatBucks|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "gme_shares",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "BatBucks GME share count."
+        },
+        {
+          "id": "liquid_bank",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "PLACEHOLDER name. Probe must bind gold_path to the account I actually moves (likely gringotts_checking only \u2014 do not invent a fake aggregate)."
+        }
+      ],
+      "held": [
+        {
+          "id": "gme_avg_cost",
+          "kind": "money_usd",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Held because I is designed not to move avg_cost."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "shares + liquid funds; avg_cost held. Rename liquid_bank to concrete account if only checking moves.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f010",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "apps": "Gringotts|Dinoco Airlines",
+      "mapped_dbs": "vaultbank.sqlite|dinoco-airlines.sqlite",
+      "determining": [
+        {
+          "id": "liquid_cash",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Checking+savings upgrade budget."
+        },
+        {
+          "id": "n_upcoming_flights",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Count of upcoming Dinoco flights in the answer's affordability calc. Primary I may hold this if it only moves cash; still in D."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Both in D. Primary I may move only cash (then n is invariant on that I, still scored in STS). Not narrowed to cash-only in D.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "counterfactual-f013",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Files|BatBucks|OddsMarket|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite|vaultbank.sqlite",
+      "determining": [
+        {
+          "id": "batbucks_dividends",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "BatBucks dividend income bucket. Do not merge into funding_sum."
+        },
+        {
+          "id": "oddsmarket_balance",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "OddsMarket available balance bucket."
+        },
+        {
+          "id": "gringotts_savings",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Gringotts savings bucket."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "3 buckets separate. $5000 instruction constant not in D. Sum/shortfall omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "preference_inference-f010",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "determining": [
+        {
+          "id": "fastest_sender",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Fastest correspondent under stated pairing."
+        },
+        {
+          "id": "designated_sender_latency",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Reply latency for a designated sender I may perturb via timestamps."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "probe_gate",
+      "review_decision": "Accept 2. Probe gate: timestamps/mail not deterministic \u2192 rejected_not_identifiable. Do not rewrite D.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "preference_inference-f014",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "determining": [
+        {
+          "id": "designated_booking_property",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "One Cheskepdia stay I may recategorize. Multi-I I1."
+        },
+        {
+          "id": "designated_booking_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "That stay's total. Multi-I I2."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Property + total on designated row. Pattern verdict omitted. Other bookings not extra D unless I requires held.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "retrieval-f002",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia|HooliMail|Files",
+      "mapped_dbs": "cheskepdia.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "sandals_jamaica_confirmation",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia confirmation number. Valid 1-field D."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 1.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "retrieval-f005",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "determining": [
+        {
+          "id": "monthly_recurring_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Combined monthly auto-charge total (agent's stated membership)."
+        },
+        {
+          "id": "designated_payee_amount",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "One payee amount I moves."
+        }
+      ],
+      "held": [
+        {
+          "id": "monthly_payee_membership",
+          "kind": "integer",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Count/membership of listed monthly payees; I amount-only, no add/remove (f036 pattern)."
+        }
+      ],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Total + 1 payee amount; list membership held.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "retrieval-f009",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia|Dinoco Airlines",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite",
+      "determining": [
+        {
+          "id": "nyc_hotel_confirmation",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Greenwich Hotel confirmation. STS requires all three even if I moves one."
+        },
+        {
+          "id": "nyc_flight_confirmation",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Matching Dinoco NYC flight confirmation."
+        },
+        {
+          "id": "nyc_checkin_date",
+          "kind": "categorical",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Greenwich check-in date (no date kind; categorical)."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 3. Do not collapse D to the I axis.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "retrieval-f010",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "determining": [
+        {
+          "id": "jamaica_trip_total",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Cheskepdia Sandals Montego Bay trip total."
+        },
+        {
+          "id": "host_name",
+          "kind": "entity",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Host name on that booking. Stays in D if I only moves total."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Total + host. Amenities omitted.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "retrieval-f017",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "OddsMarket",
+      "mapped_dbs": "oddsmarket.sqlite",
+      "determining": [
+        {
+          "id": "total_invested",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Total amount invested in open OddsMarket positions. Multi-I axis."
+        },
+        {
+          "id": "n_open_positions",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "Not filled until inject-probe. Semantic freeze does not include gold_path.",
+          "review_note": "Count of positions marked open. Multi-I axis."
+        }
+      ],
+      "held": [],
+      "distractor": [],
+      "identifiability": "pending_probe",
+      "review_decision": "Invested + n_open. PnL omitted. c3 process dropped.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    },
+    {
+      "id": "situated_action-f029",
+      "category": "situated_action",
+      "state_family": "categorical",
+      "apps": "Files|HooliMail|HooliWork",
+      "mapped_dbs": "mail.sqlite",
+      "determining": [],
+      "held": [],
+      "distractor": [],
+      "identifiability": "likely_rejected_not_identifiable",
+      "review_decision": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only.",
+      "_status": "SEMANTIC_FROZEN_GOLD_PATH_OPEN"
+    }
+  ]
+}

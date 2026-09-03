@@ -1,0 +1,291 @@
+{
+  "_status": "sealed",
+  "_sealed_at": "2026-09-03T19:14:00Z",
+  "_spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md \u00a74",
+  "_multi_i_seed": 20260903,
+  "_paper1_excluded": [
+    "aggregation-f003",
+    "aggregation-f018",
+    "counterfactual-f004",
+    "preference_inference-f004",
+    "preference_inference-f018",
+    "retrieval-f001",
+    "retrieval-f003",
+    "retrieval-f016",
+    "retrieval-f029",
+    "retrieval-f030"
+  ],
+  "n_tasks": 27,
+  "tasks": [
+    {
+      "id": "aggregation-f004",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "state_family_rationale": "category=aggregation \u2192 derived total",
+      "apps": "Cheskepdia|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "What did that recent Philadelphia overnight trip cost me all-in? It was a quick one-night hotel stay downtown. Give me the damage from the hotel and any related card charges."
+    },
+    {
+      "id": "aggregation-f020",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "state_family_rationale": "category=aggregation \u2192 derived total",
+      "apps": "Gringotts|BatBucks",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "My credit card is deep in the hole. Tell me how fast I've been burning through it by giving me a monthly burn rate, then check if my BatBucks cash could cover a paydown."
+    },
+    {
+      "id": "aggregation-f036",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "state_family_rationale": "category=aggregation \u2192 derived total",
+      "apps": "Gringotts",
+      "mapped_dbs": "vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "How much did I spend on improv classes during the last full calendar year? Add up every Scranton Improv class charge from that year (the outbound debits whose description matches 'Scranton Improv Work"
+    },
+    {
+      "id": "aggregation-f037",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "state_family_rationale": "category=aggregation \u2192 derived total",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Triage my inbox. It's overflowing, so give me a per-sender count and the top 10 senders filling it up."
+    },
+    {
+      "id": "aggregation-f040",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "state_family_rationale": "category=aggregation \u2192 derived total",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "Give me a complete rollup of everything I pay regularly: subscriptions, improv class, anything recurring. If you happen to find any renewal notices in my HooliMail, factor those in \u2014 but Gringotts is "
+    },
+    {
+      "id": "contradiction-f003",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=contradiction with multi-source / joint cue",
+      "apps": "Dinoco Airlines|Gringotts|HooliMail",
+      "mapped_dbs": "dinoco-airlines.sqlite|vaultbank.sqlite|mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "My Dinoco profile says I have Gold Voyager and a decent chunk of miles, but honestly I haven't flown THAT much. Can you walk through the flights I've actually booked and tell me whether the mileage ba"
+    },
+    {
+      "id": "contradiction-f004",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=contradiction with multi-source / joint cue",
+      "apps": "BatBucks|OddsMarket|HooliChat|HooliWork",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "I think I might be doubled up on GameStop. I've got it in BatBucks as an actual stock, and I also have a bet on OddsMarket for GameStop going up. Quantify my total GameStop exposure across both accoun"
+    },
+    {
+      "id": "contradiction-f006",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=contradiction with multi-source / joint cue",
+      "apps": "Cheskepdia|Dinoco Airlines|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "I've got the Jamaica trip AND the Barbados trip booked about four weeks apart. Given where my credit card balance is right now, can I actually afford both of these or am I about to max out? Be honest "
+    },
+    {
+      "id": "contradiction-f011",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "state_family_rationale": "instruction temporal cue: last year",
+      "apps": "SpeedTax|Gringotts|HooliMail",
+      "mapped_dbs": "speedtax.sqlite|vaultbank.sqlite|mail.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "My tax return claims a charitable deduction for last year. Can you cross-check that against actual donations that hit my card over the past year? If you happen to spot any charity donation receipts in"
+    },
+    {
+      "id": "contradiction-f014",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=contradiction with multi-source / joint cue",
+      "apps": "LockedIn|SpeedTax|HooliChat|Gringotts",
+      "mapped_dbs": "lockedin.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "I've been telling people in DMs that I make 160K base, but my W-2 says something different. Can you check my W-2, the paycheck deposits on my card, and compare them to what I've been claiming? Note my"
+    },
+    {
+      "id": "contradiction-f017",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "state_family_rationale": "instruction temporal cue: this year",
+      "apps": "Gringotts|BatBucks|HooliChat",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "I've been telling Pam over DMs that I'm being financially disciplined this year. Pull my biggest single expense so far this year (check both Gringotts and my biggest discretionary BatBucks buy) and pu"
+    },
+    {
+      "id": "contradiction-f022",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=contradiction with multi-source / joint cue",
+      "apps": "Gringotts|HooliChat|HooliMail|SpeedTax",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite|speedtax.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "I've been sending a bunch of money via Zelle each month. Can you figure out who's getting it (use HooliChat DMs and HooliMail Zelle confirmations to put names to recipients), and then cross-check agai"
+    },
+    {
+      "id": "contradiction-f024",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "state_family_rationale": "instruction temporal cue: latest",
+      "apps": "HooliMail|SpeedTax|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Jan rejected my latest expense report, but I think some of those same charges might be sitting in my tax return as deductions. The Chili's receipt in ~/Downloads/ was one of the rejected ones \u2014 start "
+    },
+    {
+      "id": "counterfactual-f001",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=counterfactual with multi-source / joint cue",
+      "apps": "Dinoco Airlines|Cheskepdia|Gringotts|HooliCalendar|HooliMail|eTaxi",
+      "mapped_dbs": "dinoco-airlines.sqlite|cheskepdia.sqlite|vaultbank.sqlite|hoolicalendar.sqlite|mail.sqlite|etaxi.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Hypothetical: what if I bail on Jamaica 72 hours before the flight? Figure out the damage across flight, hotel, and cards. How much do I actually get back versus eat? And what do I need to cancel or c"
+    },
+    {
+      "id": "counterfactual-f002",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=counterfactual with multi-source / joint cue",
+      "apps": "Gringotts|BatBucks|OddsMarket|Cheskepdia|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite|oddsmarket.sqlite|cheskepdia.sqlite|mail.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "What if my credit card gets declined when the hotel tries to settle my Barbados booking? Walk me through my rescue options (checking, savings, brokerage cash, prediction-market balance), and check Hoo"
+    },
+    {
+      "id": "counterfactual-f003",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "state_family_rationale": "instruction temporal cue: last year",
+      "apps": "HooliMail|HooliShop|HangryDash|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|hoolishop.sqlite|hangrydash.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "What if the Dundies venue ends up costing double what I planned? Where do I cut: trophies, catering, somewhere else? Dig through the email thread and my Dundies doc for the planned numbers, then use l"
+    },
+    {
+      "id": "counterfactual-f005",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=counterfactual with multi-source / joint cue",
+      "apps": "BatBucks|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "What if I doubled my GameStop position by buying enough shares to match what I already own at my average cost? Can I actually afford that given my checking, savings, and how much headroom I have left "
+    },
+    {
+      "id": "counterfactual-f010",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "state_family_rationale": "instruction temporal cue: upcoming",
+      "apps": "Gringotts|Dinoco Airlines",
+      "mapped_dbs": "vaultbank.sqlite|dinoco-airlines.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "What if I upgraded all my upcoming flights to first class? Assume it's about six hundred bucks extra per flight. Can I cover that out of checking and savings without touching the credit card? And whic"
+    },
+    {
+      "id": "counterfactual-f013",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "state_family_rationale": "category=counterfactual with multi-source / joint cue",
+      "apps": "Files|BatBucks|OddsMarket|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite|vaultbank.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Hypothetical: what if I self-funded the Threat Level Midnight sequel with a five grand budget? I'd pull from my brokerage dividends, the prediction-market balance, and savings. Look at my sequel notes"
+    },
+    {
+      "id": "preference_inference-f010",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "state_family_rationale": "category=preference_inference \u2192 entity",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Help me auto-triage my inbox. Which senders do I usually reply to fast, and which ones do I let sit for days? I want to build a priority filter around that pattern."
+    },
+    {
+      "id": "preference_inference-f014",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "state_family_rationale": "category=preference_inference \u2192 entity",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "Look at my hotel and resort bookings on Cheskepdia. Am I a luxury-hotels guy or a budget-hotels guy, and what's my pattern?"
+    },
+    {
+      "id": "retrieval-f002",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "state_family_rationale": "retrieval default \u2192 numeric field read",
+      "apps": "Cheskepdia|HooliMail|Files",
+      "mapped_dbs": "cheskepdia.sqlite|mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Pull up my confirmation number for the Sandals reservation in Jamaica. I need it for the concierge and I can't find it anywhere. If you can find a corroborating copy in HooliMail or in the Jamaica tri"
+    },
+    {
+      "id": "retrieval-f005",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "state_family_rationale": "money_usd / integer stress in instruction or rubric",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "I'm pretty sure I'm paying for too many subscriptions. Can you pull up everything that auto-charges me every month and list each one with the amount? If you happen to find any subscription welcome or "
+    },
+    {
+      "id": "retrieval-f009",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "state_family_rationale": "retrieval default \u2192 numeric field read",
+      "apps": "Cheskepdia|Dinoco Airlines",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "For my recent NYC trip, pull up the hotel confirmation, the flight confirmation, and the check-in date \u2014 I need to send them to someone. I stayed at the Greenwich and flew Dinoco."
+    },
+    {
+      "id": "retrieval-f010",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "state_family_rationale": "money_usd / integer stress in instruction or rubric",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "What was the total cost of my Jamaica trip \u2014 pull the trip total from the booking. Also tell me the host name on file and what amenities the property comes with so I know what I'm getting."
+    },
+    {
+      "id": "retrieval-f017",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "state_family_rationale": "money_usd / integer stress in instruction or rubric",
+      "apps": "OddsMarket",
+      "mapped_dbs": "oddsmarket.sqlite",
+      "multi_i_extra_leg": true,
+      "instruction_summary": "Pull up my OddsMarket bets. I want to know what positions I have open, how much I've put in total, and my current profit or loss."
+    },
+    {
+      "id": "situated_action-f029",
+      "category": "situated_action",
+      "state_family": "categorical",
+      "state_family_rationale": "instruction categorical cue",
+      "apps": "Files|HooliMail|HooliWork",
+      "mapped_dbs": "mail.sqlite",
+      "multi_i_extra_leg": false,
+      "instruction_summary": "Open my Threat Level Midnight sequel notes file and add five new plot points for me. Big ones. Michael Scarn's back. Send out the revised plot notes to a handful of my friends from work, who could be "
+    }
+  ]
+}

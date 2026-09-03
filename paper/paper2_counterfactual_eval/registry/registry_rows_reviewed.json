@@ -1,0 +1,1603 @@
+{
+  "_status": "DRAFT_NOT_FROZEN",
+  "_spec": "PAPER2_SPEC.md step 2 (registry rows), before step 3 (inject-probe)",
+  "_rules_frozen_at": "2026-09-03",
+  "_positive_cap": 4,
+  "_source_sealed_tasks": "paper/paper2_counterfactual_eval/registry/sealed_tasks.json",
+  "n_tasks": 27,
+  "n_needs_review": 8,
+  "rows": [
+    {
+      "id": "aggregation-f004",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Cheskepdia|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "aggregation-f004.c0",
+          "rubric_index": 0,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent opens Cheskepdia and reads the live Philadelphia overnight hotel booking (property name as shown on the Cheskepdia booking record), reporting its total price and dates as shown live",
+          "rubric_weight": 0.35
+        },
+        {
+          "id": "aggregation-f004.c1",
+          "rubric_index": 1,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent cross-references Gringotts around the Philadelphia overnight trip dates (as read from the Cheskepdia booking) for the related card charges the ledger shows live \u2014 the hotel line (which on this bake matches the Cheskepdia booking's property name and posts on the check-in day, so an exact-name match is expected rather than an alias), plus on-trip incidentals such as the eTaxi rides between Scranton and Philadelphia, gas, or food. Any defensible set of charges the live ledger shows around those dates is acceptable; the agent is not required to hunt for a differently-named hotel merchant.",
+          "rubric_weight": 0.25
+        },
+        {
+          "id": "aggregation-f004.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent reports the combined Philadelphia trip total (hotel + any on-trip card charges) as the all-in damage Michael asked for",
+          "rubric_weight": 0.25
+        },
+        {
+          "id": "aggregation-f004.c3",
+          "rubric_index": 3,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent states the Philadelphia trip all-in damage as a single final dollar figure combining the hotel and incidentals (not assuming a flight)",
+          "rubric_weight": 0.15
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "aggregation-f020",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts|BatBucks",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "aggregation-f020.c0",
+          "rubric_index": 0,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent reads the current Gringotts credit card balance and credit limit from the credit account view",
+          "rubric_weight": 0.186666
+        },
+        {
+          "id": "aggregation-f020.c3",
+          "rubric_index": 3,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent calculates the runway in months from the current credit card balance to the credit limit at the computed monthly burn rate \u2014 or, if the net trend is a paydown (payments exceed charges), explicitly states that the balance is moving away from the limit so no months-to-limit applies",
+          "rubric_weight": 0.173334
+        },
+        {
+          "id": "aggregation-f020.c5",
+          "rubric_index": 5,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent completes all credit card burn-rate subtasks and delivers the BatBucks paydown check against the card balance before ending the task",
+          "rubric_weight": 0.133332
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "Agent pulls the available Gringotts credit card charges and payments history to feed the monthly burn rate computation, and states the window it used",
+          "rubric_weight": 0.173334
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent computes a monthly net burn rate on the credit card from the available charges minus payments",
+          "rubric_weight": 0.173334
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the credit card burn rate as a specific number and the months-to-limit as a specific number (or an explicit not-applicable when the computed burn rate is negative / a net paydown), and states whether BatBucks cash can cover the paydown",
+          "rubric_weight": 0.16
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "aggregation-f036",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts",
+      "mapped_dbs": "vaultbank.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "improv_spend_last_full_year",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Sum qualifying Scranton Improv class debits, last full calendar year."
+        }
+      ],
+      "held": [
+        {
+          "id": "improv_txn_count_last_full_year",
+          "kind": "integer",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Held ONLY if I modifies amounts without add/remove qualifying txns."
+        }
+      ],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "Agent filters Gringotts to the seeded Scranton Improv class charges (outbound debits whose description matches 'Scranton Improv Workshop' or 'SCRANTON IMPROV ACADEMY' case-insensitively, i.e. where Scranton Improv is the payee/merchant \u2014 both description patterns must be included) dated within the last full calendar year (excludes the year before and the current year); excludes any inbound teaching-income credits AND excludes eTaxi/transportation debits where 'Scranton Improv' appears only as a venue address rather than the merchant",
+          "rubric_weight": 0.2
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "1 determining (total). Count held iff I is amount-only (no add/remove txns)."
+    },
+    {
+      "id": "aggregation-f037",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [
+        {
+          "id": "aggregation-f037.c3",
+          "rubric_index": 3,
+          "kind": "integer",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent presents the top-10 inbox senders as a readable ranked list with one sender per line and a visible count column",
+          "rubric_weight": 0.125
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "Agent reads the HooliMail folders through the app, which is the authoritative view of the mailbox, and states the source it used",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "Agent groups the messages it read by sender email address and counts how many messages each sender contributes, with the per-sender counts consistent with the folder scope it stated in the first criterion",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the inbox senders as a top-10 ranked list with per-sender counts",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent lists approximately 10 inbox sender entries in the top-senders ranking (not just 5 or 7)",
+          "rubric_weight": 0.125
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "aggregation-f040",
+      "category": "aggregation",
+      "state_family": "aggregation",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "n_rubric_criteria": 7,
+      "determining": [
+        {
+          "id": "aggregation-f040.c0",
+          "rubric_index": 0,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent enumerates the recurring Gringotts bill_pay entries as they appear live (each payee with its amount and frequency) and reports a monthly subtotal that is arithmetically consistent with the list it reported. The live list includes a monthly credit-card payment line that the app does not flag as autopay; a total that includes it and a total that excludes it are both acceptable so long as the agent states which rows it counted.",
+          "rubric_weight": 0.162462
+        },
+        {
+          "id": "aggregation-f040.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent accounts for the improv class as a recurring cost using the per-session amount and cadence shown in the Gringotts transactions ledger (a bill_pay improv payee is also acceptable if one is listed live), provided the agent says which source it used and does not count improv twice in the same subtotal.",
+          "rubric_weight": 0.162462
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent scans for other recurring charges and reports findings",
+          "rubric_weight": 0.15
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent optionally checks HooliMail for renewal notices covering the recurring subscriptions and any other regular payments; absence of such emails is acceptable since the primary source is Gringotts",
+          "rubric_weight": 0.15
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent reports both monthly and annual combined totals",
+          "rubric_weight": 0.124924
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Quality: Complete rollup is clear and totaled",
+          "rubric_weight": 0.124924
+        },
+        {
+          "rubric_index": 6,
+          "reason": "not_in_D",
+          "criterion": "Agent completes a rollup of everything the user pays regularly including subscriptions, improv class, and any other recurring charges with monthly and annual totals",
+          "rubric_weight": 0.125228
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f003",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Dinoco Airlines|Gringotts|HooliMail",
+      "mapped_dbs": "dinoco-airlines.sqlite|vaultbank.sqlite|mail.sqlite",
+      "n_rubric_criteria": 8,
+      "determining": [
+        {
+          "id": "loyalty_tier",
+          "kind": "categorical",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Dinoco profile loyalty tier."
+        },
+        {
+          "id": "loyalty_miles",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Dinoco profile miles balance."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "Agent enumerates every Dinoco flight in the history with route details",
+          "rubric_weight": 0.12
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent cross-references Gringotts for Dinoco charges to corroborate flight history",
+          "rubric_weight": 0.12
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent searches HooliMail for Dinoco boarding-pass and itinerary artifacts to corroborate the flights Michael has actually booked; if HooliMail has no matching entries the agent says so. Surfacing boarding-pass files saved locally (e.g. in ~/Downloads) is acceptable extra corroboration but is not required, since the instruction names only Dinoco, Gringotts, and HooliMail.",
+          "rubric_weight": 0.12
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "tier+miles. miles-from-flights omitted (not default held)."
+    },
+    {
+      "id": "contradiction-f004",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "BatBucks|OddsMarket|HooliChat|HooliWork",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [
+        {
+          "id": "contradiction-f004.c0",
+          "rubric_index": 0,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the BatBucks GME share count, average cost, and resulting cost-basis exposure.",
+          "rubric_weight": 0.2
+        },
+        {
+          "id": "contradiction-f004.c1",
+          "rubric_index": 1,
+          "kind": "categorical",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the OddsMarket GameStop-above-$100 YES position's share count, recorded cost basis, and currently displayed status.",
+          "rubric_weight": 0.2
+        },
+        {
+          "id": "contradiction-f004.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent correctly computes the combined cost-basis exposure and explains that both positions express a positive GameStop thesis through different products.",
+          "rubric_weight": 0.25
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The agent searches both HooliChat and HooliWork for GME or GameStop and identifies the people in matching conversations, or explicitly reports no matches for a searched source.",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "The final answer clearly reconciles both financial sources and reports who Michael has discussed GameStop with.",
+          "rubric_weight": 0.15
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f006",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Cheskepdia|Dinoco Airlines|Gringotts",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [
+        {
+          "id": "contradiction-f006.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the current Gringotts checking balance, credit-card balance, credit limit, and resulting credit headroom.",
+          "rubric_weight": 0.2
+        },
+        {
+          "id": "contradiction-f006.c4",
+          "rubric_index": 4,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent correctly compares remaining (not-yet-posted) trip costs with available resources and gives a clear, evidence-based max-out and affordability verdict without assuming the trips are four weeks apart. If the live records show that all or nearly all trip costs have already posted, or that one of the trips has already completed, then concluding that there is little or no remaining exposure \u2014 and saying so explicitly, with the posted-versus-outstanding reasoning that leads there \u2014 is the correct answer rather than a miss.",
+          "rubric_weight": 0.24
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately reports the live Jamaica and Barbados hotel dates and totals from Cheskepdia.",
+          "rubric_weight": 0.18
+        },
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately reports the live Jamaica and Barbados flight dates and costs from Dinoco Airlines.",
+          "rubric_weight": 0.18
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The agent avoids double counting by distinguishing trip charges already posted to an account from costs still outstanding.",
+          "rubric_weight": 0.2
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f011",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "SpeedTax|Gringotts|HooliMail",
+      "mapped_dbs": "speedtax.sqlite|vaultbank.sqlite|mail.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "claimed_charitable_2025",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "SpeedTax TY2025 charitable claimed. Multi-I I1 moves this, I2 holds it."
+        },
+        {
+          "id": "gringotts_donation_sum_2025",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Sum Gringotts 2025 charity debits. Multi-I I2 moves this, I1 holds it."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately reports the charitable deduction claimed on the 2025 SpeedTax return.",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately states whether the available Gringotts ledger covers calendar year 2025 and, when it does, identifies and sums its 2025 donation transactions; absent period coverage is not scored as zero donations.",
+          "rubric_weight": 0.3
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "When comparable 2025 Gringotts evidence exists, the agent correctly computes the difference between the claimed deduction and the sum of donation transactions dated in calendar year 2025 as shown live in Gringotts (the correct difference is whatever the live ledger yields, including zero); otherwise the agent clearly explains why a numeric primary-record reconciliation is unavailable.",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The agent gives a clear evidence-based verdict \u2014 supported, understated, overstated, or not verifiable \u2014 that is consistent with the donation evidence it actually gathered: the live Gringotts calendar-year-2025 charity debits plus any HooliMail charity receipts it surfaced, versus the claimed deduction (the correct verdict is whichever one those live figures imply, not a memorized expected answer)",
+          "rubric_weight": 0.25
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "Accept 2 determining. Verdict omitted (derived). No held."
+    },
+    {
+      "id": "contradiction-f014",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "LockedIn|SpeedTax|HooliChat|Gringotts",
+      "mapped_dbs": "lockedin.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [
+        {
+          "id": "contradiction-f014.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent finds and accurately reports Michael's $160,000 base-salary claim from a HooliChat DM.",
+          "rubric_weight": 0.18
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately reports Michael's LockedIn title and company.",
+          "rubric_weight": 0.12
+        },
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately reports the employer and gross wages on the 2025 SpeedTax W-2.",
+          "rubric_weight": 0.22
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately states whether Gringotts covers calendar year 2025 and, when it does, sums Dunder Mifflin paycheck deposits in that window; when it does not, the agent labels the deposit comparison unavailable rather than substituting another year.",
+          "rubric_weight": 0.22
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "The agent compares the salary claim with the 2025 W-2 and any comparable 2025 paycheck deposits without treating gross wages and net deposits as equivalent, then gives a clear discrepancy verdict that identifies unavailable evidence.",
+          "rubric_weight": 0.26
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f017",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "Gringotts|BatBucks|HooliChat",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "contradiction-f017.c0",
+          "rubric_index": 0,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately identifies the largest ordinary Gringotts spending transaction in the available ledger with date and amount, excluding transfers and credit-card payments.",
+          "rubric_weight": 0.25
+        },
+        {
+          "id": "contradiction-f017.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately identifies the largest discretionary buy in the available BatBucks order ledger with security, date, quantity, and dollar size.",
+          "rubric_weight": 0.25
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "The agent finds and accurately reports Michael's financial-discipline claim to Pam from HooliChat DMs.",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The final response places both transactions next to the claim and gives a clear evidence-based assessment, stating the window each record falls in",
+          "rubric_weight": 0.3
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f022",
+      "category": "contradiction",
+      "state_family": "relational_joint",
+      "apps": "Gringotts|HooliChat|HooliMail|SpeedTax",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite|speedtax.sqlite",
+      "n_rubric_criteria": 8,
+      "determining": [
+        {
+          "id": "contradiction-f022.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent groups Zelle recipients and computes monthly totals of money sent to figure out who is getting it each month",
+          "rubric_weight": 0.133332
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "Agent lists all year-to-date Zelle sent transactions from Gringotts with recipients",
+          "rubric_weight": 0.133336
+        },
+        {
+          "rubric_index": 2,
+          "reason": "action_gate",
+          "criterion": "Agent cross-checks the Zelle sends against HooliChat for corroborating payment discussion and reports what it finds, including an explicit no-corroboration result where the chats contain none",
+          "rubric_weight": 0.122222
+        },
+        {
+          "rubric_index": 3,
+          "reason": "action_gate",
+          "criterion": "Agent locates Zelle confirmation emails in HooliMail",
+          "rubric_weight": 0.122222
+        },
+        {
+          "rubric_index": 4,
+          "reason": "action_gate",
+          "criterion": "Agent opens SpeedTax and reports what it can see about charitable deductions and dependent claims (per-recipient names if available, otherwise aggregate totals)",
+          "rubric_weight": 0.133332
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent compares Zelle recipients against SpeedTax data \u2014 flagging overlap if SpeedTax exposes per-recipient names, OR flagging the cross-check as inconclusive if SpeedTax only shows aggregate totals without recipient identifiers",
+          "rubric_weight": 0.133332
+        },
+        {
+          "rubric_index": 6,
+          "reason": "action_gate",
+          "criterion": "Agent cites Gringotts Zelle transfers, HooliChat payment DMs, HooliMail confirmations, and SpeedTax charitable and dependent claims as the data sources backing the cross-check",
+          "rubric_weight": 0.11111
+        },
+        {
+          "rubric_index": 7,
+          "reason": "action_gate",
+          "criterion": "Agent delivers a final answer that is either (a) an overlap report with names if SpeedTax data permits or (b) an explicit inconclusive verdict citing SpeedTax's aggregate-only view, without leaving subtasks unresolved",
+          "rubric_weight": 0.111114
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "contradiction-f024",
+      "category": "contradiction",
+      "state_family": "temporal",
+      "apps": "HooliMail|SpeedTax|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|speedtax.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 9,
+      "determining": [
+        {
+          "id": "chilis_receipt_amount",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Chili's line on receipt / rejected item. File+sqlite guest gold required."
+        },
+        {
+          "id": "speedtax_overlap",
+          "kind": "categorical",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "overlap vs none vs SpeedTax live deductions."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "Agent reads the expense-report rejection thread in HooliMail",
+          "rubric_weight": 0.115944
+        },
+        {
+          "rubric_index": 2,
+          "reason": "action_gate",
+          "criterion": "Agent opens the local Expense_Report_Q1_2026 file and cross-references its charges against the rejected items to find any double-dip into SpeedTax deductions",
+          "rubric_weight": 0.10628
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent reviews SpeedTax deductions claimed on the most-recent in-progress return and determines whether any could cover the rejected-expense period, correctly noting if the only in-progress return (TY2025) predates the Q1-2026 rejected charges so none covers them",
+          "rubric_weight": 0.115941
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent identifies overlap between rejected items and SpeedTax deductions (or explicitly confirms no explicit deduction-field overlap; if the return's deduction notes mention the George Foreman grill, surface it, otherwise reporting that no double-dip entry exists in the return data is correct)",
+          "rubric_weight": 0.115941
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent recommends removing any overlapping items from the return, or confirms there are none to remove if no field-level overlap exists",
+          "rubric_weight": 0.10628
+        },
+        {
+          "rubric_index": 6,
+          "reason": "action_gate",
+          "criterion": "Agent cites the HooliMail rejection thread, local Expense_Report_Q1_2026 file, and SpeedTax deductions as the data sources backing the double-dipping audit risk check",
+          "rubric_weight": 0.096617
+        },
+        {
+          "rubric_index": 7,
+          "reason": "not_in_D",
+          "criterion": "Agent delivers a final verdict on whether any of the rejected charges are accidentally sitting on the SpeedTax return as deductions without leaving subtasks unresolved",
+          "rubric_weight": 0.096621
+        },
+        {
+          "rubric_index": 8,
+          "reason": "action_gate",
+          "criterion": "Agent opens the Chili's receipt file in ~/Downloads/ and cross-checks that line against the deduction categories on the most-recent SpeedTax return, stating whether that return's period actually covers the receipt date",
+          "rubric_weight": 0.130435
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe_or_reject",
+      "review_decision": "Accept 2 determining. If probe cannot stabilize file+sqlite guest gold \u2192 rejected_not_identifiable. Do not rescue."
+    },
+    {
+      "id": "counterfactual-f001",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Dinoco Airlines|Cheskepdia|Gringotts|HooliCalendar|HooliMail|eTaxi",
+      "mapped_dbs": "dinoco-airlines.sqlite|cheskepdia.sqlite|vaultbank.sqlite|hoolicalendar.sqlite|mail.sqlite|etaxi.sqlite",
+      "n_rubric_criteria": 7,
+      "determining": [
+        {
+          "id": "counterfactual-f001.c0",
+          "rubric_index": 0,
+          "kind": "categorical",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent identifies Michael's live Dinoco Jamaica flight (flight number + confirmation as seeded in the airline app) and reads the cancel-modal generic policy copy (travel-credit vs original-payment per cabin class) from the trip-detail UI when describing cancellation impact (no requirement to quote dollar-precise refund fees, since those are not surfaced in the UI)",
+          "rubric_weight": 0.157894
+        },
+        {
+          "id": "counterfactual-f001.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent identifies the Sandals Montego Bay Jamaica hotel reservation with its Cheskepdia booking total and explains its cancellation window within 72 hours of the flight",
+          "rubric_weight": 0.157894
+        },
+        {
+          "id": "counterfactual-f001.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent computes total Jamaica cancellation exposure as the sum of the Dinoco flight cost basis and the Cheskepdia hotel total, and splits it into refundable-back vs non-refundable-eat buckets across flight, hotel, and cards using whatever policy text the UI surfaces (do not penalize the absence of dollar-precise refund fees, which the trip-detail UI does not expose). Where the live sources show more than one figure for the flight cost basis, any of them may be used provided the agent cites the message or screen the figure came from and then uses that figure consistently in its totals.",
+          "rubric_weight": 0.157892
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Enumerates calendar cleanup for events in the Jamaica trip window",
+          "rubric_weight": 0.157894
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent lists the HooliMail threads and recipients that need a Jamaica cancellation notice sent as part of the cleanup plan",
+          "rubric_weight": 0.105264
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent checks eTaxi for any airport ride tied to the Jamaica departure; if a ride is scheduled, includes it in the cancellation action plan; if none exists, explicitly notes the absence and flags that a replacement ride would need to be arranged",
+          "rubric_weight": 0.105264
+        },
+        {
+          "rubric_index": 6,
+          "reason": "not_in_D",
+          "criterion": "Produces an organized, ordered action plan ('do this in the next 72h')",
+          "rubric_weight": 0.157898
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "counterfactual-f002",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Gringotts|BatBucks|OddsMarket|Cheskepdia|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|batbucks.sqlite|oddsmarket.sqlite|cheskepdia.sqlite|mail.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "liquid_cash",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Checking+savings (define gold_path on probe). Multi-I I1 moves this."
+        },
+        {
+          "id": "hotel_settle",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Cheskepdia Barbados settle. Multi-I I2 moves this."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Ranks options by pain and picks a recommended path",
+          "rubric_weight": 0.219299
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "liquid_cash + hotel_settle. Card headroom omitted unless I explicitly locks card."
+    },
+    {
+      "id": "counterfactual-f003",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "apps": "HooliMail|HooliShop|HangryDash|Gringotts|Files",
+      "mapped_dbs": "mail.sqlite|hoolishop.sqlite|hangrydash.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "venue_planned",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Planned venue cost from doc/email. Multi-I axis 1."
+        },
+        {
+          "id": "credit_headroom",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Card limit minus owed. Multi-I axis 2."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent presents a coherent revised Dundies budget with its assumptions labeled and states whether it fits or what shortfall remains",
+          "rubric_weight": 0.12
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "venue + headroom (not venue-only). Trophy qty omitted."
+    },
+    {
+      "id": "counterfactual-f005",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "BatBucks|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "gme_shares",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "BatBucks GME share count."
+        },
+        {
+          "id": "liquid_bank",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "PLACEHOLDER name. Probe must bind gold_path to the account I actually moves (likely gringotts_checking only \u2014 do not invent a fake aggregate)."
+        }
+      ],
+      "held": [
+        {
+          "id": "gme_avg_cost",
+          "kind": "money_usd",
+          "role": "held",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Held because I is designed not to move avg_cost."
+        }
+      ],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "Agent delivers a go/no-go recommendation on doubling the GameStop position and notes the concentration-risk caveat",
+          "rubric_weight": 0.131578
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "shares + liquid funds; avg_cost held. Rename liquid_bank to concrete account if only checking moves."
+    },
+    {
+      "id": "counterfactual-f010",
+      "category": "counterfactual",
+      "state_family": "temporal",
+      "apps": "Gringotts|Dinoco Airlines",
+      "mapped_dbs": "vaultbank.sqlite|dinoco-airlines.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "liquid_cash",
+          "kind": "money_usd",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Checking+savings upgrade budget."
+        },
+        {
+          "id": "n_upcoming_flights",
+          "kind": "integer",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe (PAPER2_SPEC step 3)",
+          "review_note": "Count of upcoming Dinoco flights in the answer's affordability calc. Primary I may hold this if it only moves cash; still in D."
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent provides a clear yes/no answer on whether Michael can cover all upcoming first-class flight upgrades from checking and savings without touching the credit card",
+          "rubric_weight": 0.166667
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "pending_probe",
+      "review_decision": "Both in D. Primary I may move only cash (then n is invariant on that I, still scored in STS). Not narrowed to cash-only in D."
+    },
+    {
+      "id": "counterfactual-f013",
+      "category": "counterfactual",
+      "state_family": "relational_joint",
+      "apps": "Files|BatBucks|OddsMarket|Gringotts",
+      "mapped_dbs": "batbucks.sqlite|oddsmarket.sqlite|vaultbank.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [
+        {
+          "id": "counterfactual-f013.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the dividend income shown in BatBucks, the available OddsMarket balance, and the Gringotts savings balance without adding an unasked year-to-date filter.",
+          "rubric_weight": 0.2
+        },
+        {
+          "id": "counterfactual-f013.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent correctly sums the three named funding sources and computes the surplus or shortfall against $5,000.",
+          "rubric_weight": 0.2
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "The agent reads ~/Documents/Projects/Threat_Level_Midnight_Sequel_Notes.txt and accurately uses relevant budget context from it.",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "The agent gives a clear proceed-or-shrink recommendation supported by the calculation and explains how material each bucket is.",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 4,
+          "reason": "not_in_D",
+          "criterion": "The agent performs no investment sale or money movement, consistent with the task's analysis-only instruction.",
+          "rubric_weight": 0.2
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "preference_inference-f010",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "apps": "HooliMail",
+      "mapped_dbs": "mail.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "preference_inference-f010.c1",
+          "rubric_index": 1,
+          "kind": "integer",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent computes a per-sender reply latency from paired received/sent timestamps, states the pairing method it used, and applies that method consistently; where reply headers do not resolve to a parent message, the agent says so rather than silently dropping those messages",
+          "rubric_weight": 0.2106
+        },
+        {
+          "id": "preference_inference-f010.c4",
+          "rubric_index": 4,
+          "kind": "integer",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent derives the fast-versus-days reply pattern from actual message timestamps in the source it chose rather than guessing, and names Michael as the sender of record",
+          "rubric_weight": 0.1052
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "action_gate",
+          "criterion": "Agent locates Michael's sent emails to build the auto-triage data set \u2014 either by walking the Maildir filesystem (.Sent/cur or .Sent/new with 'From: michael.scott' grep) or by querying the HooliMail Sent folder via /api/emails?folder=sent",
+          "rubric_weight": 0.2106
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the fastest and slowest correspondents under the pairing method it stated, and the reported figures follow from that method applied to the live mailbox",
+          "rubric_weight": 0.2106
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent proposes a concrete auto-triage filter rule based on the data",
+          "rubric_weight": 0.1578
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent finishes the auto-triage build: the recommended priority filter rule is stated and references the fastest and slowest senders",
+          "rubric_weight": 0.1052
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "preference_inference-f014",
+      "category": "preference_inference",
+      "state_family": "preference_recommendation",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "n_rubric_criteria": 6,
+      "determining": [
+        {
+          "id": "preference_inference-f014.c0",
+          "rubric_index": 0,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent lists Michael's Cheskepdia hotel/resort bookings with their property names, including at minimum the Jamaica, NYC, Barbados, and Philadelphia hotel stays (listing additional hotel/resort bookings present in the account, e.g. a Scranton hotel stay, is equally acceptable \u2014 no exact booking count is required)",
+          "rubric_weight": 0.21
+        },
+        {
+          "id": "preference_inference-f014.c1",
+          "rubric_index": 1,
+          "kind": "categorical",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent categorizes each Cheskepdia hotel/resort booking it lists as luxury-tier or budget-tier and labels which group the pattern favors",
+          "rubric_weight": 0.21
+        },
+        {
+          "id": "preference_inference-f014.c4",
+          "rubric_index": 4,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent lists specific Cheskepdia booking rows (property name, total) when stating the luxury-versus-budget verdict",
+          "rubric_weight": 0.105
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent flags Sandals (Montego Bay + Royal Barbados) as the dominant luxury pattern",
+          "rubric_weight": 0.21
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent identifies the Philadelphia Radisson stay as the non-Sandals outlier in the pattern and characterizes it consistently with what the live records show about that trip",
+          "rubric_weight": 0.16
+        },
+        {
+          "rubric_index": 5,
+          "reason": "not_in_D",
+          "criterion": "Agent delivers the full luxury-versus-budget guy verdict with the pattern summary, not stopping before answering the question",
+          "rubric_weight": 0.105
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "retrieval-f002",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia|HooliMail|Files",
+      "mapped_dbs": "cheskepdia.sqlite|mail.sqlite",
+      "n_rubric_criteria": 3,
+      "determining": [
+        {
+          "id": "retrieval-f002.c1",
+          "rubric_index": 1,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the confirmation number displayed on that Cheskepdia booking record.",
+          "rubric_weight": 0.45
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "action_gate",
+          "criterion": "The agent locates the correct Sandals Montego Bay Jamaica booking in Cheskepdia.",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "The final answer clearly identifies Cheskepdia as the source of truth and ties the number to the Sandals Montego Bay Jamaica reservation.",
+          "rubric_weight": 0.3
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "retrieval-f005",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Gringotts|HooliMail",
+      "mapped_dbs": "vaultbank.sqlite|mail.sqlite",
+      "n_rubric_criteria": 3,
+      "determining": [
+        {
+          "id": "retrieval-f005.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent accurately reports the amount of each listed monthly recurring charge.",
+          "rubric_weight": 0.3
+        },
+        {
+          "id": "retrieval-f005.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "The agent computes a combined monthly total that is arithmetically consistent with the charges it listed and clearly identifies Gringotts as the source of truth; because the live list has no active/cancelled flag and the card-autopay line may reasonably be included or excluded, any total matching the agent's stated treatment is correct.",
+          "rubric_weight": 0.25
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "The agent accurately lists the monthly recurring auto-charges shown in Gringotts without adding non-monthly or fabricated charges. The live list mixes autopay-enabled payees with other monthly lines (including a monthly credit-card payment line that the app does not flag as autopay) and carries no explicit active/cancelled flag, so listing the monthly recurring set with or without that card line is acceptable provided the agent is consistent.",
+          "rubric_weight": 0.45
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "retrieval-f009",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia|Dinoco Airlines",
+      "mapped_dbs": "cheskepdia.sqlite|dinoco-airlines.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "retrieval-f009.c0",
+          "rubric_index": 0,
+          "kind": "entity",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent finds The Greenwich Hotel NYC booking in Cheskepdia and reports the live confirmation number as shown on the booking",
+          "rubric_weight": 0.3
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 1,
+          "reason": "not_in_D",
+          "criterion": "Agent finds the NYC Dinoco flight that matches the Greenwich Hotel stay (the AVP-to-JFK flight departing on the hotel check-in date; confirmation DN-87856) and reports that confirmation code from the live booking, not the confirmation of the later unrelated NYC flight",
+          "rubric_weight": 0.3
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the NYC check-in date as seeded on the Greenwich Hotel booking",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the Greenwich hotel confirmation, the Dinoco flight confirmation, and the NYC check-in date together in one response for the recent NYC trip",
+          "rubric_weight": 0.15
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "retrieval-f010",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "Cheskepdia",
+      "mapped_dbs": "cheskepdia.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "retrieval-f010.c1",
+          "rubric_index": 1,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent reports the trip total cost exactly as shown on the live Cheskepdia Sandals Montego Bay booking it identified.",
+          "rubric_weight": 0.25
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "not_in_D",
+          "criterion": "Agent identifies Michael's upcoming Sandals Montego Bay reservation in Cheskepdia; where the account also holds an older completed Sandals stay in Jamaica, using the upcoming one is correct and naming both is acceptable",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 2,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the host name as listed on the live Cheskepdia Sandals Montego Bay booking it identified (the upcoming booking shows 'Sandals Resorts Concierge').",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 3,
+          "reason": "not_in_D",
+          "criterion": "Agent reports the amenities list shown on the live Cheskepdia Sandals Montego Bay booking it identified (or notes that no amenities are listed if that booking shows none).",
+          "rubric_weight": 0.25
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "retrieval-f017",
+      "category": "retrieval",
+      "state_family": "numeric",
+      "apps": "OddsMarket",
+      "mapped_dbs": "oddsmarket.sqlite",
+      "n_rubric_criteria": 4,
+      "determining": [
+        {
+          "id": "retrieval-f017.c2",
+          "rubric_index": 2,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent reports the total amount invested and current total profit or loss computed from the live open positions",
+          "rubric_weight": 0.3
+        },
+        {
+          "id": "retrieval-f017.c3",
+          "rubric_index": 3,
+          "kind": "money_usd",
+          "kind_basis": "heuristic_keyword_match",
+          "role": "determining",
+          "weight": 1,
+          "gold_path": null,
+          "gold_path_note": "TBD at inject-probe design (PAPER2_SPEC step 3)",
+          "criterion": "Agent's answer clearly covers all three requested outputs\u2014open positions, total invested, and current profit or loss\u2014and identifies OddsMarket as the source",
+          "rubric_weight": 0.2
+        }
+      ],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "action_gate",
+          "criterion": "Agent opens OddsMarket and identifies all positions the app currently marks open",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 1,
+          "reason": "action_gate",
+          "criterion": "Agent lists each open position with its market title or ticker, side, and share details rather than giving only a generic summary",
+          "rubric_weight": 0.25
+        }
+      ],
+      "needs_review": [],
+      "_status": "DRAFT_NOT_FROZEN"
+    },
+    {
+      "id": "situated_action-f029",
+      "category": "situated_action",
+      "state_family": "categorical",
+      "apps": "Files|HooliMail|HooliWork",
+      "mapped_dbs": "mail.sqlite",
+      "n_rubric_criteria": 5,
+      "determining": [],
+      "held": [],
+      "held_note": "Not auto-drafted (rule 2). Add by hand only if instruction/rubric requires another field correct on BOTH legs and that field is not touched by I (retrieval-f030 pattern).",
+      "distractor": [],
+      "distractor_note": "Not auto-drafted (rule 4). Add by hand if a field is in the world, unscored by the rubric (or scored but not in D), and deliberately left untouched (retrieval-f016 GME pattern).",
+      "omitted_rubric_ids": [
+        {
+          "rubric_index": 0,
+          "reason": "action_gate",
+          "criterion": "Agent locates and opens ~/Documents/Projects/Threat_Level_Midnight_Sequel_Notes.txt (via any file manager, text editor, or equivalent) before editing it",
+          "rubric_weight": 0.15
+        },
+        {
+          "rubric_index": 1,
+          "reason": "action_gate",
+          "criterion": "Agent adds at least five new plot points to the existing file and saves the additions so they persist on disk",
+          "rubric_weight": 0.25
+        },
+        {
+          "rubric_index": 2,
+          "reason": "style",
+          "criterion": "The five new plot points use Michael Scarn's over-the-top Threat Level Midnight action tone",
+          "rubric_weight": 0.2
+        },
+        {
+          "rubric_index": 3,
+          "reason": "action_gate",
+          "criterion": "Agent sends the saved revised notes file as an attachment, or pastes its complete revised contents, to at least three Dunder Mifflin coworkers; a summary or bare link alone does not satisfy this",
+          "rubric_weight": 0.3
+        },
+        {
+          "rubric_index": 4,
+          "reason": "style",
+          "criterion": "Agent explicitly frames the recipients as potential casting candidates for the Threat Level Midnight sequel",
+          "rubric_weight": 0.1
+        }
+      ],
+      "needs_review": [],
+      "_status": "REVIEWED_NOT_FROZEN",
+      "_reviewed_at": "2026-09-03T19:07:14Z",
+      "identifiability": "likely_rejected_not_identifiable",
+      "review_decision": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only."
+    }
+  ],
+  "_reviewed_needs_review_at": "2026-09-03T19:07:14Z",
+  "_reviewed_ids": [
+    "aggregation-f036",
+    "contradiction-f003",
+    "contradiction-f011",
+    "contradiction-f024",
+    "counterfactual-f002",
+    "counterfactual-f003",
+    "counterfactual-f005",
+    "counterfactual-f010",
+    "situated_action-f029"
+  ],
+  "n_reviewed": 9,
+  "n_still_draft": 18
+}

@@ -39,6 +39,7 @@ DEFAULT_EMAIL = "michael.scott@dundermifflin.com"
 # Phase B specs first so the six frozen IDs are not shadowed by Stage 3
 # probe-only stubs in interventions.json.
 SPEC_PATHS = (
+    ROOT / "cf" / "paper2_interventions.json",
     ROOT / "cf" / "phase_b_interventions.json",
     ROOT / "cf" / "interventions.json",
     ROOT / "cf" / "stage4_locked.json",

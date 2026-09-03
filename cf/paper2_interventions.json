@@ -1,0 +1,1158 @@
+{
+  "_note": "Tier 1 SQL is READY_RELATIVE (schema columns, no invented G0/G1). Run --probe-only only on READY_RELATIVE. I1 uses task id; I2 uses {id}-I2. Multi-I PASS/REJECT per variant; fail I2 does not relabel as single-I. Reject does not rewrite D (PAPER2_SPEC §7).",
+  "_email": "michael.scott@dundermifflin.com",
+  "_semantic": "paper/paper2_counterfactual_eval/registry/registry_semantic_frozen.json",
+  "interventions": [
+    {
+      "id": "aggregation-f004",
+      "task_id": "aggregation-f004",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "philly_hotel_total",
+        "philly_card_incidentals"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. All-in derived omitted. Property locator omitted.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": "SELECT id, property_name, location, check_in, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price + 250 WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))"
+        }
+      ],
+      "do_not_touch": "vaultbank transactions; other bookings",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 moves philly_hotel_total only."
+      },
+      "moves": [
+        "philly_hotel_total"
+      ],
+      "holds_this_I": [
+        "philly_card_incidentals"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "aggregation-f020",
+      "task_id": "aggregation-f020",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "card_balance",
+        "batbucks_cash"
+      ],
+      "semantic_held": [
+        "card_limit"
+      ],
+      "review_decision": "card_balance + batbucks_cash; card_limit held. Burn/runway omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT id, type, name, balance, credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+      "patch": [
+        "UPDATE accounts SET balance = balance + 400 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT credit_limit FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+        },
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT cash FROM portfolio WHERE user_email = :email"
+        }
+      ],
+      "do_not_touch": "credit_limit; batbucks cash",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "Moves card_balance; card_limit held; batbucks_cash unmoved determining."
+      },
+      "moves": [
+        "card_balance"
+      ],
+      "holds_this_I": [
+        "card_limit",
+        "batbucks_cash"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "aggregation-f036",
+      "task_id": "aggregation-f036",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "improv_spend_last_full_year"
+      ],
+      "semantic_held": [
+        "improv_txn_count_last_full_year"
+      ],
+      "review_decision": "1 determining (total). Count held iff I is amount-only (no add/remove txns).",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT ifnull(sum(t.amount),0) AS improv_spend, count(*) AS n FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT)",
+      "patch": [
+        "UPDATE transactions SET amount = amount * 1.4 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT))"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT)"
+        }
+      ],
+      "do_not_touch": "row count of qualifying improv debits",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "Scale amounts only; n_txn held. Calendar year = last full year via now-1 year."
+      },
+      "moves": [
+        "improv_spend_last_full_year"
+      ],
+      "holds_this_I": [
+        "improv_txn_count_last_full_year"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "aggregation-f037",
+      "task_id": "aggregation-f037",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "top_sender",
+        "top_sender_count"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. Probe gate: unstable mail gold \u2192 rejected_not_identifiable. Do not rewrite D to rescue.",
+      "identifiability": "probe_gate",
+      "db": "mail.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "aggregation-f040",
+      "task_id": "aggregation-f040",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "billpay_monthly_subtotal",
+        "improv_recurring_amount"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. Annual derived. Mail renewals omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT id, payee, amount, frequency FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%' ORDER BY payee",
+      "patch": [
+        "UPDATE bill_pay SET amount = amount * 1.25 WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 billpay_monthly_subtotal; improv unmoved."
+      },
+      "moves": [
+        "billpay_monthly_subtotal"
+      ],
+      "holds_this_I": [
+        "improv_recurring_amount"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "aggregation-f040-I2",
+      "task_id": "aggregation-f040",
+      "variant": "I2",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "billpay_monthly_subtotal",
+        "improv_recurring_amount"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. Annual derived. Mail renewals omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT ifnull(sum(t.amount),0) AS improv FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%')",
+      "patch": [
+        "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%'))"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS billpay FROM bill_pay WHERE user_email = :email AND lower(ifnull(payee,'')) NOT LIKE '%credit card%' AND lower(ifnull(payee,'')) NOT LIKE '%sapphire%'"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I2 improv_recurring_amount; bill_pay unmoved."
+      },
+      "moves": [
+        "improv_recurring_amount"
+      ],
+      "holds_this_I": [
+        "billpay_monthly_subtotal"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f003",
+      "task_id": "contradiction-f003",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "loyalty_tier",
+        "loyalty_miles"
+      ],
+      "semantic_held": [],
+      "review_decision": "tier+miles. miles-from-flights omitted (not default held).",
+      "identifiability": "pending_probe",
+      "db": "dinoco-airlines.sqlite",
+      "probe": "SELECT status, miles, miles_ytd FROM loyalty WHERE user_email = :email",
+      "patch": [
+        "UPDATE loyalty SET status = 'Silver Voyager', miles = miles / 2, miles_ytd = miles_ytd / 2 WHERE user_email = :email"
+      ],
+      "extra_probes": [],
+      "do_not_touch": "flights itinerary",
+      "expect": {
+        "probe_changes": true,
+        "note": "Moves loyalty_tier + loyalty_miles (both determining)."
+      },
+      "moves": [
+        "loyalty_tier",
+        "loyalty_miles"
+      ],
+      "holds_this_I": [],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f004",
+      "task_id": "contradiction-f004",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "batbucks_gme_shares",
+        "oddsmarket_gme_yes"
+      ],
+      "semantic_held": [
+        "gme_avg_cost"
+      ],
+      "review_decision": "shares + OM YES state; avg_cost held. Combined exposure omitted.",
+      "identifiability": "pending_probe",
+      "db": "batbucks.sqlite",
+      "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "patch": [
+        "UPDATE holdings SET shares = shares + 40 WHERE user_email = :email AND upper(ticker)='GME'"
+      ],
+      "extra_probes": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT shares, status, market_ticker FROM positions WHERE user_email = :email AND (upper(market_ticker) LIKE '%GME%' OR lower(title) LIKE '%gamestop%')"
+        }
+      ],
+      "do_not_touch": "GME avg_cost; OddsMarket GME YES",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "Moves GME shares; avg_cost held; OM YES unmoved determining."
+      },
+      "moves": [
+        "batbucks_gme_shares"
+      ],
+      "holds_this_I": [
+        "gme_avg_cost",
+        "oddsmarket_gme_yes"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f006",
+      "task_id": "contradiction-f006",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "jamaica_hotel_total",
+        "barbados_hotel_total",
+        "credit_headroom"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 3. Flights omitted. Affordability verdict omitted.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": "SELECT id, property_name, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%'))",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price + 500 WHERE user_email = :email AND (lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%'))"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 jamaica_hotel_total."
+      },
+      "moves": [
+        "jamaica_hotel_total"
+      ],
+      "holds_this_I": [
+        "barbados_hotel_total",
+        "credit_headroom"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f006-I2",
+      "task_id": "contradiction-f006",
+      "variant": "I2",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "jamaica_hotel_total",
+        "barbados_hotel_total",
+        "credit_headroom"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 3. Flights omitted. Affordability verdict omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+      "patch": [
+        "UPDATE accounts SET balance = balance + 800 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT property_name, total_price FROM bookings WHERE user_email = :email AND ((lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')) OR (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%'))"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I2 credit_headroom via higher card balance; hotels unmoved."
+      },
+      "moves": [
+        "credit_headroom"
+      ],
+      "holds_this_I": [
+        "jamaica_hotel_total",
+        "barbados_hotel_total"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f011",
+      "task_id": "contradiction-f011",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "claimed_charitable_2025",
+        "gringotts_donation_sum_2025"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2 determining. Verdict omitted (derived). No held.",
+      "identifiability": "pending_probe",
+      "db": "speedtax.sqlite",
+      "probe": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "patch": [
+        "UPDATE tax_data SET field_value = CAST(CAST(field_value AS REAL) + 400 AS TEXT) WHERE field_name IN ('charitable_contributions','charitable_total') AND return_id IN (SELECT id FROM tax_returns WHERE user_email = :email AND tax_year = 2025)"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS don FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 claimed_charitable_2025."
+      },
+      "moves": [
+        "claimed_charitable_2025"
+      ],
+      "holds_this_I": [
+        "gringotts_donation_sum_2025"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f011-I2",
+      "task_id": "contradiction-f011",
+      "variant": "I2",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "claimed_charitable_2025",
+        "gringotts_donation_sum_2025"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2 determining. Verdict omitted (derived). No held.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT ifnull(sum(t.amount),0) AS don FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%')",
+      "patch": [
+        "UPDATE transactions SET amount = amount * 1.6 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND strftime('%Y', t.date)='2025' AND (lower(t.description) LIKE '%donat%' OR lower(t.description) LIKE '%charit%' OR lower(ifnull(t.category,'')) LIKE '%charit%'))"
+      ],
+      "extra_probes": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I2 donation ledger; SpeedTax claim unmoved."
+      },
+      "moves": [
+        "gringotts_donation_sum_2025"
+      ],
+      "holds_this_I": [
+        "claimed_charitable_2025"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f014",
+      "task_id": "contradiction-f014",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "w2_gross_wages",
+        "claimed_salary_dm"
+      ],
+      "semantic_held": [
+        "lockedin_title_company"
+      ],
+      "review_decision": "W-2 + claimed DM; LockedIn held. Paycheck sum omitted. Verdict omitted.",
+      "identifiability": "pending_probe",
+      "db": "lockedin.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "contradiction-f017",
+      "task_id": "contradiction-f017",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "largest_gringotts_spend",
+        "largest_batbucks_buy"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. Pam claim and assessment omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT t.id, t.date, t.description, t.amount FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND lower(t.description) NOT LIKE '%transfer%' AND lower(t.description) NOT LIKE '%payment%' ORDER BY t.amount ASC LIMIT 1",
+      "patch": [
+        "UPDATE transactions SET amount = amount * 2 WHERE id = (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND lower(t.description) NOT LIKE '%transfer%' AND lower(t.description) NOT LIKE '%payment%' ORDER BY t.amount ASC LIMIT 1)"
+      ],
+      "extra_probes": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ticker, shares, side, status FROM orders WHERE user_email = :email AND lower(side) LIKE '%buy%' ORDER BY shares DESC LIMIT 1"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "Scale current max Gringotts debit; BatBucks max buy unmoved."
+      },
+      "moves": [
+        "largest_gringotts_spend"
+      ],
+      "holds_this_I": [
+        "largest_batbucks_buy"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f022",
+      "task_id": "contradiction-f022",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "zelle_sent_ytd",
+        "speedtax_charitable"
+      ],
+      "semantic_held": [],
+      "review_decision": "Zelle YTD + SpeedTax charitable. Overlap/inconclusive omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT ifnull(sum(amount),0) AS zelle_ytd FROM zelle_transfers WHERE user_email = :email AND lower(direction) LIKE '%sent%'",
+      "patch": [
+        "UPDATE zelle_transfers SET amount = amount * 1.3 WHERE user_email = :email AND lower(direction) LIKE '%sent%'"
+      ],
+      "extra_probes": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 zelle_sent_ytd; SpeedTax charitable unmoved."
+      },
+      "moves": [
+        "zelle_sent_ytd"
+      ],
+      "holds_this_I": [
+        "speedtax_charitable"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "contradiction-f024",
+      "task_id": "contradiction-f024",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "chilis_receipt_amount",
+        "speedtax_overlap"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2 determining. If probe cannot stabilize file+sqlite guest gold \u2192 rejected_not_identifiable. Do not rescue.",
+      "identifiability": "pending_probe_or_reject",
+      "db": "mail.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "counterfactual-f001",
+      "task_id": "counterfactual-f001",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "jamaica_flight_cost",
+        "jamaica_hotel_total"
+      ],
+      "semantic_held": [],
+      "review_decision": "Flight cost + hotel total. Action-plan / confirmation omitted.",
+      "identifiability": "pending_probe",
+      "db": "dinoco-airlines.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "counterfactual-f002",
+      "task_id": "counterfactual-f002",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "liquid_cash",
+        "hotel_settle"
+      ],
+      "semantic_held": [],
+      "review_decision": "liquid_cash + hotel_settle. Card headroom omitted unless I explicitly locks card.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+      "patch": [
+        "UPDATE accounts SET balance = balance * 0.5 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 liquid_cash."
+      },
+      "moves": [
+        "liquid_cash"
+      ],
+      "holds_this_I": [
+        "hotel_settle"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "counterfactual-f002-I2",
+      "task_id": "counterfactual-f002",
+      "variant": "I2",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "liquid_cash",
+        "hotel_settle"
+      ],
+      "semantic_held": [],
+      "review_decision": "liquid_cash + hotel_settle. Card headroom omitted unless I explicitly locks card.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": "SELECT id, property_name, total_price FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+      "patch": [
+        "UPDATE bookings SET total_price = total_price + 700 WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I2 hotel_settle."
+      },
+      "moves": [
+        "hotel_settle"
+      ],
+      "holds_this_I": [
+        "liquid_cash"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "counterfactual-f003",
+      "task_id": "counterfactual-f003",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "venue_planned",
+        "credit_headroom"
+      ],
+      "semantic_held": [],
+      "review_decision": "venue + headroom (not venue-only). Trophy qty omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+      "patch": [
+        "UPDATE accounts SET credit_limit = credit_limit - 500 WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0"
+      ],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "I1 credit_headroom. venue_planned is Files \u2014 I2 not sqlite."
+      },
+      "moves": [
+        "credit_headroom"
+      ],
+      "holds_this_I": [
+        "venue_planned"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "counterfactual-f003-I2",
+      "task_id": "counterfactual-f003",
+      "variant": "I2",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_FILE_BACKEND",
+      "semantic_D": [
+        "venue_planned",
+        "credit_headroom"
+      ],
+      "semantic_held": [],
+      "review_decision": "venue + headroom (not venue-only). Trophy qty omitted.",
+      "identifiability": "pending_probe",
+      "db": "mail.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      },
+      "_sql_note": "venue_planned lives in Files/HooliMail (Dundies doc/thread), not a mapped sqlite field. Do not invent a sqlite stand-in. Probe on guest files or REJECT this variant.",
+      "moves": [
+        "venue_planned"
+      ],
+      "holds_this_I": [
+        "credit_headroom"
+      ]
+    },
+    {
+      "id": "counterfactual-f005",
+      "task_id": "counterfactual-f005",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "gme_shares",
+        "liquid_bank"
+      ],
+      "semantic_held": [
+        "gme_avg_cost"
+      ],
+      "review_decision": "shares + liquid funds; avg_cost held. Rename liquid_bank to concrete account if only checking moves.",
+      "identifiability": "pending_probe",
+      "db": "batbucks.sqlite",
+      "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "patch": [
+        "UPDATE holdings SET shares = shares * 2 WHERE user_email = :email AND upper(ticker)='GME'"
+      ],
+      "extra_probes": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'"
+        },
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'"
+        }
+      ],
+      "do_not_touch": "GME avg_cost; checking balance",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "Moves gme_shares; avg_cost held; liquid_bank = checking unmoved this I."
+      },
+      "moves": [
+        "gme_shares"
+      ],
+      "holds_this_I": [
+        "gme_avg_cost",
+        "liquid_bank"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "counterfactual-f010",
+      "task_id": "counterfactual-f010",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "liquid_cash",
+        "n_upcoming_flights"
+      ],
+      "semantic_held": [],
+      "review_decision": "Both in D. Primary I may move only cash (then n is invariant on that I, still scored in STS). Not narrowed to cash-only in D.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT ifnull(sum(balance),0) AS liquid FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+      "patch": [
+        "UPDATE accounts SET balance = balance * 0.4 WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')"
+      ],
+      "extra_probes": [
+        {
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT count(*) AS n_upcoming FROM flights WHERE user_email = :email AND date(departure_date) >= date('now')"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 liquid_cash; n_upcoming unmoved determining."
+      },
+      "moves": [
+        "liquid_cash"
+      ],
+      "holds_this_I": [
+        "n_upcoming_flights"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "counterfactual-f013",
+      "task_id": "counterfactual-f013",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "batbucks_dividends",
+        "oddsmarket_balance",
+        "gringotts_savings"
+      ],
+      "semantic_held": [],
+      "review_decision": "3 buckets separate. $5000 instruction constant not in D. Sum/shortfall omitted.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%sav%'",
+      "patch": [
+        "UPDATE accounts SET balance = balance * 0.2 WHERE user_email = :email AND lower(type) LIKE '%sav%'"
+      ],
+      "extra_probes": [
+        {
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email"
+        },
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT balance FROM account WHERE user_email = :email"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 gringotts_savings only; do not merge buckets."
+      },
+      "moves": [
+        "gringotts_savings"
+      ],
+      "holds_this_I": [
+        "batbucks_dividends",
+        "oddsmarket_balance"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "preference_inference-f010",
+      "task_id": "preference_inference-f010",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "fastest_sender",
+        "designated_sender_latency"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 2. Probe gate: timestamps/mail not deterministic \u2192 rejected_not_identifiable. Do not rewrite D.",
+      "identifiability": "probe_gate",
+      "db": "mail.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "preference_inference-f014",
+      "task_id": "preference_inference-f014",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "designated_booking_property",
+        "designated_booking_total"
+      ],
+      "semantic_held": [],
+      "review_decision": "Property + total on designated row. Pattern verdict omitted. Other bookings not extra D unless I requires held.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "preference_inference-f014-I2",
+      "task_id": "preference_inference-f014",
+      "variant": "I2",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "designated_booking_property",
+        "designated_booking_total"
+      ],
+      "semantic_held": [],
+      "review_decision": "Property + total on designated row. Pattern verdict omitted. Other bookings not extra D unless I requires held.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "retrieval-f002",
+      "task_id": "retrieval-f002",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "sandals_jamaica_confirmation"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 1.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": "SELECT confirmation_code, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')",
+      "patch": [
+        "UPDATE bookings SET confirmation_code = confirmation_code || '-CF' WHERE user_email = :email AND lower(property_name) LIKE '%sandals%' AND (lower(location) LIKE '%jamaica%' OR lower(property_name) LIKE '%montego%')"
+      ],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Moves confirmation string only."
+      },
+      "moves": [
+        "sandals_jamaica_confirmation"
+      ],
+      "holds_this_I": [],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "retrieval-f005",
+      "task_id": "retrieval-f005",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "monthly_recurring_total",
+        "designated_payee_amount"
+      ],
+      "semantic_held": [
+        "monthly_payee_membership"
+      ],
+      "review_decision": "Total + 1 payee amount; list membership held.",
+      "identifiability": "pending_probe",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT id, payee, amount FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1",
+      "patch": [
+        "UPDATE bill_pay SET amount = amount + 15 WHERE id = (SELECT id FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1)"
+      ],
+      "extra_probes": [
+        {
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "One payee amount; membership count held. monthly_recurring_total derived from list."
+      },
+      "moves": [
+        "designated_payee_amount",
+        "monthly_recurring_total"
+      ],
+      "holds_this_I": [
+        "monthly_payee_membership"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "retrieval-f009",
+      "task_id": "retrieval-f009",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "nyc_hotel_confirmation",
+        "nyc_flight_confirmation",
+        "nyc_checkin_date"
+      ],
+      "semantic_held": [],
+      "review_decision": "Accept 3. Do not collapse D to the I axis.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "retrieval-f010",
+      "task_id": "retrieval-f010",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [
+        "jamaica_trip_total",
+        "host_name"
+      ],
+      "semantic_held": [],
+      "review_decision": "Total + host. Amenities omitted.",
+      "identifiability": "pending_probe",
+      "db": "cheskepdia.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    },
+    {
+      "id": "retrieval-f017",
+      "task_id": "retrieval-f017",
+      "variant": "I1",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "total_invested",
+        "n_open_positions"
+      ],
+      "semantic_held": [],
+      "review_decision": "Invested + n_open. PnL omitted. c3 process dropped.",
+      "identifiability": "pending_probe",
+      "db": "oddsmarket.sqlite",
+      "probe": "SELECT total_invested, balance FROM account WHERE user_email = :email",
+      "patch": [
+        "UPDATE account SET total_invested = total_invested * 1.5 WHERE user_email = :email"
+      ],
+      "extra_probes": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I1 total_invested; n_open unmoved."
+      },
+      "moves": [
+        "total_invested"
+      ],
+      "holds_this_I": [
+        "n_open_positions"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "retrieval-f017-I2",
+      "task_id": "retrieval-f017",
+      "variant": "I2",
+      "role": "paper2_tier1",
+      "_sql_status": "READY_RELATIVE",
+      "semantic_D": [
+        "total_invested",
+        "n_open_positions"
+      ],
+      "semantic_held": [],
+      "review_decision": "Invested + n_open. PnL omitted. c3 process dropped.",
+      "identifiability": "pending_probe",
+      "db": "oddsmarket.sqlite",
+      "probe": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(status)='active'",
+      "patch": [
+        "UPDATE positions SET status = 'settled' WHERE id = (SELECT id FROM positions WHERE user_email = :email AND lower(status)='active' ORDER BY id LIMIT 1)"
+      ],
+      "extra_probes": [
+        {
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT total_invested FROM account WHERE user_email = :email"
+        }
+      ],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "extra_probes_must_not_change": true,
+        "note": "I2 settle one open position; total_invested unmoved."
+      },
+      "moves": [
+        "n_open_positions"
+      ],
+      "holds_this_I": [
+        "total_invested"
+      ],
+      "_sql_note": "Relative patch from schema columns; G0/G1 filled by live --probe-only. Zero-row UPDATE is identifiability reject, not a D rewrite."
+    },
+    {
+      "id": "situated_action-f029",
+      "task_id": "situated_action-f029",
+      "variant": "I1",
+      "role": "paper2_skeleton",
+      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "semantic_D": [],
+      "semantic_held": [],
+      "review_decision": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only.",
+      "identifiability": "likely_rejected_not_identifiable",
+      "db": "mail.sqlite",
+      "probe": null,
+      "patch": [],
+      "extra_probes": [],
+      "do_not_touch": "",
+      "expect": {
+        "probe_changes": true,
+        "note": "Fill after schema dump; do not invent G0/G1."
+      }
+    }
+  ]
+}

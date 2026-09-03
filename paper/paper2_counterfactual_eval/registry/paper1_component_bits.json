@@ -1,0 +1,62 @@
+{
+  "source": "out/stage4_counterfactual_analysis_final/tracking_evidence.md",
+  "note": "Component bits are the Paper 1 hand-coding, not a new traj pass. Keys: model\\ttask",
+  "pairs": {
+    "Claude\tretrieval-f001": {"m0": {"loyalty_status": true, "loyalty_miles": true}, "m1": {"loyalty_status": true, "loyalty_miles": true}},
+    "GPT\tretrieval-f001": {"m0": {"loyalty_status": true, "loyalty_miles": true}, "m1": {"loyalty_status": true, "loyalty_miles": true}},
+    "Qwen3.5-35B-A3B\tretrieval-f001": {"m0": {"loyalty_status": true, "loyalty_miles": true}, "m1": {"loyalty_status": true, "loyalty_miles": true}},
+    "Qwen3.5-9B\tretrieval-f001": {"m0": {"loyalty_status": true, "loyalty_miles": true}, "m1": {"loyalty_status": true, "loyalty_miles": true}},
+    "Qwen3.8-Flash\tretrieval-f001": {"m0": {"loyalty_status": true, "loyalty_miles": true}, "m1": {"loyalty_status": true, "loyalty_miles": true}},
+
+    "Claude\taggregation-f003": {"m0": {"combined_refund": true}, "m1": {"combined_refund": true}},
+    "GPT\taggregation-f003": {"m0": {"combined_refund": true}, "m1": {"combined_refund": true}},
+    "Qwen3.5-9B\taggregation-f003": {"m0": {"combined_refund": true}, "m1": {"combined_refund": true}},
+    "Qwen3.8-Flash\taggregation-f003": {"m0": {"combined_refund": true}, "m1": {"combined_refund": true}},
+
+    "Claude\tpreference_inference-f018": {
+      "m0": {"gme_shares": true, "oddsmarket_yes": true},
+      "m1": {"gme_shares": true, "oddsmarket_yes": false},
+      "note": "CF GME 0 matches; OddsMarket YES still 200/active"
+    },
+
+    "GPT\tcounterfactual-f004": {
+      "m0": {"1099_amount": true},
+      "m1": {"1099_amount": false},
+      "note": "Both answers say $1,200; base gold is $1,200 so base matches; CF gold is $0"
+    },
+
+    "Claude\tretrieval-f003": {"m0": {"w2_wages": true}, "m1": {"w2_wages": true}},
+    "GPT\tretrieval-f003": {"m0": {"w2_wages": true}, "m1": {"w2_wages": true}},
+
+    "Claude\tretrieval-f016": {"m0": {"cost_basis_total": true, "cash": true}, "m1": {"cost_basis_total": true, "cash": true}},
+    "GPT\tretrieval-f016": {"m0": {"cost_basis_total": true, "cash": true}, "m1": {"cost_basis_total": true, "cash": true}},
+    "Qwen3.5-9B\tretrieval-f016": {
+      "m0": {"cost_basis_total": false, "cash": true},
+      "m1": {"cost_basis_total": true, "cash": true},
+      "note": "Audit flags base total $8,788.75 vs gold $8,213.25; cash not flagged"
+    },
+
+    "Claude\tretrieval-f029": {"m0": {"w2_wages": true, "fed_withheld": true}, "m1": {"w2_wages": true, "fed_withheld": true}},
+    "GPT\tretrieval-f029": {"m0": {"w2_wages": true, "fed_withheld": true}, "m1": {"w2_wages": true, "fed_withheld": true}},
+    "Qwen3.8-Flash\tretrieval-f029": {
+      "m0": {"w2_wages": true, "fed_withheld": true},
+      "m1": {"w2_wages": false, "fed_withheld": true},
+      "note": "CF wages $91,200 vs gold $90,000; withheld $18,000 matches"
+    },
+
+    "Claude\tretrieval-f030": {
+      "m0": {"1099_ty2025": false, "charitable": true},
+      "m1": {"1099_ty2025": true, "charitable": true},
+      "note": "Base reads TY2024 $1,080 not TY2025 $1,200 held; CF 1099+$100 charitable match"
+    },
+    "GPT\tretrieval-f030": {"m0": {"1099_ty2025": true, "charitable": true}, "m1": {"1099_ty2025": true, "charitable": true}},
+
+    "Claude\taggregation-f018": {
+      "m0": {"charitable_sqlite": true, "home_office_days": true},
+      "m1": {"charitable_sqlite": true, "home_office_days": true}
+    },
+
+    "Claude\tpreference_inference-f004": {"m0": {"hd_winner": true, "hd_count": true}, "m1": {"hd_winner": true, "hd_count": true}},
+    "GPT\tpreference_inference-f004": {"m0": {"hd_winner": true, "hd_count": true}, "m1": {"hd_winner": true, "hd_count": true}}
+  }
+}
