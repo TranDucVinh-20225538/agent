@@ -785,31 +785,49 @@
       "id": "counterfactual-f003-I2",
       "task_id": "counterfactual-f003",
       "variant": "I2",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_FILE_BACKEND",
+      "role": "paper2_file_backend",
+      "_sql_status": "READY_FILE",
       "semantic_D": [
         "venue_planned",
         "credit_headroom"
       ],
       "semantic_held": [],
       "review_decision": "venue + headroom (not venue-only). Trophy qty omitted.",
-      "identifiability": "pending_probe",
-      "db": "mail.sqlite",
-      "probe": null,
+      "identifiability": "probe_passed",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
       "patch": [],
       "extra_probes": [],
-      "do_not_touch": "",
+      "do_not_touch": "vaultbank credit accounts; Chili's VENUE line",
       "expect": {
-        "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
+        "probe_changes": false,
+        "file_must_also_change": true,
+        "note": "I2 venue_planned via Dundies Categories file budget line; credit_headroom SQL probe must stay put."
       },
-      "_sql_note": "venue_planned lives in Files/HooliMail (Dundies doc/thread), not a mapped sqlite field. Do not invent a sqlite stand-in. Probe on guest files or REJECT this variant.",
+      "_sql_note": "File-backend I2: patch ~/Documents/Dundies_2026_Categories.txt budget. Do not invent sqlite stand-in for venue_planned. Absolute file replace (Paper 1 file discipline); held channel is credit_headroom.",
       "moves": [
         "venue_planned"
       ],
       "holds_this_I": [
         "credit_headroom"
-      ]
+      ],
+      "_inventory_tier": 1,
+      "file_patches": [
+        {
+          "path": "~/Documents/Dundies_2026_Categories.txt",
+          "replace": [
+            [
+              "BUDGET: $50 from PPC + $200 from my personal funds",
+              "BUDGET: $50 from PPC + $350 from my personal funds"
+            ]
+          ],
+          "hold_constant": "VENUE: Chili's (CONFIRMED despite the 'incident.' I wrote them a letter.)"
+        }
+      ],
+      "files": [
+        "~/Documents/Dundies_2026_Categories.txt"
+      ],
+      "gate_verdict": "PASS"
     },
     {
       "id": "counterfactual-f005",
@@ -1290,7 +1308,7 @@
       "task_id": "situated_action-f029",
       "variant": "I1",
       "role": "paper2_tier3",
-      "_sql_status": "NEEDS_HAND_D",
+      "_sql_status": "REJECTED_NOT_IDENTIFIABLE",
       "semantic_D": [],
       "semantic_held": [],
       "review_decision": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only.",
@@ -1305,8 +1323,9 @@
         "note": "Fill after schema dump; do not invent G0/G1."
       },
       "_inventory_tier": 3,
-      "_sql_note": "Stopped before SQL: registry_semantic_frozen.json has determining=[]. review_decision: no invented D (action/style only; former zero_candidates). Hand-design D in a separate dated amendment before any inject-probe. Do not invent D under gate time pressure (DESIGN.md \u00a72).",
-      "gate_skip_reason": "needs_hand_D_design"
+      "_sql_note": "REJECTED_NOT_IDENTIFIABLE: frozen determining=[]. review_decision forbids inventing D (action/style only). No D rewrite; variant contributes zero to analysis denominators.",
+      "gate_verdict": "REJECTED_NOT_IDENTIFIABLE",
+      "gate_skip_reason": "rejected_not_identifiable"
     }
   ]
 }

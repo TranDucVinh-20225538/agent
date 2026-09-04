@@ -1,0 +1,36 @@
+{
+  "id": "counterfactual-f003-I2",
+  "role": "paper2_file_backend",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-04T07:33:45.110425+00:00",
+  "patch": [],
+  "applied_sql": [],
+  "extra_patches": [],
+  "file_patches": [
+    {
+      "path": "~/Documents/Dundies_2026_Categories.txt",
+      "replace": [
+        [
+          "BUDGET: $50 from PPC + $200 from my personal funds",
+          "BUDGET: $50 from PPC + $350 from my personal funds"
+        ]
+      ],
+      "hold_constant": "VENUE: Chili's (CONFIRMED despite the 'incident.' I wrote them a letter.)"
+    }
+  ],
+  "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+  "probe_before": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+  "probe_after": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+  "extra_probes_before": [],
+  "extra_probes_after": [],
+  "files_before": {
+    "~/Documents/Dundies_2026_Categories.txt": "THE DUNDIES 2026 - AWARD CATEGORIES\n===================================\n\nFINALIZED CATEGORIES:\n- Whitest Sneakers (returning champion: Jim)\n- Bushiest Beaver (Angela vetoed. Keeping it anyway.)\n- Don't Go In There After Me (Kevin, 3rd consecutive year)\n- Hottest in the Office (HR said I can't do this one. Doing it anyway.)\n- Most Improved (Toby. Just kidding. Toby can't improve.)\n- Best Office DJ (Darryl)\n- Longest Bathroom Break (Kevin)\n- Best Dundies Speech (me, obviously)\n- Funniest Joke Teller (also me)\n- World's Best Boss (I'm nominating myself. Again.)\n\nVENUE: Chili's (CONFIRMED despite the 'incident.' I wrote them a letter.)\nBUDGET: $50 from PPC + $200 from my personal funds\nKARAOKE: YES. Non-negotiable.\nTOBY: NOT invited. This is final."
+  },
+  "files_after": {
+    "~/Documents/Dundies_2026_Categories.txt": "THE DUNDIES 2026 - AWARD CATEGORIES\n===================================\n\nFINALIZED CATEGORIES:\n- Whitest Sneakers (returning champion: Jim)\n- Bushiest Beaver (Angela vetoed. Keeping it anyway.)\n- Don't Go In There After Me (Kevin, 3rd consecutive year)\n- Hottest in the Office (HR said I can't do this one. Doing it anyway.)\n- Most Improved (Toby. Just kidding. Toby can't improve.)\n- Best Office DJ (Darryl)\n- Longest Bathroom Break (Kevin)\n- Best Dundies Speech (me, obviously)\n- Funniest Joke Teller (also me)\n- World's Best Boss (I'm nominating myself. Again.)\n\nVENUE: Chili's (CONFIRMED despite the 'incident.' I wrote them a letter.)\nBUDGET: $50 from PPC + $350 from my personal funds\nKARAOKE: YES. Non-negotiable.\nTOBY: NOT invited. This is final."
+  },
+  "gold_moved": false,
+  "ok": true,
+  "fails": []
+}

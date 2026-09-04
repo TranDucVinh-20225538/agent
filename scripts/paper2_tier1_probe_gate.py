@@ -209,7 +209,9 @@ def classify(row_base: dict, rec: dict | None) -> dict:
         out["verdict_detail"] = "guest_sqlite_or_control_error"
         return out
 
-    if not fails and moved:
+    # Trust cf_inject evaluate_expect: ok covers SQL-moved and file-moved cases
+    # (e.g. file-backend I2 with expect.probe_changes=false + file_must_also_change).
+    if not fails:
         out["verdict"] = "PASS"
         out["verdict_detail"] = ""
         return out

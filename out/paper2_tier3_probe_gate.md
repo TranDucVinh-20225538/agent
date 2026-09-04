@@ -7,7 +7,9 @@ No agent. No judge. Sealed registry / D untouched.
 Group 1 (non-`-I2`): **3** `aggregation-f037` … `preference_inference-f010`
 Group 2 (`-I2`): **0**
 
-**Total: 3 PASS / 0 REJECT (identifiability) / 0 REJECT (held-leak) / 0 technical-failure / 1 needs_hand_D_design** (of 4).
+**Total: 3 PASS / 1 REJECTED_NOT_IDENTIFIABLE / 0 REJECT (held-leak) / 0 technical-failure** (of 4).
+
+Amendment: `situated_action-f029` recorded as **REJECTED_NOT_IDENTIFIABLE** (no `D` rewrite).
 
 ### By group
 
@@ -16,11 +18,9 @@ Group 2 (`-I2`): **0**
 | group1 non-I2 | 3 | 0 | 0 | 0 |
 | group2 -I2 | 0 | 0 | 0 | 0 |
 
-### Skipped — needs hand `D` design (not run)
+### Skipped / rejected without inject
 
-Inventing `D` under gate time pressure is forbidden (DESIGN.md §2 / frozen review_decision).
-
-- `situated_action-f029`: **needs_hand_D_design** — No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only.
+- `situated_action-f029`: **REJECTED_NOT_IDENTIFIABLE** — No invented D. Keep in seal for stratification. Action/style only. `D` untouched.
 
 ### Notes (not reclassifications)
 
@@ -32,5 +32,7 @@ Inventing `D` under gate time pressure is forbidden (DESIGN.md §2 / frozen revi
 | `aggregation-f037` | 1 | PASS | True |  |
 | `contradiction-f024` | 1 | PASS | True |  |
 | `preference_inference-f010` | 1 | PASS | True |  |
-| `situated_action-f029` | 1 | needs_hand_D_design | None | needs_hand_D_design |
+| `situated_action-f029` | 1 | REJECTED_NOT_IDENTIFIABLE | None | no determining D (action/style only); not run |
+
+**Amendment:** `situated_action-f029` → **REJECTED_NOT_IDENTIFIABLE** (no `D` rewrite; exits confirmatory analysis set).
 
