@@ -1,0 +1,37 @@
+{
+  "id": "contradiction-f024",
+  "role": "paper2_tier3",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-04T04:41:02.003151+00:00",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22')"
+  ],
+  "applied_sql": [
+    "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22')"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT t.id, t.date, t.description, t.amount FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22'",
+  "probe_before": "[{\"id\":1435,\"date\":\"2026-03-22\",\"description\":\"CHILIS GRILL #4420 SCR\",\"amount\":-34.75}]",
+  "probe_after": "[{\"id\":1435,\"date\":\"2026-03-22\",\"description\":\"CHILIS GRILL #4420 SCR\",\"amount\":-52.125}]",
+  "extra_probes_before": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total','medical_expenses','home_office_days') ORDER BY d.field_name",
+      "result": "[{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"home_office_days\",\"field_value\":\"104\"},\n{\"field_name\":\"medical_expenses\",\"field_value\":\"0\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total','medical_expenses','home_office_days') ORDER BY d.field_name",
+      "result": "[{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"home_office_days\",\"field_value\":\"104\"},\n{\"field_name\":\"medical_expenses\",\"field_value\":\"0\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

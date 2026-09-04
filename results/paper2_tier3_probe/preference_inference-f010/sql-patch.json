@@ -1,0 +1,8 @@
+{
+  "condition": "preference_inference-f010",
+  "id": "preference_inference-f010",
+  "patch": [
+    "UPDATE emails SET date = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(replace(substr(date,1,19),'T',' '), '+3 days')) WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com'"
+  ],
+  "file_patches": []
+}

@@ -35,6 +35,7 @@ REPORT_STEM = f"paper2_tier{INVENTORY_TIER}_probe_gate"
 EXPECTED = {
     1: (18, 5),
     2: (5, 1),
+    3: (3, 0),  # situated_action-f029 is NEEDS_HAND_D — not in READY_RELATIVE
 }
 
 
@@ -280,7 +281,58 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
     OUT.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(parents=True, exist_ok=True)
 
+    # Tier 3: append NEEDS_HAND_D skips before summarizing so they appear in all artifacts.
+    if INVENTORY_TIER == 3:
+        doc = json.loads(SPEC_PATH.read_text())
+        have = {r["task_id"] for r in rows}
+        for e in doc.get("interventions") or []:
+            if e.get("_sql_status") != "NEEDS_HAND_D" or e.get("_inventory_tier") != 3:
+                continue
+            if e["id"] in have:
+                continue
+            rows.append({
+                "task_id": e["id"],
+                "group": "1",
+                "ok": False,
+                "gold_moved": None,
+                "fails": "needs_hand_D_design",
+                "returncode": 0,
+                "guest_json": "",
+                "probe_before": "",
+                "probe_after": "",
+                "extra_probes_before": [],
+                "extra_probes_after": [],
+                "error": e.get("_sql_note") or "",
+                "verdict": "needs_hand_D_design",
+                "verdict_detail": e.get("review_decision") or "",
+            })
+
     json_path = OUT / f"{REPORT_STEM}.json"
+    cols = [
+        "task_id",
+        "group",
+        "verdict",
+        "gold_moved",
+        "fails",
+        "returncode",
+        "verdict_detail",
+        "guest_json",
+        "error",
+    ]
+
+    def count(pred, group=None):
+        return sum(
+            1
+            for r in rows
+            if pred(r) and (group is None or r.get("group") == group)
+        )
+
+    n_pass = count(lambda r: r["verdict"] == "PASS")
+    n_id = count(lambda r: r["verdict"] == "REJECT_identifiability")
+    n_hold = count(lambda r: r["verdict"] == "REJECT_held_leak")
+    n_tech = count(lambda r: r["verdict"] == "technical_failure")
+    n_need = count(lambda r: r["verdict"] == "needs_hand_D_design")
+
     json_path.write_text(
         json.dumps(
             {
@@ -297,36 +349,13 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
         + "\n"
     )
 
-    cols = [
-        "task_id",
-        "group",
-        "verdict",
-        "gold_moved",
-        "fails",
-        "returncode",
-        "verdict_detail",
-        "guest_json",
-        "error",
-    ]
     csv_path = OUT / f"{REPORT_STEM}.csv"
     with csv_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
 
-    def count(pred, group=None):
-        return sum(
-            1
-            for r in rows
-            if pred(r) and (group is None or r.get("group") == group)
-        )
-
-    n_pass = count(lambda r: r["verdict"] == "PASS")
-    n_id = count(lambda r: r["verdict"] == "REJECT_identifiability")
-    n_hold = count(lambda r: r["verdict"] == "REJECT_held_leak")
-    n_tech = count(lambda r: r["verdict"] == "technical_failure")
-
-    pair_id = "contradiction-f011" if INVENTORY_TIER == 1 else "preference_inference-f014"
+    pair_id = {1: "contradiction-f011", 2: "preference_inference-f014"}.get(INVENTORY_TIER)
     md = [
         f"# Paper 2 — Tier {INVENTORY_TIER} inject-probe gate",
         "",
@@ -340,8 +369,9 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
         + (f" `{group2[0]}` … `{group2[-1]}`" if group2 else ""),
         "",
         f"**Total: {n_pass} PASS / {n_id} REJECT (identifiability) / "
-        f"{n_hold} REJECT (held-leak) / {n_tech} technical-failure** "
-        f"(of {len(rows)}).",
+        f"{n_hold} REJECT (held-leak) / {n_tech} technical-failure"
+        + (f" / {n_need} needs_hand_D_design" if n_need else "")
+        + f"** (of {len(rows)}).",
         "",
         "### By group",
         "",
@@ -356,17 +386,42 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
             f"{count(lambda r: r['verdict']=='technical_failure', gname)} |"
         )
 
-    i1 = next((r for r in rows if r["task_id"] == pair_id), None)
-    i2 = next((r for r in rows if r["task_id"] == f"{pair_id}-I2"), None)
+    if pair_id:
+        i1 = next((r for r in rows if r["task_id"] == pair_id), None)
+        i2 = next((r for r in rows if r["task_id"] == f"{pair_id}-I2"), None)
+        md.extend(
+            [
+                "",
+                f"### `{pair_id}` pair (partial multi-I failure clause)",
+                "",
+                f"- I1 (`{pair_id}`): **{(i1 or {}).get('verdict', 'missing')}**",
+                f"- I2 (`{pair_id}-I2`): **{(i2 or {}).get('verdict', 'missing')}**",
+                "",
+                "Each variant is its own unit; a reject does not relabel the task as single-I.",
+            ]
+        )
+
+    if n_need:
+        md.extend(
+            [
+                "",
+                "### Skipped — needs hand `D` design (not run)",
+                "",
+                "Inventing `D` under gate time pressure is forbidden "
+                "(DESIGN.md §2 / frozen review_decision).",
+                "",
+            ]
+        )
+        for r in rows:
+            if r["verdict"] != "needs_hand_D_design":
+                continue
+            md.append(
+                f"- `{r['task_id']}`: **needs_hand_D_design** — "
+                f"{(r.get('verdict_detail') or r.get('error') or '')[:200]}"
+            )
+
     md.extend(
         [
-            "",
-            f"### `{pair_id}` pair (partial multi-I failure clause)",
-            "",
-            f"- I1 (`{pair_id}`): **{(i1 or {}).get('verdict', 'missing')}**",
-            f"- I2 (`{pair_id}-I2`): **{(i2 or {}).get('verdict', 'missing')}**",
-            "",
-            "Each variant is its own unit; a reject does not relabel the task as single-I.",
             "",
             "| task_id | group | verdict | gold_moved | fails |",
             "| --- | --- | --- | --- | --- |",
@@ -385,9 +440,11 @@ def write_report(rows: list[dict], group1: list[str], group2: list[str]) -> None
     print(f"wrote {csv_path}", flush=True)
     print(f"wrote {md_path}", flush=True)
     print(
-        f"summary PASS={n_pass} REJECT_id={n_id} REJECT_held={n_hold} tech={n_tech}",
+        f"summary PASS={n_pass} REJECT_id={n_id} REJECT_held={n_hold} "
+        f"tech={n_tech} needs_hand_D={n_need}",
         flush=True,
     )
+
 
 
 def main() -> int:

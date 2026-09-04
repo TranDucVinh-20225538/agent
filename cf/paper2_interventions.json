@@ -129,8 +129,8 @@
       "id": "aggregation-f037",
       "task_id": "aggregation-f037",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier3",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "top_sender",
         "top_sender_count"
@@ -139,16 +139,31 @@
       "review_decision": "Accept 2. Probe gate: unstable mail gold \u2192 rejected_not_identifiable. Do not rewrite D to rescue.",
       "identifiability": "probe_gate",
       "db": "mail.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT from_email AS top_sender, count(*) AS top_sender_count FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1",
+      "patch": [
+        "UPDATE emails SET from_email = from_email || '.cf-moved' WHERE id IN (SELECT id FROM emails WHERE user_email = :email AND from_email = (SELECT from_email FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1) ORDER BY id LIMIT 80)"
+      ],
+      "extra_probes": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT from_email, count(*) AS n FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' GROUP BY from_email"
+        }
+      ],
+      "do_not_touch": "toby.flenderson message set; non-top senders",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
+        "extra_probes_must_not_change": true,
+        "note": "Reassign 80 msgs from current top from_email. Unstable mail gold \u2192 REJECT ok; do not rewrite D."
       },
       "_inventory_tier": 3,
-      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
+      "_sql_note": "Tier 3 relative patch from guest schema dump (out/paper2_tier3_schema_dump.json). G0/G1 from live inject-probe. Zero-row / unstable gold \u2192 REJECT, not a D rewrite.",
+      "moves": [
+        "top_sender",
+        "top_sender_count"
+      ],
+      "holds_this_I": [
+        "toby_sender_count"
+      ]
     },
     {
       "id": "aggregation-f040",
@@ -584,8 +599,8 @@
       "id": "contradiction-f024",
       "task_id": "contradiction-f024",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier3",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "chilis_receipt_amount",
         "speedtax_overlap"
@@ -593,17 +608,31 @@
       "semantic_held": [],
       "review_decision": "Accept 2 determining. If probe cannot stabilize file+sqlite guest gold \u2192 rejected_not_identifiable. Do not rescue.",
       "identifiability": "pending_probe_or_reject",
-      "db": "mail.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "db": "vaultbank.sqlite",
+      "probe": "SELECT t.id, t.date, t.description, t.amount FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22'",
+      "patch": [
+        "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22')"
+      ],
+      "extra_probes": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total','medical_expenses','home_office_days') ORDER BY d.field_name"
+        }
+      ],
+      "do_not_touch": "speedtax tax_data; Downloads/Chilis_Receipt_March_2026.txt",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
+        "extra_probes_must_not_change": true,
+        "note": "Relative vault Chili's 2026-03-22 amount; SpeedTax deductions held. Receipt file not relatively patchable \u2014 REJECT ok if not identifiable."
       },
       "_inventory_tier": 3,
-      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
+      "_sql_note": "Tier 3 relative patch from guest schema dump (out/paper2_tier3_schema_dump.json). G0/G1 from live inject-probe. Zero-row / unstable gold \u2192 REJECT, not a D rewrite.",
+      "moves": [
+        "chilis_receipt_amount"
+      ],
+      "holds_this_I": [
+        "speedtax_overlap"
+      ]
     },
     {
       "id": "counterfactual-f001",
@@ -913,8 +942,8 @@
       "id": "preference_inference-f010",
       "task_id": "preference_inference-f010",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier3",
+      "_sql_status": "READY_RELATIVE",
       "semantic_D": [
         "fastest_sender",
         "designated_sender_latency"
@@ -923,16 +952,30 @@
       "review_decision": "Accept 2. Probe gate: timestamps/mail not deterministic \u2192 rejected_not_identifiable. Do not rewrite D.",
       "identifiability": "probe_gate",
       "db": "mail.sqlite",
-      "probe": null,
-      "patch": [],
-      "extra_probes": [],
-      "do_not_touch": "",
+      "probe": "SELECT id, from_email, date FROM emails WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com' ORDER BY date, id LIMIT 10",
+      "patch": [
+        "UPDATE emails SET date = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(replace(substr(date,1,19),'T',' '), '+3 days')) WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com'"
+      ],
+      "extra_probes": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT id, date FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' ORDER BY date, id LIMIT 10"
+        }
+      ],
+      "do_not_touch": "toby.flenderson timestamps; sent table",
       "expect": {
         "probe_changes": true,
-        "note": "Fill after schema dump; do not invent G0/G1."
+        "extra_probes_must_not_change": true,
+        "note": "Perturb Jim inbound dates (+3d) as designated_sender_latency surface. Mail timestamps may be non-deterministic \u2192 REJECT ok."
       },
       "_inventory_tier": 3,
-      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
+      "_sql_note": "Tier 3 relative patch from guest schema dump (out/paper2_tier3_schema_dump.json). G0/G1 from live inject-probe. Zero-row / unstable gold \u2192 REJECT, not a D rewrite.",
+      "moves": [
+        "designated_sender_latency"
+      ],
+      "holds_this_I": [
+        "toby_inbound_dates"
+      ]
     },
     {
       "id": "preference_inference-f014",
@@ -1246,14 +1289,14 @@
       "id": "situated_action-f029",
       "task_id": "situated_action-f029",
       "variant": "I1",
-      "role": "paper2_skeleton",
-      "_sql_status": "PENDING_GUEST_SCHEMA",
+      "role": "paper2_tier3",
+      "_sql_status": "NEEDS_HAND_D",
       "semantic_D": [],
       "semantic_held": [],
       "review_decision": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only.",
       "identifiability": "likely_rejected_not_identifiable",
       "db": "mail.sqlite",
-      "probe": null,
+      "probe": "",
       "patch": [],
       "extra_probes": [],
       "do_not_touch": "",
@@ -1262,7 +1305,8 @@
         "note": "Fill after schema dump; do not invent G0/G1."
       },
       "_inventory_tier": 3,
-      "_sql_note": "Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate. Deferred: inventory Tier 3 / likely reject \u2014 fill after Tier 2 gate."
+      "_sql_note": "Stopped before SQL: registry_semantic_frozen.json has determining=[]. review_decision: no invented D (action/style only; former zero_candidates). Hand-design D in a separate dated amendment before any inject-probe. Do not invent D under gate time pressure (DESIGN.md \u00a72).",
+      "gate_skip_reason": "needs_hand_D_design"
     }
   ]
 }

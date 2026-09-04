@@ -1,0 +1,8 @@
+{
+  "condition": "contradiction-f024",
+  "id": "contradiction-f024",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 1.5 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(t.description) LIKE '%chili%' AND t.date = '2026-03-22')"
+  ],
+  "file_patches": []
+}

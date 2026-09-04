@@ -1,0 +1,37 @@
+{
+  "id": "aggregation-f037",
+  "role": "paper2_tier3",
+  "db": "mail.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-04T04:40:59.480200+00:00",
+  "patch": [
+    "UPDATE emails SET from_email = from_email || '.cf-moved' WHERE id IN (SELECT id FROM emails WHERE user_email = :email AND from_email = (SELECT from_email FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1) ORDER BY id LIMIT 80)"
+  ],
+  "applied_sql": [
+    "UPDATE emails SET from_email = from_email || '.cf-moved' WHERE id IN (SELECT id FROM emails WHERE user_email = :email AND from_email = (SELECT from_email FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1) ORDER BY id LIMIT 80)"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT from_email AS top_sender, count(*) AS top_sender_count FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1",
+  "probe_before": "[{\"top_sender\":\"noreply@hangrydash.com\",\"top_sender_count\":794}]",
+  "probe_after": "[{\"top_sender\":\"noreply@hangrydash.com\",\"top_sender_count\":714}]",
+  "extra_probes_before": [
+    {
+      "db": "mail.sqlite",
+      "sql": "SELECT from_email, count(*) AS n FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' GROUP BY from_email",
+      "result": "[{\"from_email\":\"toby.flenderson@dundermifflin.com\",\"n\":37}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "mail.sqlite",
+      "sql": "SELECT from_email, count(*) AS n FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' GROUP BY from_email",
+      "result": "[{\"from_email\":\"toby.flenderson@dundermifflin.com\",\"n\":37}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

@@ -1,0 +1,114 @@
+{
+  "written_at": "2026-09-04T04:41:05.382707+00:00",
+  "inventory_tier": 3,
+  "spec": "paper/paper2_counterfactual_eval/PAPER2_SPEC.md \u00a77",
+  "interventions": "/mnt/data2/Vinh/agent/cf/paper2_interventions.json",
+  "group1": [
+    "aggregation-f037",
+    "contradiction-f024",
+    "preference_inference-f010"
+  ],
+  "group2": [],
+  "rows": [
+    {
+      "task_id": "aggregation-f037",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier3_probe/aggregation-f037/aggregation-f037.guest.json",
+      "probe_before": "[{\"top_sender\":\"noreply@hangrydash.com\",\"top_sender_count\":794}]",
+      "probe_after": "[{\"top_sender\":\"noreply@hangrydash.com\",\"top_sender_count\":714}]",
+      "extra_probes_before": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT from_email, count(*) AS n FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' GROUP BY from_email",
+          "result": "[{\"from_email\":\"toby.flenderson@dundermifflin.com\",\"n\":37}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT from_email, count(*) AS n FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' GROUP BY from_email",
+          "result": "[{\"from_email\":\"toby.flenderson@dundermifflin.com\",\"n\":37}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "contradiction-f024",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier3_probe/contradiction-f024/contradiction-f024.guest.json",
+      "probe_before": "[{\"id\":1435,\"date\":\"2026-03-22\",\"description\":\"CHILIS GRILL #4420 SCR\",\"amount\":-34.75}]",
+      "probe_after": "[{\"id\":1435,\"date\":\"2026-03-22\",\"description\":\"CHILIS GRILL #4420 SCR\",\"amount\":-52.125}]",
+      "extra_probes_before": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total','medical_expenses','home_office_days') ORDER BY d.field_name",
+          "result": "[{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"home_office_days\",\"field_value\":\"104\"},\n{\"field_name\":\"medical_expenses\",\"field_value\":\"0\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "speedtax.sqlite",
+          "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND d.field_name IN ('charitable_contributions','charitable_total','medical_expenses','home_office_days') ORDER BY d.field_name",
+          "result": "[{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"home_office_days\",\"field_value\":\"104\"},\n{\"field_name\":\"medical_expenses\",\"field_value\":\"0\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "preference_inference-f010",
+      "group": "1",
+      "ok": true,
+      "gold_moved": true,
+      "fails": "",
+      "returncode": 0,
+      "guest_json": "/mnt/data2/Vinh/agent/results/paper2_tier3_probe/preference_inference-f010/preference_inference-f010.guest.json",
+      "probe_before": "[{\"id\":859,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-09-19T18:18:44Z\"},\n{\"id\":909,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-11-17T16:08:21Z\"},\n{\"id\":901,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-01T05:46:14Z\"},\n{\"id\":961,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-03T18:25:05Z\"},\n{\"id\":755,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-13T18:22:01Z\"},\n{\"id\":892,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-04T13:22:06Z\"},\n{\"id\":772,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-25T12:09:17Z\"},\n{\"id\":939,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-28T06:23:39Z\"},\n{\"id\":804,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-02-21T12:03:01Z\"},\n{\"id\":994,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-03-08T11:42:34Z\"}]",
+      "probe_after": "[{\"id\":859,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-09-22T18:18:44Z\"},\n{\"id\":909,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-11-20T16:08:21Z\"},\n{\"id\":901,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-04T05:46:14Z\"},\n{\"id\":961,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-06T18:25:05Z\"},\n{\"id\":755,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-16T18:22:01Z\"},\n{\"id\":892,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-07T13:22:06Z\"},\n{\"id\":772,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-28T12:09:17Z\"},\n{\"id\":939,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-31T06:23:39Z\"},\n{\"id\":804,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-02-24T12:03:01Z\"},\n{\"id\":994,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-03-11T11:42:34Z\"}]",
+      "extra_probes_before": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT id, date FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' ORDER BY date, id LIMIT 10",
+          "result": "[{\"id\":902,\"date\":\"2024-10-07T09:00:24Z\"},\n{\"id\":867,\"date\":\"2024-10-11T10:40:18Z\"},\n{\"id\":756,\"date\":\"2024-10-21T04:30:43Z\"},\n{\"id\":856,\"date\":\"2025-02-13T09:31:33Z\"},\n{\"id\":798,\"date\":\"2025-03-01T12:39:24Z\"},\n{\"id\":841,\"date\":\"2025-06-14T12:20:09Z\"},\n{\"id\":952,\"date\":\"2025-06-30T11:13:43Z\"},\n{\"id\":950,\"date\":\"2025-07-01T13:03:38Z\"},\n{\"id\":771,\"date\":\"2025-07-08T04:47:53Z\"},\n{\"id\":757,\"date\":\"2025-07-12T17:00:35Z\"}]"
+        }
+      ],
+      "extra_probes_after": [
+        {
+          "db": "mail.sqlite",
+          "sql": "SELECT id, date FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' ORDER BY date, id LIMIT 10",
+          "result": "[{\"id\":902,\"date\":\"2024-10-07T09:00:24Z\"},\n{\"id\":867,\"date\":\"2024-10-11T10:40:18Z\"},\n{\"id\":756,\"date\":\"2024-10-21T04:30:43Z\"},\n{\"id\":856,\"date\":\"2025-02-13T09:31:33Z\"},\n{\"id\":798,\"date\":\"2025-03-01T12:39:24Z\"},\n{\"id\":841,\"date\":\"2025-06-14T12:20:09Z\"},\n{\"id\":952,\"date\":\"2025-06-30T11:13:43Z\"},\n{\"id\":950,\"date\":\"2025-07-01T13:03:38Z\"},\n{\"id\":771,\"date\":\"2025-07-08T04:47:53Z\"},\n{\"id\":757,\"date\":\"2025-07-12T17:00:35Z\"}]"
+        }
+      ],
+      "error": "",
+      "verdict": "PASS",
+      "verdict_detail": ""
+    },
+    {
+      "task_id": "situated_action-f029",
+      "group": "1",
+      "ok": false,
+      "gold_moved": null,
+      "fails": "needs_hand_D_design",
+      "returncode": 0,
+      "guest_json": "",
+      "probe_before": "",
+      "probe_after": "",
+      "extra_probes_before": [],
+      "extra_probes_after": [],
+      "error": "Stopped before SQL: registry_semantic_frozen.json has determining=[]. review_decision: no invented D (action/style only; former zero_candidates). Hand-design D in a separate dated amendment before any inject-probe. Do not invent D under gate time pressure (DESIGN.md \u00a72).",
+      "verdict": "needs_hand_D_design",
+      "verdict_detail": "No invented D. Keep in seal for stratification. After probe may be rejected_not_identifiable. Action/style only."
+    }
+  ]
+}
