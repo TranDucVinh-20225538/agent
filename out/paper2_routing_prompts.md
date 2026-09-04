@@ -21,6 +21,7 @@
 | multi-I (both PASS) | 7 tasks |
 | `contradiction-f024` | rejected; **absent** from T and cell_order |
 | Image block | filled: `mypcbench.qcow2` sha256 `7c2ddcf2…2f43f59` @ node30 |
+| SMALL entrypoint | `paper2_exec_small_lane.sh` → `paper2_exec_run.sh` (exec after human OK) |
 | SMALL/LARGE split | wire `OPENROUTER_API_KEY_SMALL` / `_LARGE` (names only in git); no silent failover |
 
 Model order (immutable): **9B → Flash → Claude → GPT**.

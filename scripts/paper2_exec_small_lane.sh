@@ -1,24 +1,34 @@
 #!/usr/bin/env bash
-# Paper 2 SMALL lane — shell plan only (do not execute until human OK).
-# Keys: OPENROUTER_API_KEY_SMALL only. Never print key values.
+# Paper 2 SMALL lane entrypoint → scripts/paper2_exec_run.sh
+# Qwen only. Bind OPENROUTER_API_KEY from _SMALL; scrub LARGE / Anthropic / native OpenAI.
+# No failover. Never print key values.
 set -euo pipefail
-A="${AGENT_ROOT:-/mnt/data2/Vinh/agent}"
+
+A="${AGENT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 H="$A/external/MyPCBench-main"
 MODEL="${1:?usage: $0 qwen/qwen3.5-9b|qwen/qwen3.8-flash}"
+
 case "$MODEL" in
-  qwen/qwen3.5-9b|qwen/qwen3.8-flash) ;;
+  qwen/qwen3.5-9b) SLUG=qwen35-9b ;;
+  qwen/qwen3.8-flash) SLUG=qwen38-flash ;;
   *) echo "SMALL lane rejects $MODEL" >&2; exit 2 ;;
 esac
-: "${OPENROUTER_API_KEY_SMALL:?set OPENROUTER_API_KEY_SMALL}"
-# Bind OpenRouter to SMALL only; scrub other provider keys for this process.
-export OPENROUTER_API_KEY="$OPENROUTER_API_KEY_SMALL"
-unset OPENROUTER_API_KEY_LARGE ANTHROPIC_API_KEY OPENAI_API_KEY || true
-unset OPENROUTER_API_KEY_SMALL  # after bind — child sees only OPENROUTER_API_KEY
+
 cd "$H"
 set -a
 # shellcheck disable=SC1091
+[ -f .env ] && source .env
+# shellcheck disable=SC1091
 source ./mypcbench-vm/env.sh
 set +a
+
+: "${OPENROUTER_API_KEY_SMALL:?set OPENROUTER_API_KEY_SMALL in host .env}"
+
+# Bind OpenRouter to SMALL only; scrub other provider keys for this process tree.
+export OPENROUTER_API_KEY="$OPENROUTER_API_KEY_SMALL"
+unset OPENROUTER_API_KEY_LARGE ANTHROPIC_API_KEY OPENAI_API_KEY OPENAI_BASE_URL || true
+unset OPENROUTER_API_KEY_SMALL  # after bind — child sees OPENROUTER_API_KEY only
+
 export AGENT_ROOT="$A"
 export PATH="$H/.venv/bin:$PATH"
 export PYTHONPATH="$H/agent-harness${PYTHONPATH:+:$PYTHONPATH}"
@@ -27,10 +37,16 @@ export MYPCBENCH_VM_READY_TIMEOUT=3600
 export MYPCBENCH_VM_HOST=127.0.0.1
 export MYPCBENCH_JUDGE_FLAVOR=per_step
 export PAPER2_EXEC_SEED=20260904
-# Results slug from model id
-slug=$(echo "$MODEL" | tr '/.' '--')
-OUT="$A/results/paper2_exec/$slug"
+
+OUT="$A/results/paper2_exec/$SLUG"
 mkdir -p "$OUT"
-echo "PLAN SMALL model=$MODEL out=$OUT qcow2=$MYPCBENCH_QCOW2"
-echo "NEXT: runner must walk out/paper2_cell_order.json with G0/G1/(G2) — not started by this script."
-echo "This file is a plan wrapper; invoke the Paper-1-style Stage4/Phase-B runner only after human OK."
+
+echo "START SMALL model=$MODEL slug=$SLUG out=$OUT qcow2=${MYPCBENCH_QCOW2:-unset}"
+echo "binding: OPENROUTER_API_KEY=set ANTHROPIC=unset LARGE=unset (values hidden)"
+echo "exec → scripts/paper2_exec_run.sh (57 legs max for this model; no failover)"
+
+export MODEL LANE=SMALL SLUG
+export OUT_ROOT="$OUT"
+export LOG="$A/results/paper2_exec_${SLUG}.log"
+
+exec bash "$A/scripts/paper2_exec_run.sh"
