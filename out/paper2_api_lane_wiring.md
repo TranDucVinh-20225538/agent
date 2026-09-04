@@ -29,3 +29,7 @@ bash scripts/paper2_exec_large_lane.sh claude-opus-4-6   # still plan until wire
 **No silent failover** from SMALL → LARGE.
 
 Verify names + routing (no agents / no QEMU): `bash scripts/paper2_exec_dry_run_routing.sh`
+
+## Auto chain
+
+While 9B is live: `tmux` session runs `scripts/paper2_exec_wait_9b_then_flash.sh` (poll → Flash). Fresh host: `scripts/paper2_exec_small_9b_then_flash.sh`. No Flash after `BUDGET_STOP`.

@@ -346,3 +346,6 @@ done
 echo "===== Paper2 exec stop $(date -Is) MODEL=$MODEL ====="
 echo "wrote $LOG"
 echo "OUT_ROOT=$OUT_ROOT CKPT=$CKPT_JSONL PROGRESS=$PROGRESS_MD"
+# Marker for chain scripts (9b → flash). Not written on BUDGET_STOP (exit 75 above).
+date -Is | tee "$OUT_ROOT/LANE_COMPLETE"
+echo "lane_complete model=$MODEL slug=$SLUG legs=57" | tee -a "$OUT_ROOT/LANE_COMPLETE"
