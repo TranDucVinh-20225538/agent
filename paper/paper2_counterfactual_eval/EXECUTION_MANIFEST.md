@@ -1,7 +1,7 @@
-# Paper 2 — execution manifest (freeze before cell 1/236)
+# Paper 2 — execution manifest (freeze before cell 1/228)
 
 **Status:** EXECUTION_FROZEN — design closed; agent failure is data.  
-**Analysis universe:** `out/paper2_analysis_universe.md` (`4f45faf`)  
+**Analysis universe:** `out/paper2_analysis_universe.md` (amended: f024 rejected pre-cell-1)  
 **Spec:** `paper/paper2_counterfactual_eval/PAPER2_SPEC.md`  
 **Do not** edit \(\mathcal{M}\), \(\mathcal{T}\), \(D\), or this file after cell 1 starts, except dated infra stop (below).
 
@@ -12,10 +12,10 @@
 | Quantity | Value |
 | --- | --- |
 | \(\|\mathcal{M}\|\) | 4 |
-| \(\|\mathcal{T}\|\) | 26 |
-| Surviving variants | 33 |
+| \(\|\mathcal{T}\|\) | 25 (seal 27 − f029 − f024) |
+| Surviving variants | 32 |
 | multi-I (I1+I2) | 7 |
-| **Legs** | **236** = \(4\times26\times2 + 4\times7\) |
+| **Legs** | **228** = \(4\times25\times2 + 4\times7\) |
 
 From cell 1 onward: stop only for **infrastructure** severe enough to halt the whole experiment (Control API dead, disk full, systematic harness bug). Not for “model looks bad / expensive / empty XML rate.”
 
@@ -33,7 +33,7 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 **Model order (full universe per model, no interleaving):**  
 1. Qwen 3.5-9B → 2. Qwen 3.8-Flash → 3. Claude Opus 4.6 → 4. GPT-5.5  
 
-**59 legs/model** (\(26\times2+7\)); **236** total. Within a model lane, key assignment is immutable. Claude/GPT never use `SMALL_KEY`. Exhausting `SMALL_KEY` mid-Qwen: checkpoint, stop, report — **no silent failover to `LARGE_KEY`** without an explicit dated operational amendment. Smoke/cost checks are **not** analysis legs.
+**57 legs/model** (\(25\times2+7\)); **228** total. Within a model lane, key assignment is immutable. Claude/GPT never use `SMALL_KEY`. Exhausting `SMALL_KEY` mid-Qwen: checkpoint, stop, report — **no silent failover to `LARGE_KEY`** without an explicit dated operational amendment. Smoke/cost checks are **not** analysis legs.
 
 ---
 
@@ -101,7 +101,7 @@ Valid pair (analysis): both legs of a scheduled pair `DONE` (Paper 1 definition)
 ## 4. Workflow
 
 1. Tag: `paper2-exec-freeze` on the commit that contains this file + filled image sha + `paper2_cell_order.json`.  
-2. Run all **236** legs (or pause only for infra stop).  
+2. Run all **228** legs (or pause only for infra stop).  
 3. Collect raw artifacts under a single tree (e.g. `results/paper2_exec/`).  
 4. Classify valid pairs / coverage.  
 5. **Then** open Layer A / Layer B.

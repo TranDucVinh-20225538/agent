@@ -7,7 +7,7 @@
     "out/paper2_tier3_probe_gate.json",
     "out/paper2_f003_i2_probe_gate.json"
   ],
-  "_note": "Surviving inject-probe variants only. Rejected variants contribute zero. Multi-I task stays in T if any variant PASSed; extra G2 leg only when both I1 and I2 PASS. No agent runs yet.",
+  "_note": "Surviving inject-probe variants only. Rejected variants contribute zero. Amendment: f024 removed before cell 1 \u2014 vaultbank PASS was not the agent receipt channel. No agent runs yet. D unchanged.",
   "n_min": 3,
   "models": [
     "claude-opus-4-6",
@@ -16,8 +16,8 @@
     "qwen/qwen3.5-9b"
   ],
   "n_models": 4,
-  "n_tasks": 26,
-  "n_surviving_variants": 33,
+  "n_tasks": 25,
+  "n_surviving_variants": 32,
   "n_multi_i_both_pass": 7,
   "tasks": [
     "aggregation-f004",
@@ -32,7 +32,6 @@
     "contradiction-f014",
     "contradiction-f017",
     "contradiction-f022",
-    "contradiction-f024",
     "counterfactual-f001",
     "counterfactual-f002",
     "counterfactual-f003",
@@ -63,7 +62,6 @@
     "contradiction-f014",
     "contradiction-f017",
     "contradiction-f022",
-    "contradiction-f024",
     "counterfactual-f001",
     "counterfactual-f002",
     "counterfactual-f002-I2",
@@ -96,6 +94,13 @@
       "id": "situated_action-f029",
       "verdict": "REJECTED_NOT_IDENTIFIABLE",
       "source": "tier3"
+    },
+    {
+      "id": "contradiction-f024",
+      "verdict": "REJECTED_NOT_IDENTIFIABLE",
+      "source": "tier3_channel_amend_pre_cell1",
+      "amended_at": "2026-09-04T08:04:27.214421+00:00",
+      "reason": "Tier-3 gate PASS measured vaultbank Chili's txn, but frozen D chilis_receipt_amount and the rubric/instruction require ~/Downloads receipt (unchanged; do_not_touch). Agent-facing channel did not move. Rescue via alternate channel forbidden by PAPER2_SPEC \u00a77 and review_decision (file+sqlite or reject). D not rewritten."
     }
   ],
   "pending_variants": [],
@@ -103,14 +108,32 @@
   "legs": {
     "formula": "|M| * |T| * 2 + |M| * n_multiI",
     "M": 4,
-    "T": 26,
+    "T": 25,
     "n_multiI": 7,
-    "base_paired": 208,
+    "base_paired": 200,
     "multi_i_extra": 28,
-    "total": 236
+    "total": 228
   },
   "sealed_task_count": 27,
   "sealed_minus_analysis": [
+    "contradiction-f024",
     "situated_action-f029"
+  ],
+  "_amended_at": "2026-09-04T08:04:27.214421+00:00",
+  "_amendments": [
+    {
+      "at": "2026-09-04T08:04:27.214421+00:00",
+      "change": "contradiction-f024 \u2192 REJECTED_NOT_IDENTIFIABLE (channel mismatch)",
+      "before": {
+        "n_tasks": 26,
+        "n_surviving_variants": 33,
+        "legs": 236
+      },
+      "after": {
+        "n_tasks": 25,
+        "n_surviving_variants": 32,
+        "legs": 228
+      }
+    }
   ]
 }

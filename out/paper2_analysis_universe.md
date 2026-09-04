@@ -1,22 +1,26 @@
 # Paper 2 — analysis universe (frozen after inject-probe)
 
-Frozen 2026-09-04T07:38:44.958454+00:00. No agent. Sealed semantic registry untouched.
+Originally frozen `2026-09-04T07:38:44.958454+00:00`. Amended `2026-09-04T08:04:27.214421+00:00`: `contradiction-f024` → REJECTED_NOT_IDENTIFIABLE (agent-facing receipt channel never moved; vaultbank PASS rescinded). Semantic D not rewritten. No agent.
 
 - **|M|** = 4: `claude-opus-4-6, gpt-5.5, qwen/qwen3.8-flash, qwen/qwen3.5-9b`
-- **|T|** = 26 tasks with ≥1 PASS variant
-- **Surviving variants** = 33
+- **|T|** = 25 tasks with ≥1 PASS variant
+- **Surviving variants** = 32
 - **n_multiI** (I1+I2 both PASS) = 7: `aggregation-f040, contradiction-f006, contradiction-f011, counterfactual-f002, counterfactual-f003, preference_inference-f014, retrieval-f017`
-- **Rejected** = 1: `situated_action-f029`
+- **Rejected** = 2: `situated_action-f029`, `contradiction-f024`
 - **Pending** = 0: (none)
 
 ## Legs (PAPER2_SPEC Cost)
 
-`legs = |M|×|T|×2 + |M|×n_multiI = 4×26×2 + 4×7 = **236**`
+`legs = |M|×|T|×2 + |M|×n_multiI = 4×25×2 + 4×7 = **228**`
 
-- base paired: 208
+- base paired: 200
 - multi-I extra: 28
 
 `n_min` = 3 (unchanged).
+
+## Amendment — contradiction-f024
+
+Tier-3 gate recorded PASS on a relative patch to vaultbank `CHILIS…` txn, while frozen component `chilis_receipt_amount` and the rubric/instruction require `~/Downloads` Chili's receipt (held in `do_not_touch`). That is a channel rescue, not identifiability of D. Reclassified **REJECTED_NOT_IDENTIFIABLE** before cell 1. No absolute file patch; no D rewrite.
 
 ## Surviving variants
 
@@ -35,7 +39,6 @@ Frozen 2026-09-04T07:38:44.958454+00:00. No agent. Sealed semantic registry unto
 - `contradiction-f014`
 - `contradiction-f017`
 - `contradiction-f022`
-- `contradiction-f024`
 - `counterfactual-f001`
 - `counterfactual-f002`
 - `counterfactual-f002-I2`
@@ -68,7 +71,6 @@ Frozen 2026-09-04T07:38:44.958454+00:00. No agent. Sealed semantic registry unto
 - `contradiction-f014`
 - `contradiction-f017`
 - `contradiction-f022`
-- `contradiction-f024`
 - `counterfactual-f001`
 - `counterfactual-f002`
 - `counterfactual-f003`
@@ -82,4 +84,3 @@ Frozen 2026-09-04T07:38:44.958454+00:00. No agent. Sealed semantic registry unto
 - `retrieval-f009`
 - `retrieval-f010`
 - `retrieval-f017`
-
