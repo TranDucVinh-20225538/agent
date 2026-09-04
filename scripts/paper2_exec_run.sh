@@ -112,7 +112,7 @@ echo "===== Paper2 exec start $(date -Is) ====="
 echo "HEAD=$(git -C "$A" rev-parse --short HEAD) LANE=$LANE MODEL=$MODEL AGENT=$AGENT_TYPE"
 echo "OUT_ROOT=$OUT_ROOT PREFIX=$PREFIX qcow2=$MYPCBENCH_QCOW2"
 echo "legs=${#LEGS[@]} (expect 57)"
-echo "binding_check: ANTHROPIC=${ANTHROPIC_API_KEY:+SET}${ANTHROPIC_API_KEY:-UNSET} LARGE=${OPENROUTER_API_KEY_LARGE:+SET}${OPENROUTER_API_KEY_LARGE:-UNSET} OPENROUTER=${OPENROUTER_API_KEY:+SET}${OPENROUTER_API_KEY:-UNSET}"
+echo "binding_check: ANTHROPIC=$([ -n "${ANTHROPIC_API_KEY:-}" ] && echo SET || echo UNSET) LARGE=$([ -n "${OPENROUTER_API_KEY_LARGE:-}" ] && echo SET || echo UNSET) OPENROUTER=$([ -n "${OPENROUTER_API_KEY:-}" ] && echo SET || echo UNSET)"
 
 pin_task() {
   local task_id="$1"
