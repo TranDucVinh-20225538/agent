@@ -59,11 +59,13 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 **Image (fill on run host before cell 1):**
 
 ```
-MYPCBENCH_QCOW2=
-sha256=
-recorded_at_utc=
-host=
+MYPCBENCH_QCOW2=/mnt/data2/Vinh/agent/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2
+sha256=7c2ddcf2c2e180d07af3a7971b97d45746605005040d74271fb3e494d2f43f59
+recorded_at_utc=2026-09-04T07:55:32Z
+host=node30
 ```
+
+Pinned base qcow2 for all 228 cells (Paper 1 / Phase B image). Overlays are per-boot ephemeral; do not swap this base mid-run. `MYPCBENCH_SKIP_QCOW2_REFRESH=1` keeps the pin from auto-refresh.
 
 System prompt / tool config: whatever each `*_cuabash` agent ships in this checkout at the tagged execution commit — do not edit agent wrappers mid-run.
 
