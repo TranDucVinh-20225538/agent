@@ -34,7 +34,14 @@ case "$LANE" in
       *) die "LARGE lane rejects MODEL=$MODEL" ;;
     esac
     ;;
-  *) die "LANE must be SMALL or LARGE" ;;
+  GPT)
+    # Operational: GPT only. Key source is set by entrypoint (openrouter SMALL burn, or native/LARGE later).
+    case "$MODEL" in
+      gpt-5.5) ;;
+      *) die "GPT lane rejects MODEL=$MODEL" ;;
+    esac
+    ;;
+  *) die "LANE must be SMALL, LARGE, or GPT" ;;
 esac
 
 mkdir -p "$A/results" "$H/results" "$ONE_DIR" "$OUT_ROOT" "$A/out"
@@ -53,6 +60,7 @@ export MYPCBENCH_JUDGE_FLAVOR=per_step
 : "${MYPCBENCH_QCOW2:?MYPCBENCH_QCOW2 unset}"
 test -f "$MYPCBENCH_QCOW2" || die "qcow2 missing: $MYPCBENCH_QCOW2"
 
+unset AGENT_MODEL || true
 case "$MODEL" in
   qwen/*)
     AGENT_TYPE="${MYPCBENCH_QWEN_AGENT:-qwen_cuabash}"
@@ -73,11 +81,24 @@ case "$MODEL" in
     ;;
   gpt-5.5)
     AGENT_TYPE="${MYPCBENCH_OPENAI_AGENT:-openai_cuabash}"
-    : "${OPENAI_API_KEY:?OPENAI_API_KEY unset}"
-    unset OPENROUTER_API_KEY OPENROUTER_API_KEY_SMALL OPENAI_BASE_URL ANTHROPIC_API_KEY || true
+    if [ "${PAPER2_GPT_VIA:-native}" = "openrouter" ]; then
+      : "${OPENROUTER_API_KEY:?OPENROUTER_API_KEY unset (bind SMALL/LARGE before GPT openrouter)}"
+      export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}"
+      export OPENAI_API_KEY="$OPENROUTER_API_KEY"
+      # Prefer explicit OpenRouter id unless caller overrides.
+      AGENT_MODEL="${MYPCBENCH_OPENAI_MODEL:-openai/gpt-5.5}"
+      unset ANTHROPIC_API_KEY || true
+      echo "GPT via OpenRouter key_source=${PAPER2_GPT_KEY_SOURCE:-unknown} model=$AGENT_MODEL"
+    else
+      : "${OPENAI_API_KEY:?OPENAI_API_KEY unset}"
+      unset OPENROUTER_API_KEY OPENROUTER_API_KEY_SMALL OPENROUTER_API_KEY_LARGE OPENAI_BASE_URL ANTHROPIC_API_KEY || true
+      AGENT_MODEL="${MYPCBENCH_OPENAI_MODEL:-gpt-5.5}"
+      echo "GPT via native OpenAI model=$AGENT_MODEL"
+    fi
     ;;
 esac
-AGENT_MODEL="$MODEL"
+# Default model id = MODEL; GPT openrouter/native branches may override AGENT_MODEL above.
+AGENT_MODEL="${AGENT_MODEL:-$MODEL}"
 
 mapfile -t LEGS < <(AGENT_ROOT="$A" python3 - <<'PY'
 import json, os

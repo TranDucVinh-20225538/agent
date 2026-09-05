@@ -33,3 +33,18 @@ Verify names + routing (no agents / no QEMU): `bash scripts/paper2_exec_dry_run_
 ## Auto chain
 
 While 9B is live: `tmux` session runs `scripts/paper2_exec_wait_9b_then_flash.sh` (poll → Flash). Fresh host: `scripts/paper2_exec_small_9b_then_flash.sh`. No Flash after `BUDGET_STOP`.
+
+## Flash → GPT (SMALL OpenRouter burn)
+
+Operational amendment (human-approved): after Flash `LANE_COMPLETE`, run GPT via OpenRouter on `OPENROUTER_API_KEY_SMALL` until budget-stop, then **stop**. Do not auto-failover to LARGE/native.
+
+```bash
+# waiter (already safe to run while Flash is live)
+bash scripts/paper2_exec_wait_flash_then_gpt_small.sh
+
+# later, after SMALL exhausted — human OK:
+# native OpenAI: wire paper2_exec_large_lane / PAPER2_GPT_VIA=native
+# or: bash scripts/paper2_exec_gpt_openrouter.sh LARGE
+```
+
+Same artifact root: `results/paper2_exec/gpt-5.5/` (resume-safe checkpoints).
