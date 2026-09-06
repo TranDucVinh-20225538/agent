@@ -14,7 +14,7 @@ PROGRESS="$OUT/PROGRESS.md"
 mkdir -p "$OUT"
 
 python3 - "$A" "$SLUG" "$STAMP" "$CKPT" "$PROGRESS" <<'PY'
-import json, re, shutil, sys
+import json, shutil, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,6 +23,9 @@ slug = sys.argv[2]
 stamp = sys.argv[3]
 ckpt = Path(sys.argv[4])
 progress = Path(sys.argv[5])
+sys.path.insert(0, str(root / "scripts"))
+from paper2_traj_terminal import canonical_last_action, find_traj, load_traj_rows
+
 H = root / "external/MyPCBench-main/results"
 OUT = root / "results/paper2_exec" / slug
 au = json.loads((root / "out/paper2_analysis_universe.json").read_text())
@@ -37,12 +40,13 @@ for task in order:
         legs.append((task, "G2"))
 
 def traj_info(d: Path):
-    traj = next(d.rglob("traj.jsonl"), None) if d.exists() else None
-    if not traj or not traj.exists():
+    traj = find_traj(d) if d.exists() else None
+    if not traj:
         return 0, False, None
-    t = traj.read_text(errors="ignore")
-    steps = t.count('"step_num"')
-    done = bool(re.search(r'"action": "DONE"|"done": true', t))
+    rows = load_traj_rows(traj)
+    steps = len(rows)
+    # Gate −1.5: last action == DONE only (not done:true)
+    done = canonical_last_action(traj) == "DONE"
     return steps, done, traj
 
 def write_finished(dirs, payload):

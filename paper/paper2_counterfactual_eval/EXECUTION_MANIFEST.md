@@ -64,6 +64,20 @@ Claude routing changes (below) **do not** unstick GPT.
 
 Wiring freeze commit for this smoke is recorded in `out/paper2_api_lane_wiring.md` after push (hash filled on host).
 
+### Dated operational note — Gate −1.5 measurement remediation (2026-09-06)
+
+Not a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). Measurement-layer fix only:
+
+| Item | Status |
+| --- | --- |
+| False-DONE root cause | `cell_has_done` matched `"done": true` (also set by `FAIL` / `PREDICT_CRASH` in traj) |
+| Canonical rule | `VALID_DONE ⇔ canonical_last_action == "DONE"` via tracked `scripts/paper2_traj_terminal.py` |
+| Offline reclass | `scripts/canonical_audit_paper2.py` → `CHECKPOINT.canonical.jsonl` + `canonical_audit.*` (Flash: 27→23 DONE; 4 mismatches). **Original `CHECKPOINT.jsonl` retained** as historical |
+| Future checkpoints | Patched `paper2_exec_run.sh` / `paper2_exec_resume_prep.sh` call the canonical helper |
+| Harness pin | `out/paper2_harness_pin.json` — tracked patch SHA256 + gitignored upstream harness SHA256 |
+
+Study 1 analysis MUST use `CHECKPOINT.canonical.jsonl` (or equivalent audit), not raw pre-remediation DONE counts.
+
 ---
 
 ## 1. Harness freeze

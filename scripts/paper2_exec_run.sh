@@ -161,10 +161,12 @@ PY
 }
 
 cell_has_done() {
+  # Gate −1.5: VALID_DONE ⇔ canonical last traj action == DONE.
+  # Do NOT treat traj "done": true as success (FAIL/PREDICT_CRASH also set it).
   local dir="$1"
-  local f
-  f=$(find "$dir" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null || true)
-  [ -n "$f" ] && grep -Eq '"action": "DONE"|"done": true' "$f"
+  local helper="$A/scripts/paper2_traj_terminal.py"
+  "$H/.venv/bin/python" "$helper" has-done-dir "$dir" 2>/dev/null \
+    || python3 "$helper" has-done-dir "$dir" 2>/dev/null
 }
 
 cell_has_step() {
@@ -216,7 +218,10 @@ write_leg_checkpoint() {
   traj=$(find "$result_dir" -name 'traj.jsonl' -size +0c -print -quit 2>/dev/null || true)
   if [ -n "$traj" ]; then
     steps=$(grep -c '"step_num"' "$traj" || true)
-    if grep -Eq '"action": "DONE"|"done": true' "$traj"; then done=true; fi
+    # Gate −1.5: parse last action object — not "done": true
+    if python3 "$A/scripts/paper2_traj_terminal.py" has-done "$traj" 2>/dev/null; then
+      done=true
+    fi
   fi
   local finished_at
   finished_at=$(date -Is)
