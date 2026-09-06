@@ -82,18 +82,18 @@ case "$MODEL" in
   gpt-5.5)
     AGENT_TYPE="${MYPCBENCH_OPENAI_AGENT:-openai_cuabash}"
     if [ "${PAPER2_GPT_VIA:-native}" = "openrouter" ]; then
-      : "${OPENROUTER_API_KEY:?OPENROUTER_API_KEY unset (bind SMALL/LARGE before GPT openrouter)}"
-      export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}"
-      export OPENAI_API_KEY="$OPENROUTER_API_KEY"
-      # Prefer explicit OpenRouter id unless caller overrides.
-      AGENT_MODEL="${MYPCBENCH_OPENAI_MODEL:-openai/gpt-5.5}"
-      unset ANTHROPIC_API_KEY || true
-      echo "GPT via OpenRouter key_source=${PAPER2_GPT_KEY_SOURCE:-unknown} model=$AGENT_MODEL"
+      die "OpenRouter GPT path disabled for Paper2 official runs (previous_response_id incompatible). Use native OPENAI_API_KEY via paper2_exec_large_lane.sh"
     else
       : "${OPENAI_API_KEY:?OPENAI_API_KEY unset}"
+      if [[ "${OPENAI_API_KEY}" == sk-or-* ]]; then
+        die "OPENAI_API_KEY looks like OpenRouter — refuse native GPT lane"
+      fi
+      if [ -n "${OPENAI_BASE_URL:-}" ]; then
+        die "OPENAI_BASE_URL is set ($OPENAI_BASE_URL) — native GPT must use default OpenAI endpoint"
+      fi
       unset OPENROUTER_API_KEY OPENROUTER_API_KEY_SMALL OPENROUTER_API_KEY_LARGE OPENAI_BASE_URL ANTHROPIC_API_KEY || true
       AGENT_MODEL="${MYPCBENCH_OPENAI_MODEL:-gpt-5.5}"
-      echo "GPT via native OpenAI model=$AGENT_MODEL"
+      echo "GPT via native OpenAI model=$AGENT_MODEL (no OpenRouter)"
     fi
     ;;
 esac

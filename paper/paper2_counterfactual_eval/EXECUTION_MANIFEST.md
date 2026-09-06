@@ -35,6 +35,19 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 
 **57 legs/model** (\(25\times2+7\)); **228** total. Within a model lane, key assignment is immutable. Claude/GPT never use `SMALL_KEY`. Exhausting `SMALL_KEY` mid-Qwen: checkpoint, stop, report — **no silent failover to `LARGE_KEY`** without an explicit dated operational amendment. Smoke/cost checks are **not** analysis legs.
 
+### Dated operational note — GPT HARD BLOCKED (2026-09-06)
+
+Not a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). Record only:
+
+| Item | Status |
+| --- | --- |
+| GPT OpenRouter auto-chain (`paper2_exec_wait_flash_then_gpt_small.sh` → `paper2_exec_gpt_openrouter.sh`) | **Removed / kill-switched.** Waiter now: Flash complete → `FLASH_COMPLETE` → exit. Default `PAPER2_GPT_AUTOSTART=0`. On-disk `results/paper2_exec/gpt-5.5/DO_NOT_AUTO_START_GPT`. |
+| Prior GPT-via-OpenRouter legs | **INVALID_INFRASTRUCTURE** (stateless Responses / `previous_response_id`; no client history adapter). Archived under `results/paper2_exec/gpt-5.5-invalid-openrouter-transport/`. Do not aggregate as agent `TERMINAL_FAIL`. |
+| Current GPT official execution | **HARD BLOCKED** — no autostart, no retry, no “wiring-only” OpenRouter fix. Native OpenAI also not assumed available (proxy/billing separate). |
+| Resume condition | Gate 0 (QEMU tool ownership) → frozen ResponseStateAdapter (or confirmed native path) → protocol/smoke/semantic validation → code review → commit/push → **this manifest amended with adapter freeze hash** → explicit human approval → GPT from leg 1. |
+
+Until that resume condition: wording “Claude/GPT never use `SMALL_KEY`” still holds for **official** cells; the invalid OpenRouter attempt does not amend routing policy.
+
 ---
 
 ## 1. Harness freeze

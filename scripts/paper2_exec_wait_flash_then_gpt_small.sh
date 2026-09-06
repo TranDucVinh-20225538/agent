@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# After Flash LANE_COMPLETE → GPT on OpenRouter SMALL until budget-stop.
-# Does not auto-start LARGE/native GPT.
+# Wait for Flash lane completion, then STOP.
+#
+# Does NOT launch GPT. Default: PAPER2_GPT_AUTOSTART=0.
+# Historical name kept so old tmux/nohup invocations still hit this script and
+# cannot resurrect paper2_exec_gpt_openrouter.sh.
+#
+# Policy (2026-09-06): GPT HARD BLOCKED until Gate 0 + frozen ResponseStateAdapter
+# + EXECUTION_MANIFEST amendment + explicit human approval.
 set -euo pipefail
 
 A="${AGENT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -8,12 +14,17 @@ FLASH_OUT="$A/results/paper2_exec/qwen38-flash"
 GPT_OUT="$A/results/paper2_exec/gpt-5.5"
 CHAIN_LOG="$A/results/paper2_exec_flash_then_gpt_small.log"
 POLL_SEC="${PAPER2_CHAIN_POLL_SEC:-60}"
+# Kill-switch: must be explicitly "1" to even consider GPT (still blocked below).
+PAPER2_GPT_AUTOSTART="${PAPER2_GPT_AUTOSTART:-0}"
 
 mkdir -p "$FLASH_OUT" "$GPT_OUT" "$A/results"
+# Persistent on-disk block (survives env forgetting the kill-switch).
+touch "$GPT_OUT/DO_NOT_AUTO_START_GPT"
+
 exec > >(stdbuf -oL -eL tee -a "$CHAIN_LOG") 2>&1
 
-echo "===== wait Flash → GPT(SMALL openrouter) $(date -Is) ====="
-echo "no auto LARGE; stop on BUDGET_STOP"
+echo "===== wait Flash → (no GPT autostart) $(date -Is) ====="
+echo "PAPER2_GPT_AUTOSTART=$PAPER2_GPT_AUTOSTART (default 0; GPT launch removed from this script)"
 
 flash_complete() {
   if [ -f "$FLASH_OUT/LANE_COMPLETE" ]; then return 0; fi
@@ -32,7 +43,8 @@ print(len(latest))
 PY
 )
   fi
-  if [ "$n" -ge 57 ] && ! pgrep -f 'scripts/paper2_exec_run.sh' >/dev/null 2>&1; then
+  # Avoid matching unrelated cmdline text: require the runner path as its own argv token.
+  if [ "$n" -ge 57 ] && ! pgrep -f '(^|/)scripts/paper2_exec_run\.sh( |$)' >/dev/null 2>&1; then
     return 0
   fi
   return 1
@@ -40,7 +52,7 @@ PY
 
 while true; do
   if [ -f "$FLASH_OUT/BUDGET_STOP.txt" ]; then
-    echo "ABORT: Flash BUDGET_STOP — not starting GPT $(date -Is)"
+    echo "ABORT: Flash BUDGET_STOP $(date -Is)"
     exit 75
   fi
   if flash_complete; then
@@ -53,31 +65,20 @@ while true; do
   sleep "$POLL_SEC"
 done
 
-# Wait for QEMU from Flash to release ports
-for _ in 1 2 3 4 5 6 7 8 9 10; do
-  if pgrep -f 'run_mypcbench.py --backend qemu' >/dev/null 2>&1; then
-    echo "QEMU still up — wait 30s"
-    sleep 30
-  else
-    break
-  fi
-done
-
-if [ -f "$GPT_OUT/LANE_COMPLETE" ]; then
-  echo "GPT already LANE_COMPLETE — done"
-  exit 0
+date -Is > "$FLASH_OUT/FLASH_COMPLETE"
+echo "wrote $FLASH_OUT/FLASH_COMPLETE"
+if [ ! -f "$FLASH_OUT/LANE_COMPLETE" ]; then
+  # Soft marker — Flash runner may also write LANE_COMPLETE; do not overwrite if present.
+  date -Is > "$FLASH_OUT/LANE_COMPLETE" || true
 fi
 
-echo "===== start GPT OpenRouter SMALL $(date -Is) ====="
-cd "$A"
-set +e
-bash scripts/paper2_exec_gpt_openrouter.sh SMALL
-rc=$?
-set -e
-if [ -f "$GPT_OUT/BUDGET_STOP.txt" ] || [ "$rc" -eq 75 ]; then
-  echo "GPT SMALL budget-stop rc=$rc — NOT starting LARGE. Resume later with native/LARGE when you OK." | tee -a "$GPT_OUT/RESUME_WITH_LARGE_LATER.txt"
-  date -Is | tee -a "$GPT_OUT/RESUME_WITH_LARGE_LATER.txt"
-  exit 75
+echo "===== Flash done; GPT NOT started (HARD BLOCK) $(date -Is) ====="
+echo "  DO_NOT_AUTO_START_GPT=$GPT_OUT/DO_NOT_AUTO_START_GPT"
+echo "  To run GPT later: Gate0 → adapter freeze → manifest amendment → explicit approval"
+echo "  Then: PAPER2_GPT_AUTOSTART is irrelevant here — launch GPT manually after unblocking."
+
+# Even if someone sets PAPER2_GPT_AUTOSTART=1, this script must not launch GPT.
+if [ "$PAPER2_GPT_AUTOSTART" = "1" ]; then
+  echo "NOTE: PAPER2_GPT_AUTOSTART=1 ignored — launch path excised; use a future approved entrypoint." >&2
 fi
-echo "===== GPT SMALL wrapper returned $rc $(date -Is) ====="
-exit "$rc"
+exit 0
