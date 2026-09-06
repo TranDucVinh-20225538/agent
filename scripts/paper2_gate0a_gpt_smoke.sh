@@ -27,13 +27,15 @@ unset OPENROUTER_API_KEY_SMALL || true
 export MYPCBENCH_QCOW2="${MYPCBENCH_QCOW2:-$A/external/MyPCBench-main/mypcbench-vm/mypcbench.qcow2}"
 test -f "$MYPCBENCH_QCOW2" || { echo "qcow2 missing: $MYPCBENCH_QCOW2" >&2; exit 2; }
 
+# Force GPT namespace — do not inherit Flash GATE0A_* from the parent shell.
+unset GATE0A_OUT GATE0A_MODEL GATE0A_CONTAINER GATE0A_TOKEN GATE0A_TOKEN_PATH || true
 export GATE0A_FAMILY="gpt"
-export GATE0A_OUT="${GATE0A_OUT:-$A/results/paper2_exec/gate0a-gpt}"
+export GATE0A_OUT="$A/results/paper2_exec/gate0a-gpt"
 export GATE0A_FREEZE_SHA="$FREEZE_SHA"
 export GATE0A_MODEL="openai/gpt-5.5"
 export GATE0A_MAX_STEPS="${GATE0A_MAX_STEPS:-10}"
 export GATE0A_VERSION="${GATE0A_VERSION:-v1.1}"
-export GATE0A_CONTAINER="${GATE0A_CONTAINER:-mypcbench-gate0a-gpt}"
+export GATE0A_CONTAINER="mypcbench-gate0a-gpt"
 export PYTHONPATH="$A/external/MyPCBench-main/agent-harness:$A/scripts:$A:${PYTHONPATH:-}"
 
 mkdir -p "$GATE0A_OUT"
