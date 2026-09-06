@@ -83,11 +83,19 @@ class OpenRouterChatCompletionsTransport:
     ) -> Dict[str, Any]:
         if not messages:
             raise TransportError("fail-closed: empty messages (would drop history)")
-        # Shallow copy list so we do not mutate caller's history accidentally
-        # beyond what apply_system_addenda already did upstream.
-        msgs = list(messages)
+        # Deep-copy so transport never mutates caller-owned history objects.
+        import copy
+
+        msgs = copy.deepcopy(messages)
         if any(m is None for m in msgs):
             raise TransportError("fail-closed: None message in history")
+        # Reject provider-state fields if a caller smuggled them into a message.
+        for m in msgs:
+            if not isinstance(m, dict):
+                raise TransportError("fail-closed: non-dict message in history")
+            for bad in ("previous_response_id", "conversation_id"):
+                if bad in m:
+                    raise TransportError(f"fail-closed: message carries {bad}")
 
         body: Dict[str, Any] = {
             "model": model or self.family.openrouter_model,
@@ -131,20 +139,26 @@ class OpenRouterChatCompletionsTransport:
         message = choice0.get("message")
         if not isinstance(message, dict):
             raise TransportError("fail-closed: missing message")
-        # Reject provider-pre-executed tool payloads (Gate 0 concern).
-        if message.get("tool_calls"):
+        # Reject provider-pre-executed / native tool payloads even if content set.
+        if message.get("tool_calls") or message.get("function_call"):
             raise TransportError(
-                "fail-closed: provider tool_calls present "
+                "fail-closed: provider tool_calls/function_call present "
                 "(native tools not allowed on frozen XML protocol)"
             )
         content = message.get("content")
+        refusal = message.get("refusal")
+        if isinstance(refusal, str) and refusal.strip() and (
+            content is None or (isinstance(content, str) and not content.strip())
+        ):
+            raise TransportError("fail-closed: refusal-only response")
         if content is None:
-            # Optional reasoning-only fallback (Qwen thinking hosts).
             reasoning = message.get("reasoning") or message.get("reasoning_content")
             if isinstance(reasoning, str) and reasoning.strip():
                 return reasoning
             raise TransportError("fail-closed: empty message.content")
         if isinstance(content, str):
+            if not content.strip():
+                raise TransportError("fail-closed: blank message.content")
             return content
         if isinstance(content, list):
             parts: List[str] = []
@@ -154,7 +168,7 @@ class OpenRouterChatCompletionsTransport:
                 elif isinstance(part, str):
                     parts.append(part)
             text = "".join(parts)
-            if not text:
+            if not text.strip():
                 raise TransportError("fail-closed: empty multipart content")
             return text
         raise TransportError("fail-closed: unsupported content type")

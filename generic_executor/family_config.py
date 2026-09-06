@@ -13,7 +13,12 @@ from typing import Any, Dict, FrozenSet, Optional
 
 @dataclass(frozen=True)
 class FamilyConfig:
-    """Maps logical family → OpenRouter model id + which gen knobs to send."""
+    """Maps logical family → OpenRouter model id + which gen knobs to send.
+
+    Protocol-forbidden fields (must NEVER appear here):
+      system_prompt, action_schema, parser, stopping_rule, observation_cadence.
+    Those stay in the frozen qwen_cuabash agent path.
+    """
 
     family: str
     openrouter_model: str
@@ -24,8 +29,22 @@ class FamilyConfig:
         )
     )
     # Extra body keys for chat-completions (never tools / previous_response_id).
+    # Only generation/template knobs — not prompts or tool schemas.
     extra_body: Dict[str, Any] = field(default_factory=dict)
     notes: str = ""
+
+
+_PROTOCOL_FORBIDDEN_CONFIG_KEYS = frozenset(
+    {
+        "system_prompt",
+        "action_schema",
+        "parser",
+        "stopping_rule",
+        "observation_cadence",
+        "tools",
+        "previous_response_id",
+    }
+)
 
 
 # Candidates for later Gate 0 — configs only; no live calls in Phase 1B.
@@ -83,6 +102,26 @@ FAMILY_CONFIGS: Dict[str, FamilyConfig] = {
         ),
     ),
 }
+
+
+def assert_family_configs_transport_only() -> None:
+    """Structural guard: FamilyConfig remains generation/routing only."""
+    for name, cfg in FAMILY_CONFIGS.items():
+        for bad in _PROTOCOL_FORBIDDEN_CONFIG_KEYS:
+            if bad in cfg.extra_body:
+                raise AssertionError(f"{name}: extra_body contains protocol key {bad}")
+            if bad in cfg.allow_keys:
+                raise AssertionError(f"{name}: allow_keys contains protocol key {bad}")
+        allowed_attrs = {
+            "family",
+            "openrouter_model",
+            "allow_keys",
+            "extra_body",
+            "notes",
+        }
+        for attr in vars(cfg):
+            if attr not in allowed_attrs:
+                raise AssertionError(f"{name}: unexpected FamilyConfig field {attr}")
 
 
 def filter_generation(cfg: FamilyConfig, generation: Optional[Dict[str, Any]]) -> Dict[str, Any]:
