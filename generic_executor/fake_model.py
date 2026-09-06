@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # FakeModel.complete uses List[Dict]
 
 
 def _tool_call_computer(action: str, **params: Any) -> str:
@@ -99,18 +99,29 @@ NOISE_EMPTY = "Action: Thinking only.\nI need more time."
 
 @dataclass
 class FakeModel:
-    """Transport stand-in: pop scripted responses; record every call payload."""
+    """Transport stand-in: pop scripted responses; record every call payload.
+
+    Implements the Phase 1B ``Transport`` contract
+    (``complete(messages, model=, generation=)``).
+    """
 
     script: List[str]
     calls: List[Dict[str, Any]] = field(default_factory=list)
     default_when_exhausted: str = NOISE_EMPTY
 
-    def complete(self, payload: Dict[str, Any]) -> str:
+    def complete(
+        self,
+        messages: List[Dict[str, Any]],
+        *,
+        model: str = "fake/model",
+        generation: Optional[Dict[str, Any]] = None,
+    ) -> str:
         self.calls.append(
             {
-                "n_messages": len(payload.get("messages") or []),
-                "messages": payload.get("messages"),
-                "model": payload.get("model"),
+                "n_messages": len(messages or []),
+                "messages": messages,
+                "model": model,
+                "generation": generation,
             }
         )
         if not self.script:
@@ -119,30 +130,7 @@ class FakeModel:
 
 
 def install_fake_llm(inner_agent: Any, fake: FakeModel) -> None:
-    """Replace vendored call_llm with FakeModel while keeping prompt injection.
+    """Install FakeModel via the shared Transport seam (Phase 1A + 1B)."""
+    from generic_executor.transport import install_transport
 
-    Preserves `_Qwen35VLPatched.call_llm` system addenda (MYPCBENCH_CONTEXT +
-    bash tool text) by wrapping the patched method's pre-processing, then
-    returning the fake completion instead of HTTP.
-    """
-
-    def fake_call_llm(payload: Dict, model: str) -> str:  # type: ignore[override]
-        msgs = payload.get("messages") or []
-        addendum_parts: List[str] = []
-        ctx = getattr(inner_agent, "_mypcbench_context", "") or ""
-        bash = getattr(inner_agent, "_bash_tool_description", "") or ""
-        if ctx:
-            addendum_parts.append(ctx)
-        if bash:
-            addendum_parts.append(bash)
-        if msgs and addendum_parts and msgs[0].get("role") == "system":
-            addendum = "\n\n" + "\n\n".join(addendum_parts)
-            content = msgs[0].get("content")
-            if isinstance(content, list):
-                msgs[0]["content"] = content + [{"type": "text", "text": addendum}]
-            elif isinstance(content, str):
-                msgs[0]["content"] = content + addendum
-        # Record post-injection payload (what a real transport would send).
-        return fake.complete({"model": model, "messages": msgs})
-
-    inner_agent.call_llm = fake_call_llm  # type: ignore[method-assign]
+    install_transport(inner_agent, fake)

@@ -39,7 +39,8 @@ from generic_executor.fake_model import FakeModel, install_fake_llm  # noqa: E40
 PROTOCOL_SPEC = "GENERIC_AGENT_PROTOCOL_SPEC.md"
 FREEZE_NOTE = (
     "Behavioral protocol frozen at Gate −2. Transport is the only "
-    "intentional generic seam (FakeModel in Phase 1)."
+    "intentional generic seam (FakeModel in 1A; OpenRouter chat-completions "
+    "in 1B — mock HTTP only until Gate 0)."
 )
 
 
