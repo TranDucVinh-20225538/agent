@@ -257,3 +257,13 @@ Measurement remediation applied **without** re-running models:
 Historical `CHECKPOINT.jsonl` unchanged. Analysis freeze for Study 1 Qwen cells should cite canonical checkpoint + this gate.
 
 **STOP after Gate −1.5 commit:** no Gate −2 / generic agent until independent review.
+
+### Gate −1.5 closures (evidence completion)
+
+| Closure | Artifact | Status |
+| --- | --- | --- |
+| A fail-closed matrix | `out/gate15_closure_A_matrix.md` | required before Gate −2 |
+| B runtime/offline parity | `out/gate15_closure_B_parity.md` + `tests/test_paper2_terminal_parity.py` | mismatch blocks Gate −2 |
+| C effective instrument pin | `out/paper2_harness_pin.json` + `out/gate15_closure_C_inventory.md` | pin-verify via `scripts/verify_paper2_harness_pin.py` |
+
+Still **no Gate −2** until independent review of A/B/C.

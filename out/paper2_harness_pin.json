@@ -1,11 +1,12 @@
 {
-  "gate": "1.5",
+  "gate": "1.5-closure",
   "title": "measurement_remediation_and_instrument_pin",
-  "recorded_at_utc": "2026-09-06T11:22:08.870605+00:00",
+  "recorded_at_utc": "2026-09-06T11:35:26.614753+00:00",
   "host": "node30",
   "agent_root": "/mnt/data2/Vinh/agent",
-  "git_head_at_record": "241f9732894b968353c109f00c6fd80629308f83",
+  "git_head_at_record": null,
   "canonical_rule": "VALID_DONE <=> canonical_last_action == \"DONE\"",
+  "fail_closed": "missing/malformed/unreadable/absent final-action evidence never VALID_DONE",
   "false_done_bug": {
     "old_predicate": "grep -Eq '\"action\": \"DONE\"|\"done\": true'",
     "fixed_by": "scripts/paper2_traj_terminal.py",
@@ -14,65 +15,245 @@
   },
   "tracked_measurement_patch": {
     "scripts/paper2_traj_terminal.py": {
-      "sha256": "f257024dd36ecceb6be39d8a22137befc8982168abce8d2b5557fa6a43934602",
-      "gitignored": false
+      "sha256": "8037548b58bba343c566f871f2a59d702dceda54767b2c1809cf7af208eaea1a",
+      "gitignored": false,
+      "option": 2,
+      "role": "terminal_status_classifier_source_of_truth",
+      "affects": [
+        "terminal_status_classification",
+        "VALID_DONE"
+      ]
     },
     "scripts/canonical_audit_paper2.py": {
       "sha256": "a9f3c9432788c9574234d61376f308791e8446f4f14cdd6c1b3cd258b5c519b1",
-      "gitignored": false
+      "gitignored": false,
+      "option": 2,
+      "role": "offline_reclassification",
+      "affects": [
+        "terminal_status_classification"
+      ]
     },
     "scripts/paper2_exec_run.sh": {
       "sha256": "319e3be62e04b22411e43b46b4b26389837eb3219db236c77bda52197692fc8a",
-      "gitignored": false
+      "gitignored": false,
+      "option": 2,
+      "role": "runtime_caller_cell_has_done_checkpoint",
+      "affects": [
+        "terminal_status_classification"
+      ]
     },
     "scripts/paper2_exec_resume_prep.sh": {
       "sha256": "baf26317b12348666be4b56d599c2ae030ad5179feba73e6251b60ed8d5e0332",
-      "gitignored": false
+      "gitignored": false,
+      "option": 2,
+      "role": "resume_backfill_caller",
+      "affects": [
+        "terminal_status_classification"
+      ]
     },
     "scripts/paper2_exec_small_lane.sh": {
       "sha256": "6fb25209065c19f71c8735c1a184ac5aea9f491e163c93c1ab62cb9774435e72",
-      "gitignored": false
+      "gitignored": false,
+      "option": 2,
+      "role": "lane_launcher",
+      "affects": [
+        "execution_orchestration"
+      ]
+    },
+    "tests/test_paper2_terminal_parity.py": {
+      "sha256": "c6649b8e64f2c4fae6d557230fe4777f00bb236d7bba3bc7c8fab45272f9741c",
+      "gitignored": false,
+      "option": 2,
+      "role": "closure_B_parity_suite",
+      "affects": [
+        "measurement_parity_evidence"
+      ]
     },
     "EXECUTION_SOURCE_MANIFEST.md": {
-      "sha256": "bfea55c76aaa63d76392433621e79444ad8a759d79f5a83d2e6017ef9cb03f9f",
-      "gitignored": false
+      "sha256": "f22fe9388390a581041a11f6bd59aaca6c8423d4ec3bf954769d7dd17cbb37ef",
+      "gitignored": false,
+      "option": 2,
+      "role": "provenance_manifest",
+      "affects": [
+        "provenance_docs"
+      ]
+    },
+    "scripts/verify_paper2_harness_pin.py": {
+      "role": "pin_drift_verifier",
+      "affects": [
+        "instrument_reproducibility"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "6aa1c3139ba5a3f34f291fb0d4a00fd09c2236628a7e996bb6a9c2973be370f3"
+    },
+    "out/gate15_closure_A_matrix.md": {
+      "role": "closure_A_report",
+      "affects": [
+        "evidence"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "77f231819db10ccb4f9a1698fb7b2bb530eb11b5b456962c9c0798762f0be02f"
+    },
+    "out/gate15_closure_B_parity.md": {
+      "role": "closure_B_report",
+      "affects": [
+        "evidence"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "75dabf26cb403b8e11b22b368f278beba6acb5b36f0a2edc7e29a915e51ffa5e"
+    },
+    "out/gate15_closure_C_inventory.md": {
+      "role": "closure_C_report",
+      "affects": [
+        "evidence"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "79902402940f0d18968b78b8a7302a5b2790706d43a4c4585332d0ad399e1f4c"
+    },
+    "tests/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitignored": false,
+      "option": 2,
+      "role": "tests_package_marker",
+      "affects": [
+        "unittest_discovery"
+      ]
     }
   },
   "upstream_gitignored_harness": {
     "external/MyPCBench-main/agent-harness/run_mypcbench.py": {
       "sha256": "9792f0ae2c25ffcc5588af4190e3bdfcc414dcbe622d1c7b9c82db65d88a497a",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "react_loop_traj_writer",
+      "affects": [
+        "terminal_action_emission",
+        "PREDICT_CRASH",
+        "EMPTY_XML",
+        "TOOL_CALL",
+        "traj.action"
+      ],
+      "option": 1
     },
     "external/MyPCBench-main/agent-harness/env.py": {
       "sha256": "d05d278802d4e8343ce018f00457d3b1cfd3d1c75c00f2fe68dafee2266493e2",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "qemu_env_step_DONE_FAIL",
+      "affects": [
+        "terminal_action_emission",
+        "DONE",
+        "FAIL",
+        "done_flag"
+      ],
+      "option": 1
     },
     "external/MyPCBench-main/agent-harness/agents/qwen_cua.py": {
       "sha256": "5a2bc727d5bcaa8e292f37630867b050485edce104df29a477d36330f2693c42",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "qwen_cuabash_shim",
+      "affects": [
+        "agent_entry",
+        "delegates_parse"
+      ],
+      "option": 1
     },
     "external/MyPCBench-main/agent-harness/agents/vendored_paper_results/qwen35vl_agent.py": {
       "sha256": "f478ebe6cbdd54051d36d0e06814569ad33892dacd5710fc667a0e14e1f072c0",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "parse_response_XML_to_DONE_FAIL",
+      "affects": [
+        "terminal_action_parsing",
+        "DONE",
+        "FAIL"
+      ],
+      "option": 1
     },
     "external/MyPCBench-main/agent-harness/agents/vendored_paper_results/utils/qwen_vl_utils.py": {
       "sha256": "b8bf6e684dd3643743c8ff746ca1b552b6a1e0a66c3fff26e4f520c47ba091a0",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "vl_utils_smart_resize",
+      "affects": [
+        "observation_preprocess"
+      ],
+      "option": 1,
+      "note": "Not a terminal classifier; pinned because Flash agent import path depends on it."
     },
     "external/MyPCBench-main/agent-harness/agents/prompts.py": {
       "sha256": "212b5310a782ef48fe97c7bb4884ffbf17d443880cc4385c2f0e1089e0c97621",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "mypcbench_context_prompt",
+      "affects": [
+        "agent_prompt"
+      ],
+      "option": 1,
+      "note": "Does not classify terminals; pinned as Flash agent dependency."
+    },
+    "external/MyPCBench-main/agent-harness/agents/base.py": {
+      "sha256": "5b359b8acf26292b7df232994bab2889721e4444f1ee882decbca870ea664700",
+      "gitignored": true,
+      "reason": ".gitignore external/",
+      "role": "base_agent_helpers",
+      "affects": [
+        "agent_base"
+      ],
+      "option": 1,
+      "note": "Gate \u22121 inventory gap filled; encode_image etc."
     },
     "external/MyPCBench-main/agent-harness/judge_results.py": {
       "sha256": "cd88a37c2b120572674115c8f4066dbb183a57e0c2aecf3ffa59c915f86ff429",
       "gitignored": true,
-      "reason": ".gitignore external/"
+      "reason": ".gitignore external/",
+      "role": "post_leg_rubric_judge_entry",
+      "affects": [
+        "rubric_scoring"
+      ],
+      "option": 1,
+      "note": "Orthogonal to Paper-2 VALID_DONE; cannot promote DONE."
+    },
+    "external/MyPCBench-main/agent-harness/utils/rubric_judge.py": {
+      "sha256": "78684aebe8bb5857fa3e87de06de99872f1e35cdd1ec155dfeb7d21aac6c9ba5",
+      "gitignored": true,
+      "reason": ".gitignore external/",
+      "role": "rubric_bundle_builder",
+      "affects": [
+        "rubric_bundle.json"
+      ],
+      "option": 1,
+      "note": "Missing rubric_bundle must not affect VALID_DONE (Closure A case 7)."
     }
+  },
+  "closure_C": {
+    "question": "Does the pin include SHA256 for every execution-critical external/runtime file that can affect terminal-action parsing or terminal-status classification?",
+    "answer": "YES for terminal-status classification (tracked SoT + callers) and for terminal-action parsing/emission on the Flash qwen_cuabash path (run_mypcbench/env/qwen_cua/qwen35vl_agent + Gate \u22121 deps), via Option 1 SHA256 pins. Vendor tree remains gitignored; reproducibility is pin-verify, not git contents.",
+    "unresolved": [
+      {
+        "path": "external/MyPCBench-main/** (remainder)",
+        "issue": "gitignored_non_inventory",
+        "severity": "accepted_residual",
+        "note": "QEMU/driver/task assets do not define Paper-2 VALID_DONE; change would not alter traj last-action classifier."
+      }
+    ]
+  },
+  "closure_B_fixtures": {
+    "tests/fixtures/paper2_terminal/01_done/leg/rubric_bundle.json": "e5f1eb4d806641698a35efe20e098efd20d7d57a9b90ee69079d5bb650920726",
+    "tests/fixtures/paper2_terminal/01_done/leg/traj.jsonl": "07a7de59df60a4db563abe071e74c8e3e3f86402072a8149f1c55de9e93c3fca",
+    "tests/fixtures/paper2_terminal/02_fail/leg/traj.jsonl": "eda341be5f13a8524f32042da4d0887f5b9b86767ef2ad6a99d1701ed47235f1",
+    "tests/fixtures/paper2_terminal/03_predict_crash/leg/traj.jsonl": "46e7fda3e83dc00a74c696866419592822a163641c4e776030048ac438364233",
+    "tests/fixtures/paper2_terminal/04_empty_xml/leg/traj.jsonl": "a4060d2ecd12c89fede4dfa5dbcd9c219f2e8246fbd10731ad4b33d2007bd376",
+    "tests/fixtures/paper2_terminal/05_malformed_action/leg/traj.jsonl": "449ca5b86389cb8b3ed62cda11c5795be2353c0812c8f4dabcfc20fd6919ff1a",
+    "tests/fixtures/paper2_terminal/06_missing_action/leg/traj.jsonl": "b4cbe80141d4a2f01c95e10043b5b86adb32021e2c9c1f1e91694585e9f87bae",
+    "tests/fixtures/paper2_terminal/07_missing_rubric_and_traj/leg/run_started.txt": "eff64b343dcb2b1dc113648e7089b9ce9f8a7f6c7808a03a2cffb4ad7302f606",
+    "tests/fixtures/paper2_terminal/08_boot_no_result/leg/guest.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "tests/fixtures/paper2_terminal/08_boot_no_result/leg/traj.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/fixtures/paper2_terminal/09_unreadable_placeholder/leg/traj.jsonl": "24098b27b46b0f88e3f477d540e99d10a7a7517e9350a57fc03966b9a62f93ee"
   }
 }
