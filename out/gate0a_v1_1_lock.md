@@ -42,6 +42,10 @@ The max_steps change from 4 to 10 applies only to Gate 0A smoke execution under 
 
 Gate decision does not require reading the reasoning transcript; transcript is qualitative taxonomy evidence only.
 
-## Rerun policy
+## Cross-family (after Flash PASS)
 
-Clean Flash rerun only: no resume, no instruction edit, no GPT/Claude Gate 0 before this result.
+Same v1.1 criteria for GPT then Claude, sequentially (separate artifact +
+QEMU container namespace; shared hostfwd ports → do not parallelize).
+
+Do not retune protocol/budget/instruction between families.
+

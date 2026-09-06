@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Gate 0A v1.1 — Flash QEMU smoke for generic executor + OpenRouter transport.
+"""Gate 0A v1.1 — QEMU smoke for generic executor + OpenRouter transport.
 
 Proves P1 tool ownership, P2 multi-turn, P3 stateless transport, P4 terminal
-with content correctness.
+with content correctness. Family selected via GATE0A_FAMILY=flash|gpt|claude.
 
 v1.1 vs v1.0 — sole execution change: max_steps 4 → 10 (Gate 0A smoke only).
 PASS requires DONE within the ten agent-turn budget AND agent-reported token
-byte-exact match to the planted token. Task/protocol/instruction unchanged.
+byte-exact match to the planted token. Task/protocol/instruction unchanged
+across families (only model id + artifact/QEMU namespace differ).
 
 Step-budget semantics: max_steps=N means N predict rounds (agent turns).
 DONE on turn N is allowed if produced during that turn (before the loop
@@ -15,7 +16,8 @@ refuses a further predict). Turns are 1-indexed; with N=10, rounds 1..10 inclusi
 Clarification: this smoke budget does NOT modify frozen Study 1
 max_steps=80 / timeout=7200 (paper2_exec_run.sh / legacy qwen_cuabash).
 
-One controlled smoke. No matrix. No GPT/Claude Gate 0 from this script.
+One controlled smoke per family. No matrix. Sequential families only unless
+each run has a fully separate QEMU + artifact namespace.
 """
 
 from __future__ import annotations
@@ -41,7 +43,7 @@ from env import MyPCBenchEnv  # noqa: E402
 
 from generic_executor.executor import build_qwen_cuabash_agent  # noqa: E402
 from generic_executor.family_config import FAMILY_CONFIGS  # noqa: E402
-from generic_executor.flash_gate0_binding import FLASH_GATE0A  # noqa: E402
+from generic_executor.gate0a_binding import get_gate0a_binding  # noqa: E402
 from generic_executor.openrouter_chat import (  # noqa: E402
     OpenRouterChatCompletionsTransport,
     TransportError,
@@ -50,15 +52,25 @@ from generic_executor.openrouter_chat import (  # noqa: E402
 from generic_executor.transport import install_transport  # noqa: E402
 from paper2_traj_terminal import inspect_last_action  # noqa: E402
 
-OUT_DIR = Path(os.environ.get("GATE0A_OUT") or (_AGENT_ROOT / "results/paper2_exec/gate0a-flash"))
-MODEL = os.environ.get("GATE0A_MODEL", FLASH_GATE0A.model_id)
+FAMILY_SLUG = os.environ.get("GATE0A_FAMILY", "flash").strip().lower()
+BINDING = get_gate0a_binding(FAMILY_SLUG)
+OUT_DIR = Path(
+    os.environ.get("GATE0A_OUT") or (_AGENT_ROOT / BINDING.default_out_rel)
+)
+MODEL = os.environ.get("GATE0A_MODEL", BINDING.model_id)
 # v1.1 default: 10 agent turns (predict rounds). Study 1 stays at 80.
 MAX_STEPS = int(os.environ.get("GATE0A_MAX_STEPS", "10"))
 GATE_VERSION = os.environ.get("GATE0A_VERSION", "v1.1")
-FREEZE_SHA = os.environ.get("GATE0A_FREEZE_SHA", "dd43cbea0150772a804c22cec1c9ddcdb6c94789")
-TOKEN = os.environ.get("GATE0A_TOKEN") or f"FLASHGATE0A-{uuid.uuid4().hex[:16]}"
-TOKEN_PATH = "/tmp/GATE0A_FLASH_TOKEN.txt"
-TOKEN_PREFIX = TOKEN.split("-", 1)[0] + "-"
+FREEZE_SHA = os.environ.get(
+    "GATE0A_FREEZE_SHA", "dd43cbea0150772a804c22cec1c9ddcdb6c94789"
+)
+TOKEN = os.environ.get("GATE0A_TOKEN") or (
+    f"{BINDING.token_prefix.rstrip('-')}-{uuid.uuid4().hex[:16]}"
+)
+TOKEN_PATH = os.environ.get("GATE0A_TOKEN_PATH", BINDING.token_path)
+TOKEN_PREFIX = BINDING.token_prefix
+CONTAINER = os.environ.get("GATE0A_CONTAINER", BINDING.container_name)
+FAMILY_CFG = FAMILY_CONFIGS[BINDING.family_key]
 
 
 def _token_byteexact_in(text: str, token: str) -> bool:
@@ -143,12 +155,15 @@ def main() -> int:
     report: Dict[str, Any] = {
         "gate": "0A",
         "gate_version": GATE_VERSION,
+        "family": FAMILY_SLUG,
+        "family_config_key": BINDING.family_key,
         "model": MODEL,
         "freeze_sha": FREEZE_SHA,
         "started_at": _utc(),
         "token_prefix": TOKEN_PREFIX,
         "token_sha256": hashlib.sha256(TOKEN.encode()).hexdigest(),
         "max_steps": MAX_STEPS,
+        "container_name": CONTAINER,
         "step_budget_semantics": (
             f"max_steps={MAX_STEPS} means {MAX_STEPS} predict rounds (agent turns). "
             f"DONE on turn {MAX_STEPS} is permitted if produced during that turn "
@@ -176,9 +191,10 @@ def main() -> int:
         (OUT_DIR / "gate0a_report.md").write_text(
             "\n".join(
                 [
-                    f"# Gate 0A Flash smoke report ({GATE_VERSION})",
+                    f"# Gate 0A {FAMILY_SLUG} smoke report ({GATE_VERSION})",
                     "",
                     f"- verdict: **{report['verdict']}**",
+                    f"- family: `{FAMILY_SLUG}`",
                     f"- failure_class: `{report.get('failure_class')}`",
                     f"- stop_reason: {report.get('stop_reason')}",
                     f"- model: `{report['model']}`",
@@ -193,24 +209,33 @@ def main() -> int:
         )
 
     # --- Guardrails ---
-    if MODEL != FLASH_GATE0A.model_id:
-        report["stop_reason"] = f"model mismatch: {MODEL} != {FLASH_GATE0A.model_id}"
+    if MODEL != BINDING.model_id:
+        report["stop_reason"] = f"model mismatch: {MODEL} != {BINDING.model_id}"
         report["failure_class"] = "transport"
         report["verdict"] = "FAIL"
         write_report()
         return 2
-    if os.environ.get("OPENROUTER_API_KEY_LARGE"):
-        report["stop_reason"] = "OPENROUTER_API_KEY_LARGE still set"
+    if not TOKEN.startswith(TOKEN_PREFIX):
+        report["stop_reason"] = (
+            f"token prefix mismatch: expected {TOKEN_PREFIX!r}, got {TOKEN[:32]!r}"
+        )
+        report["failure_class"] = "QEMU ownership"
+        report["verdict"] = "FAIL"
+        write_report()
+        return 2
+    if MODEL in BINDING.forbid_fallback_models:
+        report["stop_reason"] = f"model is a forbidden fallback: {MODEL}"
         report["failure_class"] = "transport"
         report["verdict"] = "FAIL"
         write_report()
         return 2
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        report["stop_reason"] = "ANTHROPIC_API_KEY still set"
-        report["failure_class"] = "transport"
-        report["verdict"] = "FAIL"
-        write_report()
-        return 2
+    for bad_key in BINDING.forbid_env_keys:
+        if os.environ.get(bad_key):
+            report["stop_reason"] = f"{bad_key} still set"
+            report["failure_class"] = "transport"
+            report["verdict"] = "FAIL"
+            write_report()
+            return 2
     api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or ""
     if not api_key.startswith("sk-or-"):
         report["stop_reason"] = "OPENAI/OPENROUTER key missing or not OpenRouter sk-or-"
@@ -230,7 +255,8 @@ def main() -> int:
         "OPENAI_BASE_URL": base,
         "key_prefix": api_key[:7] + "***",
         "model": MODEL,
-        "lane": "SMALL",
+        "lane": BINDING.lane,
+        "family": FAMILY_SLUG,
     }
 
     qcow2 = os.environ.get("MYPCBENCH_QCOW2") or str(
@@ -238,7 +264,7 @@ def main() -> int:
     )
     screen = (1280, 800)
     env = MyPCBenchEnv(
-        container_name=os.environ.get("GATE0A_CONTAINER", "mypcbench-gate0a-flash"),
+        container_name=CONTAINER,
         screen_size=screen,
         client_password=os.environ.get("MYPCBENCH_CLIENT_PASSWORD", "password"),
         backend="qemu",
@@ -283,7 +309,7 @@ def main() -> int:
     try:
         print(f"[gate0a] boot QEMU qcow2={qcow2}", flush=True)
         obs = env.reset(
-            task_config={"id": "gate0a-flash", "instruction": "gate0a"},
+            task_config={"id": f"gate0a-{FAMILY_SLUG}", "instruction": "gate0a"},
             soft=False,
         )
         shot0 = obs.get("screenshot")
@@ -310,7 +336,7 @@ def main() -> int:
         # (we only check model responses later; plant is local.)
         transport = OpenRouterChatCompletionsTransport(
             api_key=api_key,
-            family=FAMILY_CONFIGS["flash"],
+            family=FAMILY_CFG,
             base_url=base.rstrip("/"),
             timeout_s=float(os.environ.get("GATE0A_HTTP_TIMEOUT", "180")),
             http_post=capturing_http_post,
@@ -326,7 +352,7 @@ def main() -> int:
             "2) After you see the file contents in <tool_response>, emit "
             "computer_use terminate with status=success.\n"
             "Do not invent the token. Do not claim success before bash output.\n"
-            f"Expected token prefix: {TOKEN.split('-')[0]}-"
+            f"Expected token prefix: {TOKEN_PREFIX}"
         )
 
         step_idx = 0
