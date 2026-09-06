@@ -37,20 +37,42 @@ class TransportError(RuntimeError):
 HttpPost = Callable[[str, Dict[str, str], bytes, float], Dict[str, Any]]
 
 
+# Deterministic bounded backoff for transient OpenRouter / upstream HTTP 429.
+# Execution plumbing only — not a methodological change.
+HTTP_429_MAX_RETRIES = 5
+HTTP_429_BACKOFF_S = (2, 4, 8, 16, 32)  # attempt index 0..4 after first failure
+
+
 def default_http_post(url: str, headers: Dict[str, str], body: bytes, timeout: float) -> Dict[str, Any]:
-    """Real urllib POST — not used by Phase 1B unit tests."""
-    req = Request(url, data=body, headers=headers, method="POST")
-    try:
-        with urlopen(req, timeout=timeout) as resp:  # noqa: S310 — caller opts in
-            raw = resp.read()
-            return json.loads(raw.decode("utf-8"))
-    except HTTPError as e:
-        detail = e.read().decode("utf-8", errors="replace") if e.fp else str(e)
-        raise TransportError(f"HTTP {e.code}: {detail}") from e
-    except URLError as e:
-        raise TransportError(f"network error: {e}") from e
-    except json.JSONDecodeError as e:
-        raise TransportError(f"non-JSON response: {e}") from e
+    """Real urllib POST with bounded retry on HTTP 429 (upstream rate limit)."""
+    import time
+
+    last_detail = ""
+    attempts = 1 + HTTP_429_MAX_RETRIES
+    for attempt in range(attempts):
+        req = Request(url, data=body, headers=headers, method="POST")
+        try:
+            with urlopen(req, timeout=timeout) as resp:  # noqa: S310 — caller opts in
+                raw = resp.read()
+                return json.loads(raw.decode("utf-8"))
+        except HTTPError as e:
+            detail = e.read().decode("utf-8", errors="replace") if e.fp else str(e)
+            last_detail = detail
+            if e.code == 429 and attempt < attempts - 1:
+                delay = HTTP_429_BACKOFF_S[min(attempt, len(HTTP_429_BACKOFF_S) - 1)]
+                print(
+                    f"[openrouter] HTTP 429 retry {attempt + 1}/{HTTP_429_MAX_RETRIES} "
+                    f"sleep={delay}s",
+                    flush=True,
+                )
+                time.sleep(delay)
+                continue
+            raise TransportError(f"HTTP {e.code}: {detail}") from e
+        except URLError as e:
+            raise TransportError(f"network error: {e}") from e
+        except json.JSONDecodeError as e:
+            raise TransportError(f"non-JSON response: {e}") from e
+    raise TransportError(f"HTTP 429: exhausted {HTTP_429_MAX_RETRIES} retries: {last_detail}")
 
 
 @dataclass
@@ -194,5 +216,11 @@ class OpenRouterChatCompletionsTransport:
                 "body_keys": sorted(body.keys()),
             }
         )
-        resp = self.http_post(self.endpoint, headers, raw, self.timeout_s)
+        try:
+            resp = self.http_post(self.endpoint, headers, raw, self.timeout_s)
+        except TransportError as e:
+            # Preserve retry exhaustion signal in the request audit log.
+            self.requests_log[-1]["transport_error"] = str(e)[:500]
+            self.requests_log[-1]["is_http_429"] = "HTTP 429" in str(e)
+            raise
         return self.extract_text(resp)

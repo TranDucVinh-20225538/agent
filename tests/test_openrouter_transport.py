@@ -259,5 +259,93 @@ class TestOpenRouterChatTransport(unittest.TestCase):
                 self.assertNotIn("tools", body)
 
 
+class TestHttp429Retry(unittest.TestCase):
+    """Execution plumbing: bounded backoff on OpenRouter HTTP 429."""
+
+    def test_default_http_post_retries_429_then_succeeds(self):
+        from generic_executor import openrouter_chat as orc
+        from urllib.error import HTTPError
+        import io
+
+        calls = {"n": 0}
+
+        class _FakeResp:
+            def read(self):
+                return json.dumps(_ok_response("ok")).encode()
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout=0):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise HTTPError(
+                    req.full_url if hasattr(req, "full_url") else "http://x",
+                    429,
+                    "Too Many Requests",
+                    hdrs=None,
+                    fp=io.BytesIO(b'{"error":{"message":"rate"}}'),
+                )
+            return _FakeResp()
+
+        sleeps = []
+        orig_sleep = __import__("time").sleep
+
+        def fake_sleep(s):
+            sleeps.append(s)
+
+        import time as _time
+
+        orig_urlopen = orc.urlopen
+        try:
+            orc.urlopen = fake_urlopen
+            _time.sleep = fake_sleep
+            out = orc.default_http_post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                {"Authorization": "Bearer x", "Content-Type": "application/json"},
+                b"{}",
+                30.0,
+            )
+        finally:
+            orc.urlopen = orig_urlopen
+            _time.sleep = orig_sleep
+
+        self.assertEqual(out["choices"][0]["message"]["content"], "ok")
+        self.assertEqual(calls["n"], 3)
+        self.assertEqual(sleeps, [2, 4])
+        self.assertEqual(orc.HTTP_429_MAX_RETRIES, 5)
+        self.assertEqual(orc.HTTP_429_BACKOFF_S, (2, 4, 8, 16, 32))
+
+    def test_default_http_post_exhausts_429(self):
+        from generic_executor import openrouter_chat as orc
+        from urllib.error import HTTPError
+        import io
+        import time as _time
+
+        def always_429(req, timeout=0):
+            raise HTTPError(
+                "http://x",
+                429,
+                "Too Many Requests",
+                hdrs=None,
+                fp=io.BytesIO(b"rate"),
+            )
+
+        orig_urlopen = orc.urlopen
+        orig_sleep = _time.sleep
+        try:
+            orc.urlopen = always_429
+            _time.sleep = lambda s: None
+            with self.assertRaises(TransportError) as cm:
+                orc.default_http_post("http://x", {}, b"{}", 10.0)
+        finally:
+            orc.urlopen = orig_urlopen
+            _time.sleep = orig_sleep
+        self.assertIn("429", str(cm.exception))
+
+
 if __name__ == "__main__":
     raise SystemExit(unittest.main(verbosity=2))
