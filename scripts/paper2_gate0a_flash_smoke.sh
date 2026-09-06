@@ -28,11 +28,13 @@ test -f "$MYPCBENCH_QCOW2" || { echo "qcow2 missing: $MYPCBENCH_QCOW2" >&2; exit
 export GATE0A_OUT="${GATE0A_OUT:-$A/results/paper2_exec/gate0a-flash}"
 export GATE0A_FREEZE_SHA="$FREEZE_SHA"
 export GATE0A_MODEL="qwen/qwen3.8-flash"
-export GATE0A_MAX_STEPS="${GATE0A_MAX_STEPS:-4}"
+# Gate 0A v1.1: smoke budget only (does NOT change Study 1 max_steps=80).
+export GATE0A_MAX_STEPS="${GATE0A_MAX_STEPS:-10}"
+export GATE0A_VERSION="${GATE0A_VERSION:-v1.1}"
 export PYTHONPATH="$A/external/MyPCBench-main/agent-harness:$A/scripts:$A:${PYTHONPATH:-}"
 
 mkdir -p "$GATE0A_OUT"
-echo "START Gate0A Flash smoke out=$GATE0A_OUT model=$GATE0A_MODEL max_steps=$GATE0A_MAX_STEPS"
+echo "START Gate0A Flash smoke version=$GATE0A_VERSION out=$GATE0A_OUT model=$GATE0A_MODEL max_steps=$GATE0A_MAX_STEPS"
 echo "binding: SMALL=set LARGE=unset ANTHROPIC=unset (values hidden)"
 echo "qcow2=$MYPCBENCH_QCOW2"
 

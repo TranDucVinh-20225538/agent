@@ -227,6 +227,8 @@ Paper-2 / MyPCBench **do not** require the Qwen model to emit Markdown ` ```DONE
 
 Loop: `while not done and step_idx < max_steps`. Each outer iteration may execute **multiple** actions from one predict; `step_idx` increments once per predict round (not per sub-action).
 
+**Clarification (Gate 0A smoke only):** The Gate 0A Flash smoke under the generic agent loop may use a smaller `max_steps` (v1.1: **10**). That change applies only to Gate 0A smoke execution. It does **not** modify the frozen `max_steps=80` / `timeout=7200` invariants for Study 1 instrument execution (`paper2_exec_run.sh` / legacy `qwen_cuabash` configuration).
+
 ### 5.2 Empty / tool-only action policy (runner)
 
 When `actions == []`:
