@@ -36,6 +36,14 @@ CASES = [
     ("07_missing_rubric_and_traj", None, False, "BOOT_NO_RESULT"),
     ("08_boot_no_result", None, False, "BOOT_NO_RESULT"),
     ("09_unreadable_placeholder", None, False, "BOOT_NO_RESULT"),
+    # Closure follow-up: prior DONE must NOT back-scan into VALID_DONE
+    # when the final row is malformed.
+    (
+        "10_fallback_trap_done_then_malformed",
+        None,
+        False,
+        "TERMINAL_FAIL",
+    ),
 ]
 
 
@@ -131,6 +139,24 @@ class TestPaper2TerminalParity(unittest.TestCase):
         text = (d / "traj.jsonl").read_text()
         self.assertIn('"done": true', text)
         self.assertNotEqual(rt["canonical_last_action"], "DONE")
+
+    def test_fallback_trap_no_backscan_to_prior_DONE(self):
+        """Step N−1 DONE + step N malformed ⇒ not VALID_DONE."""
+        from paper2_traj_terminal import inspect_last_action
+
+        d = FIX / "10_fallback_trap_done_then_malformed" / "leg"
+        info = inspect_last_action(d / "traj.jsonl")
+        self.assertIsNone(info["canonical_last_action"])
+        self.assertFalse(info["valid_done"])
+        self.assertEqual(info["evidence_kind"], EV_MALFORMED_ACTION)
+        # Prior row literally has action DONE — must not be selected
+        text = (d / "traj.jsonl").read_text()
+        self.assertIn('"action": "DONE"', text)
+        rt = runtime_classify_dir(d)
+        off = offline_classify_dir(d)
+        self.assertEqual(rt["valid_done"], off["valid_done"])
+        self.assertFalse(rt["valid_done"])
+        self.assertEqual(rt["status"], "TERMINAL_FAIL")
 
 
 def write_report(path: Path) -> None:

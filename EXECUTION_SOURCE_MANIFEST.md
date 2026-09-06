@@ -267,3 +267,17 @@ Historical `CHECKPOINT.jsonl` unchanged. Analysis freeze for Study 1 Qwen cells 
 | C effective instrument pin | `out/paper2_harness_pin.json` + `out/gate15_closure_C_inventory.md` | pin-verify via `scripts/verify_paper2_harness_pin.py` |
 
 Still **no Gate −2** until independent review of A/B/C.
+
+---
+
+## 8. Gate −2 open (protocol freeze) — 2026-09-06
+
+Gate −1.5 **FINAL PASS**. Gate −2 artifact:
+
+- `GENERIC_AGENT_PROTOCOL_SPEC.md` — extracted from pinned instrument; generic loop still **BLOCKED**.
+
+Follow-ups (non-blocking):
+
+1. Fallback-trap fixture `10_fallback_trap_done_then_malformed` (DONE@N−1 + malformed@N; no back-scan).
+2. Vendor delta reviewability vs upstream = **optional**; SHA pin closes identity/drift (Gate −1 CLOSED).
+

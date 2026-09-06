@@ -1,7 +1,7 @@
 {
-  "gate": "1.5-closure",
+  "gate": "2-protocol-freeze",
   "title": "measurement_remediation_and_instrument_pin",
-  "recorded_at_utc": "2026-09-06T11:35:26.614753+00:00",
+  "recorded_at_utc": "2026-09-06T11:47:34.717845+00:00",
   "host": "node30",
   "agent_root": "/mnt/data2/Vinh/agent",
   "git_head_at_record": "3f636dcea734624fccd9a736ff3403b729431d32",
@@ -61,22 +61,22 @@
       ]
     },
     "tests/test_paper2_terminal_parity.py": {
-      "sha256": "c6649b8e64f2c4fae6d557230fe4777f00bb236d7bba3bc7c8fab45272f9741c",
-      "gitignored": false,
-      "option": 2,
       "role": "closure_B_parity_suite",
       "affects": [
         "measurement_parity_evidence"
-      ]
-    },
-    "EXECUTION_SOURCE_MANIFEST.md": {
-      "sha256": "f22fe9388390a581041a11f6bd59aaca6c8423d4ec3bf954769d7dd17cbb37ef",
+      ],
       "gitignored": false,
       "option": 2,
+      "sha256": "1e594898c29f9afa8e0f1e8e3162e133261536ee28711c1089a0e22273520796"
+    },
+    "EXECUTION_SOURCE_MANIFEST.md": {
       "role": "provenance_manifest",
       "affects": [
         "provenance_docs"
-      ]
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "57972014eef7335c27674e4827f3c53fadf4cd958999c18661e04a58d7a0f499"
     },
     "scripts/verify_paper2_harness_pin.py": {
       "role": "pin_drift_verifier",
@@ -94,7 +94,7 @@
       ],
       "gitignored": false,
       "option": 2,
-      "sha256": "77f231819db10ccb4f9a1698fb7b2bb530eb11b5b456962c9c0798762f0be02f"
+      "sha256": "62c3d804500648622aa16d60c23ebcfcc3ba03c6ece3bf192bed719eb4a09e2a"
     },
     "out/gate15_closure_B_parity.md": {
       "role": "closure_B_report",
@@ -103,7 +103,7 @@
       ],
       "gitignored": false,
       "option": 2,
-      "sha256": "75dabf26cb403b8e11b22b368f278beba6acb5b36f0a2edc7e29a915e51ffa5e"
+      "sha256": "eeb382ad77867a5063b52009bb830472332a28dda75a9bde08b09a00b1031f56"
     },
     "out/gate15_closure_C_inventory.md": {
       "role": "closure_C_report",
@@ -122,6 +122,33 @@
       "affects": [
         "unittest_discovery"
       ]
+    },
+    "GENERIC_AGENT_PROTOCOL_SPEC.md": {
+      "role": "gate2_protocol_freeze",
+      "affects": [
+        "protocol_spec"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "5f4c31677f9f79daa924f5df1d7d46ff95736c34ec6d98df71e1de1be6e2ba98"
+    },
+    "GENERIC_AGENT_INVARIANTS.md": {
+      "role": "gate2_companion_extract",
+      "affects": [
+        "protocol_docs"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "e34319bc32203beae1154ed29aff0a14fe10bedd66992ff77332426a06c9b4c8"
+    },
+    "out/gate15_closure_B_parity.json": {
+      "role": "closure_B_report_json",
+      "affects": [
+        "evidence"
+      ],
+      "gitignored": false,
+      "option": 2,
+      "sha256": "18bd5e212fa95630c456f9c9923cecacc7f0f6f47c1ca8af5dfb595e86396a27"
     }
   },
   "upstream_gitignored_harness": {
@@ -254,6 +281,7 @@
     "tests/fixtures/paper2_terminal/07_missing_rubric_and_traj/leg/run_started.txt": "eff64b343dcb2b1dc113648e7089b9ce9f8a7f6c7808a03a2cffb4ad7302f606",
     "tests/fixtures/paper2_terminal/08_boot_no_result/leg/guest.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
     "tests/fixtures/paper2_terminal/08_boot_no_result/leg/traj.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "tests/fixtures/paper2_terminal/09_unreadable_placeholder/leg/traj.jsonl": "24098b27b46b0f88e3f477d540e99d10a7a7517e9350a57fc03966b9a62f93ee"
+    "tests/fixtures/paper2_terminal/09_unreadable_placeholder/leg/traj.jsonl": "24098b27b46b0f88e3f477d540e99d10a7a7517e9350a57fc03966b9a62f93ee",
+    "tests/fixtures/paper2_terminal/10_fallback_trap_done_then_malformed/leg/traj.jsonl": "f1d8b8a9c552166a8832a0f80770bffaa913c87e390fa22f7c5bf0377baf3031"
   }
 }

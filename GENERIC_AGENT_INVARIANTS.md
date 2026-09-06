@@ -2,6 +2,8 @@
 
 **Purpose:** Extract behavioral invariants from the frozen Paper-2 `qwen_cuabash` stack **before** any generic-agent refactor. This document is descriptive, not normative redesign.
 
+**Gate −2 freeze:** Prefer **`GENERIC_AGENT_PROTOCOL_SPEC.md`** for Study-2 invariant status (FROZEN vs ALLOWED CHANGE). This file remains a detailed companion extract.
+
 **Status:** Extraction only — **no implementation changes** associated with this file.
 
 **Repo HEAD at extraction:** `64054a1` (`phase-a-results`)
