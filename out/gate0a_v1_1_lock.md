@@ -49,3 +49,8 @@ QEMU container namespace; shared hostfwd ports → do not parallelize).
 
 Do not retune protocol/budget/instruction between families.
 
+**Outcome (2026-09-06):** Flash / GPT / Claude all PASS → roster LOCK
+(`out/study2_roster_lock.md`). Next gates: P1 consistency, task separation,
+Phase 4 preregistration, cost-per-leg → N — not Gate 0A retune.
+
+
