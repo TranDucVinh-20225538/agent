@@ -1,0 +1,22 @@
+{
+  "id": "retrieval-f009",
+  "role": "paper2_tier2",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT confirmation_code, property_name, check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+  "probe_before": "[{\"confirmation_code\":\"GH-29481\",\"property_name\":\"The Greenwich Hotel\",\"check_in\":\"2026-05-02\"}]",
+  "extra_probes": [
+    {
+      "db": "dinoco-airlines.sqlite",
+      "sql": "SELECT confirmation_code, flight_number, destination, departure_date FROM flights WHERE user_email = :email AND (upper(destination) = 'JFK' OR lower(destination_city) LIKE '%new york%' OR lower(destination_city) LIKE '%manhattan%' OR upper(ifnull(flight_number,'')) = 'DN6769')",
+      "result": "[{\"confirmation_code\":\"DN-87856\",\"flight_number\":\"DN6769\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-02\"},\n{\"confirmation_code\":\"DN-EVE001\",\"flight_number\":\"DN-EVE001\",\"destination\":\"JFK\",\"departure_date\":\"2026-05-24\"}]"
+    },
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%greenwich%')",
+      "result": "[{\"check_in\":\"2026-05-02\"}]"
+    }
+  ],
+  "files": {}
+}

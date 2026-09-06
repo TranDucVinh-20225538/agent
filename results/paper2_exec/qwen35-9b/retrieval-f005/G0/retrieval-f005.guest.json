@@ -1,0 +1,17 @@
+{
+  "id": "retrieval-f005",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT id, payee, amount FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1",
+  "probe_before": "[{\"id\":4,\"payee\":\"Comcast Xfinity Internet\",\"amount\":89.9899999999999948}]",
+  "extra_probes": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT count(*) AS n FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%'",
+      "result": "[{\"n\":12}]"
+    }
+  ],
+  "files": {}
+}

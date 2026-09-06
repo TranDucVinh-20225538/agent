@@ -1,0 +1,17 @@
+{
+  "id": "contradiction-f014",
+  "role": "paper2_tier2",
+  "db": "speedtax.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND tr.tax_year = 2025 AND field_name = 'w2_gross_wages'",
+  "probe_before": "[{\"field_name\":\"w2_gross_wages\",\"field_value\":\"142000\"}]",
+  "extra_probes": [
+    {
+      "db": "lockedin.sqlite",
+      "sql": "SELECT title, company FROM experience WHERE profile_id IN (SELECT id FROM profiles WHERE email = :email) AND ifnull(is_current,0) = 1",
+      "result": "[{\"title\":\"Regional Manager, Scranton Branch\",\"company\":\"Dunder Mifflin\"}]"
+    }
+  ],
+  "files": {}
+}

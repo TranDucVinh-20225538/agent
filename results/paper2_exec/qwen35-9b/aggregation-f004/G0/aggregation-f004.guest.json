@@ -1,0 +1,17 @@
+{
+  "id": "aggregation-f004",
+  "role": "paper2_tier1",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT id, property_name, location, check_in, total_price FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%')",
+  "probe_before": "[{\"id\":4,\"property_name\":\"Radisson Blu Warwick Hotel\",\"location\":\"Philadelphia, PA\",\"check_in\":\"2026-03-22\",\"total_price\":129.0}]",
+  "extra_probes": [
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT ifnull(sum(t.amount),0) AS incidentals FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.date IN (SELECT check_in FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%philadelphia%' OR lower(location) LIKE '%philadelphia%' OR lower(address) LIKE '%philadelphia%'))",
+      "result": "ERROR: guest sqlite3 failed (1): Error: in prepare, no such table: bookings\n"
+    }
+  ],
+  "files": {}
+}

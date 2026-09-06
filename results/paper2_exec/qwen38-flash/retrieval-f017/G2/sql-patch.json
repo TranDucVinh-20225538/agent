@@ -1,0 +1,8 @@
+{
+  "condition": "retrieval-f017-I2",
+  "id": "retrieval-f017-I2",
+  "patch": [
+    "UPDATE positions SET status = 'settled' WHERE id = (SELECT id FROM positions WHERE user_email = :email AND lower(status)='active' ORDER BY id LIMIT 1)"
+  ],
+  "file_patches": []
+}

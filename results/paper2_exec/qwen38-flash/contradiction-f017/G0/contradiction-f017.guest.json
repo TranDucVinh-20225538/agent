@@ -1,0 +1,17 @@
+{
+  "id": "contradiction-f017",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT t.id, t.date, t.description, t.amount FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND lower(t.description) NOT LIKE '%transfer%' AND lower(t.description) NOT LIKE '%payment%' ORDER BY t.amount ASC LIMIT 1",
+  "probe_before": "[{\"id\":1603,\"date\":\"2026-04-15\",\"description\":\"Cheskepdia - Penthouse Suite on Wyoming Ave (Scranton, PA) [CHK-SC0415]\",\"amount\":-3778.0}]",
+  "extra_probes": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT ticker, shares, side, status FROM orders WHERE user_email = :email AND lower(side) LIKE '%buy%' ORDER BY shares DESC LIMIT 1",
+      "result": "[{\"ticker\":\"RIVN\",\"shares\":100.0,\"side\":\"buy\",\"status\":\"filled\"}]"
+    }
+  ],
+  "files": {}
+}

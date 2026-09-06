@@ -1,0 +1,17 @@
+{
+  "id": "retrieval-f010",
+  "role": "paper2_tier2",
+  "db": "cheskepdia.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT id, property_name, total_price, host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+  "probe_before": "[{\"id\":2,\"property_name\":\"Sandals Montego Bay\",\"total_price\":1975.0,\"host_name\":\"Sandals Resorts Concierge\"}]",
+  "extra_probes": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT host_name FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%montego bay%')",
+      "result": "[{\"host_name\":\"Sandals Resorts Concierge\"}]"
+    }
+  ],
+  "files": {}
+}
