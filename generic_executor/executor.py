@@ -76,15 +76,19 @@ def _append_traj(traj_path: Path, row: Dict[str, Any]) -> None:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-def build_qwen_cuabash_agent(*, env: FakeEnv, model_name: str = "fake/model") -> QwenOSWorldAgent:
-    """Construct the frozen Paper-2 agent (enable_bash=True) against FakeEnv."""
+def build_qwen_cuabash_agent(*, env: Any, model_name: str = "fake/model") -> QwenOSWorldAgent:
+    """Construct the frozen Paper-2 agent (enable_bash=True) against FakeEnv/QEMU env."""
     # Keep thinking off for deterministic parse (no reasoning salvage needed).
     os.environ.setdefault("MYPCBENCH_QWEN_ENABLE_THINKING", "0")
     os.environ.setdefault("MYPCBENCH_QWEN_KEEP_REASONING", "0")
+    screen = getattr(env, "screen_size", None)
+    if not screen:
+        screen = (int(env.screen_width), int(env.screen_height))
     agent = QwenOSWorldAgent(
         model=model_name,
-        screen_size=env.screen_size,
-        client_password="password",
+        screen_size=screen,
+        client_password=getattr(env, "client_password", None)
+        or os.environ.get("MYPCBENCH_CLIENT_PASSWORD", "password"),
         enable_bash=True,
         env=env,
         enable_thinking=False,
