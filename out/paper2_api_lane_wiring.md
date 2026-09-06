@@ -58,7 +58,7 @@ bash scripts/paper2_claude_gate0_openrouter_small.sh
 
 Pass Gate 0 ≠ start matrix. Review smoke report, then further human approval before any Claude matrix.
 
-**Wiring freeze commit (filled after push):** `WIRING_FREEZE_COMMIT=PENDING`
+**Wiring freeze commit (filled after push):** `WIRING_FREEZE_COMMIT=0ae55b417dfc17a0ec5252c2a73dac7439227f26`
 
 ## GPT HARD BLOCKED
 
