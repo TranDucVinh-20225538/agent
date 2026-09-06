@@ -33,7 +33,9 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 **Model order (full universe per model, no interleaving):**  
 1. Qwen 3.5-9B → 2. Qwen 3.8-Flash → 3. Claude Opus 4.6 → 4. GPT-5.5  
 
-**57 legs/model** (\(25\times2+7\)); **228** total. Within a model lane, key assignment is immutable. Claude/GPT never use `SMALL_KEY`. Exhausting `SMALL_KEY` mid-Qwen: checkpoint, stop, report — **no silent failover to `LARGE_KEY`** without an explicit dated operational amendment. Smoke/cost checks are **not** analysis legs.
+**57 legs/model** (\(25\times2+7\)); **228** total. Within a model lane, key assignment is immutable for **official matrix cells**. Exhausting `SMALL_KEY` mid-Qwen: checkpoint, stop, report — **no silent failover to `LARGE_KEY`** without an explicit dated operational amendment. Smoke/cost checks are **not** analysis legs.
+
+Default official routing intent (pre-amendment baseline): Qwen on `SMALL_KEY`; Claude/GPT on native / `LARGE_KEY` lanes. **Do not** silently rebind Claude or GPT to `SMALL_KEY` to match chat assumptions — any such route requires a dated note below.
 
 ### Dated operational note — GPT HARD BLOCKED (2026-09-06)
 
@@ -46,7 +48,21 @@ Not a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). Record only:
 | Current GPT official execution | **HARD BLOCKED** — no autostart, no retry, no “wiring-only” OpenRouter fix. Native OpenAI also not assumed available (proxy/billing separate). |
 | Resume condition | Gate 0 (QEMU tool ownership) → frozen ResponseStateAdapter (or confirmed native path) → protocol/smoke/semantic validation → code review → commit/push → **this manifest amended with adapter freeze hash** → explicit human approval → GPT from leg 1. |
 
-Until that resume condition: wording “Claude/GPT never use `SMALL_KEY`” still holds for **official** cells; the invalid OpenRouter attempt does not amend routing policy.
+Claude routing changes (below) **do not** unstick GPT.
+
+### Dated operational note — Claude OpenRouter SMALL compatibility smoke only (2026-09-06)
+
+**Not** Claude matrix start. **Not** a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). Human-approved **provisional** routing for a Gate-0-style tool-ownership smoke:
+
+| Item | Status |
+| --- | --- |
+| Scope | `scripts/paper2_claude_gate0_openrouter_small.sh` only |
+| Key | Bind `OPENROUTER_API_KEY_SMALL` → `ANTHROPIC_API_KEY` (harness client). Scrub native Anthropic backup keys / refuse missing OpenRouter base URL. |
+| Base URL | `ANTHROPIC_BASE_URL=https://openrouter.ai/api` (Anthropic Messages–compatible OpenRouter skin). No fallback to `api.anthropic.com`. |
+| Matrix | Claude **57 legs remain unstarted** until smoke PASS is reviewed and a further explicit approval amends this file. Official matrix lane for Claude is still planned as native/`LARGE_KEY` unless that later amendment says otherwise. |
+| GPT | Unchanged: **HARD BLOCKED**. |
+
+Wiring freeze commit for this smoke is recorded in `out/paper2_api_lane_wiring.md` after push (hash filled on host).
 
 ---
 
