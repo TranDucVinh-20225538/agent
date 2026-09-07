@@ -1,0 +1,86 @@
+{
+  "artifact": "study2_round57_preflight",
+  "checked_at_utc": "2026-09-06T17:37:00.397831+00:00",
+  "verdict": "PASS",
+  "A_balance": {
+    "ok": true,
+    "fingerprint_masked": "sk-or-v1-008\u20269dd",
+    "live_label": "sk-or-v1-008...9dd",
+    "limit": 1500,
+    "limit_remaining": 1268.486531707,
+    "usage": 231.513468293,
+    "min_required_usd": 100.0,
+    "checked_at_utc": "2026-09-06T17:37:00.738204+00:00"
+  },
+  "B_shared_executor_evidence": {
+    "ok": true,
+    "gate": false,
+    "families": [
+      {
+        "family": "flash",
+        "model_id": "qwen/qwen3.8-flash",
+        "out_slug": "study2-flash",
+        "bridge_module": "scripts/study2_run_mypcbench.py",
+        "agent_factory": "generic_executor.executor.build_qwen_cuabash_agent",
+        "transport_class": "generic_executor.openrouter_chat.OpenRouterChatCompletionsTransport",
+        "install_transport": "generic_executor.transport.install_transport",
+        "family_config_model": "qwen/qwen3.8-flash",
+        "models_match": true
+      },
+      {
+        "family": "gpt",
+        "model_id": "openai/gpt-5.5",
+        "out_slug": "study2-gpt",
+        "bridge_module": "scripts/study2_run_mypcbench.py",
+        "agent_factory": "generic_executor.executor.build_qwen_cuabash_agent",
+        "transport_class": "generic_executor.openrouter_chat.OpenRouterChatCompletionsTransport",
+        "install_transport": "generic_executor.transport.install_transport",
+        "family_config_model": "openai/gpt-5.5",
+        "models_match": true
+      },
+      {
+        "family": "claude",
+        "model_id": "anthropic/claude-opus-4.6",
+        "out_slug": "study2-claude",
+        "bridge_module": "scripts/study2_run_mypcbench.py",
+        "agent_factory": "generic_executor.executor.build_qwen_cuabash_agent",
+        "transport_class": "generic_executor.openrouter_chat.OpenRouterChatCompletionsTransport",
+        "install_transport": "generic_executor.transport.install_transport",
+        "family_config_model": "anthropic/claude-opus-4.6",
+        "models_match": true
+      }
+    ],
+    "note": "All Study 2 families use study2_run_mypcbench \u2192 qwen_cuabash + OpenRouterChatCompletionsTransport."
+  },
+  "C_universe_order": {
+    "ok": true,
+    "issues": [],
+    "hashes": {
+      "prereg_sha256": "6803c6439af8ec579d6c74e3597bee5d3a3743bcd21b23b0145d7f4d33542a33",
+      "manifest_prereg_sha256": "6803c6439af8ec579d6c74e3597bee5d3a3743bcd21b23b0145d7f4d33542a33",
+      "cell_order_sha256": "9e77c0ff61c41dbb904d2063b449d2f54e893164e8da8a0fcc3c0e90b7bed667",
+      "universe_sha256": "c076e50d7681d07832076123e7c0cb57a14876e26a067bd2ccdfd701c1338a7c"
+    },
+    "matrix": {
+      "T": 25,
+      "n_multiI": 7,
+      "N_fam": 57,
+      "L_total": 171,
+      "seed": 20260904,
+      "first_task": "retrieval-f010",
+      "first_legs": [
+        "retrieval-f010:G0",
+        "retrieval-f010:G1",
+        "retrieval-f017:G0",
+        "retrieval-f017:G1",
+        "retrieval-f017:G2"
+      ]
+    },
+    "manifest_path": "out/study2_launch_manifest.json"
+  },
+  "launch_gates": {
+    "A": true,
+    "C": true,
+    "B_evidence_only": true
+  }
+}

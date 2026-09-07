@@ -1,0 +1,123 @@
+{
+  "artifact": "study2_matrix_dry_validation",
+  "checked_at_utc": "2026-09-06T17:23:46.004675+00:00",
+  "verdict": "PASS",
+  "checks": {
+    "bind_008": {
+      "ok": true,
+      "fingerprint_masked": "sk-or-v1-008\u20269dd",
+      "base_url": "https://openrouter.ai/api/v1",
+      "key_source": "OPENROUTER_API_KEY_LARGE"
+    },
+    "family_resolution": [
+      {
+        "family": "flash",
+        "config_key": "flash",
+        "model_id": "qwen/qwen3.8-flash",
+        "out_slug": "study2-flash",
+        "out_dir": "results/paper2_exec/study2-flash",
+        "family_config_model": "qwen/qwen3.8-flash",
+        "models_match": true,
+        "transport": "OpenRouterChatCompletionsTransport",
+        "agent_factory": "build_qwen_cuabash_agent + install_transport"
+      },
+      {
+        "family": "gpt",
+        "config_key": "gpt_family",
+        "model_id": "openai/gpt-5.5",
+        "out_slug": "study2-gpt",
+        "out_dir": "results/paper2_exec/study2-gpt",
+        "family_config_model": "openai/gpt-5.5",
+        "models_match": true,
+        "transport": "OpenRouterChatCompletionsTransport",
+        "agent_factory": "build_qwen_cuabash_agent + install_transport"
+      },
+      {
+        "family": "claude",
+        "config_key": "claude_family",
+        "model_id": "anthropic/claude-opus-4.6",
+        "out_slug": "study2-claude",
+        "out_dir": "results/paper2_exec/study2-claude",
+        "family_config_model": "anthropic/claude-opus-4.6",
+        "models_match": true,
+        "transport": "OpenRouterChatCompletionsTransport",
+        "agent_factory": "build_qwen_cuabash_agent + install_transport"
+      }
+    ],
+    "family_order": [
+      "flash",
+      "gpt",
+      "claude"
+    ],
+    "all_models_match_config": true,
+    "legs": {
+      "per_family": 57,
+      "families": 3,
+      "total_planned": 171,
+      "expect_total": 171,
+      "first_five": [
+        {
+          "task": "retrieval-f010",
+          "leg": "G0",
+          "cf": "retrieval-f010",
+          "probe": true
+        },
+        {
+          "task": "retrieval-f010",
+          "leg": "G1",
+          "cf": "retrieval-f010",
+          "probe": false
+        },
+        {
+          "task": "retrieval-f017",
+          "leg": "G0",
+          "cf": "retrieval-f017",
+          "probe": true
+        },
+        {
+          "task": "retrieval-f017",
+          "leg": "G1",
+          "cf": "retrieval-f017",
+          "probe": false
+        },
+        {
+          "task": "retrieval-f017",
+          "leg": "G2",
+          "cf": "retrieval-f017-I2",
+          "probe": false
+        }
+      ],
+      "multiI_g2_count": 7
+    },
+    "entrypoint_scan": {
+      "files_scanned": [
+        "scripts/study2_matrix.sh",
+        "scripts/study2_matrix_lane.sh",
+        "scripts/study2_exec_run.sh",
+        "scripts/study2_run_mypcbench.py",
+        "scripts/study2_bind_execution_key.sh"
+      ],
+      "forbidden_hits": []
+    },
+    "entrypoints_present": {
+      "study2_matrix.sh": true,
+      "study2_matrix_lane.sh": true,
+      "study2_exec_run.sh": true,
+      "study2_run_mypcbench.py": true,
+      "study2_bind_execution_key.sh": true
+    },
+    "no_matrix_legs_yet": {
+      "study2_dirs": [],
+      "ok": true
+    }
+  },
+  "forbidden_env_list": [
+    "OPENROUTER_API_KEY_SMALL",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_API_KEY_BACKUP",
+    "GATE0A_FAMILY",
+    "GATE0A_OUT",
+    "GATE0A_MODEL"
+  ],
+  "note": "Dry validation only \u2014 matrix not launched."
+}

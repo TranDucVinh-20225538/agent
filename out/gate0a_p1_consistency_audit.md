@@ -39,6 +39,7 @@ Interpretation: the GPT secondary flag is an **artifact-schema / echo** asymmetr
 
 ## Decision
 
-- Consistency audit: **PASS**
+- Consistency audit: **PASS** (primary sha-match / ownership chain)
+- Traj-echo detail: see **`out/gate0a_p1_traj_echo_evidence.md`** (evidence for turns, real vs placeholder, pre-/post-bash)
 - No Gate 0A retest required
 - Optional later hardening (not blocking): persist `bash_result` into traj lines for audit convenience

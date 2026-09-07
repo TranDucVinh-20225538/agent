@@ -1,8 +1,28 @@
-# Study 2 — cost-per-leg (OpenRouter pull) → N options
+# Study 2 — cost-per-leg (OpenRouter) — planning only
 
-**Status:** ESTIMATE — human must lock N / budget before matrix start.  
-**Pulled:** 2026-09-06 via `GET https://openrouter.ai/api/v1/models` (list prices) + `GET /api/v1/key` (SMALL lane remaining).  
-**No Study 2 legs run for this estimate.**
+**Status:** COST ENVELOPE ONLY — **not** a matrix lock; **not** a methodological N lock.  
+**Pulled:** 2026-09-06 — OpenRouter list prices + SMALL key remaining magnitude.  
+**Methodological N:** see `out/study2_phase4_preregistration_audit.md` (57/family is **conditional carry-forward**, not signed).
+
+## Clarification (read first)
+
+| Symbol | Meaning in *this* file |
+| --- | --- |
+| \(L_{full}\) = 171 = 57×3 | **Planning identity only:** IF Study 2 adopts Gate 0A roster \|M\|=3 AND the frozen analysis \|T\|=25 with \(n_{multiI}=7\), THEN legs = \(3\times25\times2+3\times7\). |
+| 57 | Per-model leg count under that same IF — **Study 1 formula on frozen T**, not a new Study 2 sample. |
+| Preregistered / locked matrix | **None yet.** Phase 4 lock block still has N **OPEN**. |
+
+Do **not** read 171 as “the Study 2 matrix is locked.”
+
+Valid methodological postures (human picks later; **no subsample seed chosen here**):
+
+1. **Full analysis T** → planning \(L=171\) (57/model).  
+2. **Subsample T** → \(L'\) only after a **seed-pre-registered** subsample amends Phase 4 (not done).  
+3. **Defer** until budget lane exists.
+
+Cost rows below are computed for posture (1) and for abstract per-leg rates usable once a locked \(L'\) exists.
+
+---
 
 ## List prices (USD / 1M tokens)
 
@@ -12,14 +32,11 @@
 | `openai/gpt-5.5` | $5.00 | $30.00 |
 | `anthropic/claude-opus-4.6` | $5.00 | $25.00 |
 
-(Batch SKUs exist at ~½ price; Study 2 default assumes **interactive** non-batch unless separately locked.)
+Interactive (non-batch) assumed unless separately locked.
 
-## Token/leg model (engineering scenarios)
+## Token/leg engineering scenarios
 
-Study 1 Flash traj sample (n=20/57): **median ~34 steps/leg**, mean ~36 (max 83).  
-No per-leg OpenRouter usage fields in `CHECKPOINT*.jsonl` — costs below are **scenario envelopes**, not measured invoices.
-
-Assume average request size grows with history+screenshots; scenarios multiply `(steps × in_tok/turn)` and `(steps × out_tok/turn)`:
+(Study 1 Flash traj sample n=20/57: median ~34 steps — **usage proxy only**, not invoice.)
 
 | Scenario | steps | in_tok/turn | out_tok/turn |
 | --- | --- | --- | --- |
@@ -27,7 +44,7 @@ Assume average request size grows with history+screenshots; scenarios multiply `
 | mid | 35 | 15,000 | 400 |
 | high | 60 | 25,000 | 600 |
 
-### Implied USD / leg
+### USD / leg (model × scenario)
 
 | Model | low | mid | high |
 | --- | --- | --- | --- |
@@ -35,48 +52,33 @@ Assume average request size grows with history+screenshots; scenarios multiply `
 | GPT-5.5 | ~$0.92 | ~$3.05 | ~$8.58 |
 | Claude Opus 4.6 | ~$0.90 | ~$2.98 | ~$8.40 |
 
-Dominant cost: **GPT + Claude input** under long multimodal histories.
+### Cost if posture (1) planning identity \(L=171\) (57 legs × each of 3 models)
 
-## Full-universe matrix (|M|=3, |T|=25, multiI=7)
-
-\[
-L = 3\times25\times2 + 3\times7 = 171 \text{ legs}
-\]
-
-(57 legs/model, same shape as Study 1 per-model count.)
-
-| Scenario | Est. total API $ (equal mix) |
+| Scenario | Est. total API $ |
 | --- | --- |
 | low | ~$105 |
 | mid | ~$350 |
 | high | ~$980 |
 
-## Lane reality check (SMALL key)
+### Cost scale for a future locked \(L'\) (no seed chosen)
 
-From OpenRouter `/api/v1/key` on `OPENROUTER_API_KEY_SMALL` (values not logged beyond magnitudes):
+Per-model cost ≈ `(legs_per_model) × (USD/leg)`.  
+For equal legs/model: `total ≈ L' × mean(USD/leg across 3 models)`.
 
-- Key **limit** ≈ $500 cumulative  
-- **Remaining** ≈ **$28** at pull time  
+| Scenario | ≈ USD per leg (mean of 3 models) | Example \(L'=57\) (1 model only) | Example \(L'=171\) |
+| --- | --- | --- | --- |
+| low | ~$0.62 | ~$35 | ~$105 |
+| mid | ~$2.04 | ~$116 | ~$350 |
+| high | ~$5.74 | ~$327 | ~$980 |
 
-Conclusion: **cannot** fund GPT+Claude Study 2 full 171-leg matrix on the current SMALL key alone. Options (human pick; do not silent-failover):
+## SMALL lane reality
 
-1. **Recharge / raise SMALL limit** to cover mid–high envelope + margin.  
-2. **Dated operational amendment:** GPT/Claude Study 2 legs on `LARGE` / dedicated keys; Flash on SMALL — protocol unchanged.  
-3. **Pre-registered \(\mathcal{T}\) subsample** (seed before any \(\tau\)) to cut \(L\) into budget — must amend Phase 4 lock block.  
-4. **Defer** matrix until budget lane is explicit.
+At pull: SMALL key remaining ≈ **$28** (limit ~$500 cumulative).  
+Even mid-envelope **full planning 171** does not fit on current SMALL remaining for GPT+Claude. Funding/lane choice is **operational**, orthogonal to locking methodological N.
 
-## Recommended decision inputs (for human)
+## What this file must not be used for
 
-| Question | Default proposal |
-| --- | --- |
-| Confirmatory \(\mathcal{T}\) | Full analysis 25 + 7 multi-I (no Gate 0A task) |
-| \(\mathcal{M}\) | Gate 0A trio only |
-| Planning scenario | **mid** (~$3/leg GPT/Claude; ~$350 total) + ≥30% contingency |
-| N lock | Either **N=171** with funded lane, or seed-locked subsample with stated \(L'\) |
-
-## What this gate does *not* do
-
-- Does not change roster  
-- Does not authorize matrix start  
-- Does not retune Gate 0A  
-- Does not treat estimates as invoices — after first ~5 Study 2 legs, reconcile measured OpenRouter generation cost and amend contingency only via dated note
+- Implying N=57 or L=171 is preregistered  
+- Choosing a subsample seed  
+- Starting Study 2 legs  
+- Changing Gate 0A / roster / protocol

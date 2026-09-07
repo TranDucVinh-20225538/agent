@@ -34,10 +34,16 @@ Log pattern (pre-repair): `Control API ready` immediately then agent loop; **no*
 
 **Docs:** `out/study2_execution_plumbing.md`.
 
-## Rerun plan (post-commit)
+## Rerun results (post-repair; stopped after G1)
 
-Only `retrieval-f010` **G0** then **G1** via
-`STUDY2_ONLY_TASK=retrieval-f010 STUDY2_ONLY_LEGS=G0,G1 STUDY2_ALLOW_PARTIAL_LEGS=1`.
-Do **not** continue to leg 3 until those results are reported.
-Live logs must show `App readiness gate PASS (incl. localhost:3005)` before agent
-steps, and `[openrouter] HTTP 429 retry…` if rate-limited.
+Filter: `STUDY2_ONLY_TASK=retrieval-f010 STUDY2_ONLY_LEGS=G0,G1 STUDY2_ALLOW_PARTIAL_LEGS=1`
+Log: `results/paper2_exec_study2-flash_f010_g0g1_post_repair.log`
+Commit: `aa060b2`
+
+| Leg | Status | Steps | Notes |
+|-----|--------|-------|-------|
+| retrieval-f010 G0 | **DONE** | 39 | readiness PASS (3005) before steps; 429 retries recovered mid-run |
+| retrieval-f010 G1 | **DONE** | 31 | readiness PASS (3005) again after QEMU reset; DONE action |
+
+Stopped at exec end after these two legs — **did not** continue to leg 3.
+Pre-repair artifacts remain under `_audit/` + `study2-flash.INVALIDATED_pre_repair_*`.
