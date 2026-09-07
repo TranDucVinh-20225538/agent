@@ -1,0 +1,12 @@
+I'll start by checking whether these local services are actually running, since the page failed to load.
+
+<tool_call>
+<function=tool_call>
+<parameter=action>
+mcp__bash__execute
+</parameter>
+<parameter=command>
+for p in 3001 3002 3003 3004 3005 3014 3015; do echo -n "port $p: "; curl -s -o /dev/null -w "%{http_code}" http://localhost:$p/ ; echo; done
+</parameter>
+</function>
+</tool_call>

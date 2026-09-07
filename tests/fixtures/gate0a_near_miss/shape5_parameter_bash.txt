@@ -1,0 +1,10 @@
+Services respond with 307 redirects (normal auth behavior). Let me verify they're actually functional by following redirects, and inspect the local mail store.
+
+<tool_call>
+<parameter=bash>
+<parameter=command>
+echo "=== Follow redirects ==="; for p in 3004 3005 3016; do echo "--- $p ---"; curl -sL --max-time 8 http://localhost:$p/ | head -c 300; echo; done
+echo "=== Maildir tree ==="; find /home/user/Maildir -maxdepth 2 -type d 2>/dev/null; echo "--- counts ---"; for d in $(find /home/user/Maildir -maxdepth 2 -type d 2>/dev/null); do echo "$d: $(ls -1 $d 2>/dev/null | wc -l)"; done
+</parameter>
+</function>
+</tool_call>

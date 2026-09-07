@@ -1,0 +1,8 @@
+All seven services return HTTP 307 — they're actually **up**; the redirect target is what matters. Let me trace where the 307 sends us so I can load them correctly in the browser.
+
+<tool_call>
+<parameter=command>
+for p in 3001 3012 3016; do echo "== port $p =="; curl -s -D - -o /dev/null --max-time 5 http://localhost:$p/ | egrep -i "^(HTTP|location)"; done
+</parameter>
+</function>
+</tool_call>

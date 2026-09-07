@@ -176,12 +176,66 @@ def apply_infra_fail_on_reset() -> None:
     rmb._study2_infra_fail_patched = True
 
 
+def apply_near_miss_parser() -> None:
+    """Ensure qwen_cua uses near-miss XML normalize + screenshot no-op."""
+    import agents.qwen_cua as qwen_cua
+    from generic_executor.near_miss_xml import (
+        apply_screenshot_noop,
+        normalize_near_miss_xml,
+    )
+
+    if getattr(qwen_cua, "_gate0a_near_miss_patched", False):
+        return
+
+    _orig_extract = qwen_cua._extract_bash_command
+
+    def _extract_bash_command(response: str):
+        return _orig_extract(normalize_near_miss_xml(response or ""))
+
+    qwen_cua._extract_bash_command = _extract_bash_command
+
+    cls = qwen_cua._Qwen35VLPatched
+    _orig_parse = cls.parse_response
+
+    def parse_response(self, response: str, **kwargs):
+        text = response or ""
+        reasoning = ""
+        if getattr(self, "reasonings", None):
+            reasoning = self.reasonings[-1] or ""
+        if reasoning and "<tool_call>" in reasoning and "<tool_call>" not in text:
+            text = text + "\n" + reasoning
+        text = normalize_near_miss_xml(text)
+        instruction, code = qwen_cua.Qwen35VLAgent.parse_response(self, text, **kwargs)
+        code = cls._scroll_at_pointer(code)
+        code = apply_screenshot_noop(text, code)
+        return instruction, code
+
+    cls.parse_response = parse_response
+    qwen_cua._gate0a_near_miss_patched = True
+
+
 def apply_all() -> Dict[str, Any]:
     apply_env_readiness_gate()
     apply_infra_fail_on_reset()
+    apply_near_miss_parser()
+    # Sanity: on-disk harness must contain explicit abort markers.
+    import run_mypcbench as rmb
+    from pathlib import Path as _P
+
+    disk_src = _P(rmb.__file__).read_text(encoding="utf-8", errors="replace")
+    has_abort = "NO_ACTION_ABORT" in disk_src
+    has_exec_exc = "EXECUTOR_EXCEPTION" in disk_src
+    if not has_abort or not has_exec_exc:
+        raise RuntimeError(
+            "GATE0A_INSTRUMENT_FAIL: run_mypcbench.py missing NO_ACTION_ABORT/"
+            f"EXECUTOR_EXCEPTION markers (abort={has_abort} exc={has_exec_exc})"
+        )
     return {
         "apps_ready_gate": True,
         "infra_fail_on_reset": True,
+        "near_miss_parser": True,
+        "run_mypcbench_has_NO_ACTION_ABORT": has_abort,
+        "run_mypcbench_has_EXECUTOR_EXCEPTION": has_exec_exc,
         "apps_ready_timeout_s": float(os.environ.get("MYPCBENCH_APPS_READY_TIMEOUT", "300")),
         "http_429_note": "handled in generic_executor.openrouter_chat.default_http_post",
     }
