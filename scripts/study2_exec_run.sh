@@ -31,6 +31,9 @@ die() { echo "STUDY2_EXEC_FAIL: $*" >&2; exit 1; }
 
 case "$STUDY2_FAMILY/$MODEL/$SLUG" in
   flash/qwen/qwen3.8-flash/study2-flash) ;;
+  # Gate 0A instrument measurement only — same flash trio, separate OUT_ROOT/PREFIX
+  # so Study 2 study2-flash cells are not skipped/contaminated.
+  flash/qwen/qwen3.8-flash/gate0a-flash-instrument) ;;
   gpt/openai/gpt-5.5/study2-gpt) ;;
   claude/anthropic/claude-opus-4.6/study2-claude) ;;
   *) die "locked trio mismatch: FAMILY=$STUDY2_FAMILY MODEL=$MODEL SLUG=$SLUG" ;;
