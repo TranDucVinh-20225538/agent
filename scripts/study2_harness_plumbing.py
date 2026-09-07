@@ -237,5 +237,8 @@ def apply_all() -> Dict[str, Any]:
         "run_mypcbench_has_NO_ACTION_ABORT": has_abort,
         "run_mypcbench_has_EXECUTOR_EXCEPTION": has_exec_exc,
         "apps_ready_timeout_s": float(os.environ.get("MYPCBENCH_APPS_READY_TIMEOUT", "300")),
-        "http_429_note": "handled in generic_executor.openrouter_chat.default_http_post",
+        "transient_retry_note": (
+            "429/5xx/timeout handled in generic_executor.openrouter_chat.default_http_post "
+            "(15 attempts or 600s)"
+        ),
     }

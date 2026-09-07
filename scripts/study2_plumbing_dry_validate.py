@@ -3,7 +3,7 @@
 
 Checks:
   1. App readiness gate is no longer a no-op and requires port 3005.
-  2. OpenRouter default_http_post has bounded 429 retry constants + wired path.
+  2. OpenRouter transport has bounded transient retry constants + wired path.
   3. All three Study 2 families share study2_run_mypcbench + OpenRouter transport.
   4. No SMALL / Gate0A / native-agent Study 2 path is introduced.
 """
@@ -49,16 +49,18 @@ def check_apps_ready_gate() -> None:
     print("PASS: app readiness gate (TCP + 3005 + timeout)")
 
 
-def check_429_retry() -> None:
+def check_transient_retry() -> None:
     from generic_executor import openrouter_chat as orc
 
-    if orc.HTTP_429_MAX_RETRIES != 5:
-        _fail(f"HTTP_429_MAX_RETRIES={orc.HTTP_429_MAX_RETRIES} want 5")
-    if orc.HTTP_429_BACKOFF_S != (2, 4, 8, 16, 32):
-        _fail(f"HTTP_429_BACKOFF_S={orc.HTTP_429_BACKOFF_S}")
+    if orc.TRANSIENT_MAX_ATTEMPTS != 15:
+        _fail(f"TRANSIENT_MAX_ATTEMPTS={orc.TRANSIENT_MAX_ATTEMPTS} want 15")
+    if orc.TRANSIENT_MAX_ELAPSED_S != 600.0:
+        _fail(f"TRANSIENT_MAX_ELAPSED_S={orc.TRANSIENT_MAX_ELAPSED_S} want 600")
+    if 429 not in orc.TRANSIENT_HTTP_CODES or 503 not in orc.TRANSIENT_HTTP_CODES:
+        _fail(f"TRANSIENT_HTTP_CODES missing 429/503: {orc.TRANSIENT_HTTP_CODES}")
     src = inspect.getsource(orc.default_http_post)
-    if "e.code == 429" not in src and "code == 429" not in src:
-        _fail("default_http_post missing HTTP 429 branch")
+    if "_is_timeout_error" not in src:
+        _fail("default_http_post missing timeout retry branch")
     if "retry" not in src.lower():
         _fail("default_http_post missing retry logging")
     # Transport used by Study 2 bridge defaults to this post
@@ -72,7 +74,7 @@ def check_429_retry() -> None:
     )
     if t.http_post is not orc.default_http_post:
         _fail("OpenRouterChatCompletionsTransport.http_post is not default_http_post")
-    print("PASS: OpenRouter 429 retry wired on shared transport")
+    print("PASS: OpenRouter bounded transient retry wired on shared transport")
 
 
 def check_shared_study2_path() -> None:
@@ -142,7 +144,7 @@ def check_run_mypcbench_infra() -> None:
 
 def main() -> None:
     check_apps_ready_gate()
-    check_429_retry()
+    check_transient_retry()
     check_shared_study2_path()
     check_run_mypcbench_infra()
     print("ALL_DRY_VALIDATE_PASS")

@@ -8,6 +8,9 @@ Live calls are intentionally not used here.
 from __future__ import annotations
 
 import json
+import random
+import socket
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 from urllib.error import HTTPError, URLError
@@ -37,42 +40,82 @@ class TransportError(RuntimeError):
 HttpPost = Callable[[str, Dict[str, str], bytes, float], Dict[str, Any]]
 
 
-# Deterministic bounded backoff for transient OpenRouter / upstream HTTP 429.
-# Execution plumbing only — not a methodological change.
-HTTP_429_MAX_RETRIES = 5
-HTTP_429_BACKOFF_S = (2, 4, 8, 16, 32)  # attempt index 0..4 after first failure
+# Bounded transport retry for transient OpenRouter / upstream failures.
+# This retries the same serialized HTTP request inside one predict turn, so
+# conversation history, QEMU state, and the leg step counter are unchanged.
+TRANSIENT_MAX_ATTEMPTS = 15  # initial request included
+TRANSIENT_MAX_ELAPSED_S = 600.0
+TRANSIENT_BACKOFF_BASE_S = 5.0
+TRANSIENT_BACKOFF_CAP_S = 60.0
+TRANSIENT_JITTER_RATIO = 0.20
+TRANSIENT_HTTP_CODES = frozenset({429, *range(500, 600)})
+
+
+def _is_timeout_error(error: BaseException) -> bool:
+    if isinstance(error, (TimeoutError, socket.timeout)):
+        return True
+    if isinstance(error, URLError):
+        reason = error.reason
+        return isinstance(reason, (TimeoutError, socket.timeout)) or "timed out" in str(reason).lower()
+    return False
+
+
+def _retry_delay(retry_index: int) -> float:
+    """Capped exponential backoff plus bounded positive jitter."""
+    base = min(TRANSIENT_BACKOFF_CAP_S, TRANSIENT_BACKOFF_BASE_S * (2 ** retry_index))
+    jitter = random.uniform(0.0, base * TRANSIENT_JITTER_RATIO)
+    return min(TRANSIENT_BACKOFF_CAP_S, base + jitter)
 
 
 def default_http_post(url: str, headers: Dict[str, str], body: bytes, timeout: float) -> Dict[str, Any]:
-    """Real urllib POST with bounded retry on HTTP 429 (upstream rate limit)."""
-    import time
-
-    last_detail = ""
-    attempts = 1 + HTTP_429_MAX_RETRIES
-    for attempt in range(attempts):
+    """POST once logically; retry the identical request on transient failures."""
+    started = time.monotonic()
+    last_error = ""
+    requests_made = 0
+    for attempt in range(TRANSIENT_MAX_ATTEMPTS):
+        elapsed = time.monotonic() - started
+        remaining = TRANSIENT_MAX_ELAPSED_S - elapsed
+        if remaining <= 0:
+            break
         req = Request(url, data=body, headers=headers, method="POST")
+        requests_made += 1
         try:
-            with urlopen(req, timeout=timeout) as resp:  # noqa: S310 — caller opts in
+            # A slow request also counts against the retry wall-clock budget.
+            with urlopen(req, timeout=min(timeout, remaining)) as resp:  # noqa: S310 — caller opts in
                 raw = resp.read()
                 return json.loads(raw.decode("utf-8"))
         except HTTPError as e:
             detail = e.read().decode("utf-8", errors="replace") if e.fp else str(e)
-            last_detail = detail
-            if e.code == 429 and attempt < attempts - 1:
-                delay = HTTP_429_BACKOFF_S[min(attempt, len(HTTP_429_BACKOFF_S) - 1)]
-                print(
-                    f"[openrouter] HTTP 429 retry {attempt + 1}/{HTTP_429_MAX_RETRIES} "
-                    f"sleep={delay}s",
-                    flush=True,
-                )
-                time.sleep(delay)
-                continue
-            raise TransportError(f"HTTP {e.code}: {detail}") from e
+            if e.code not in TRANSIENT_HTTP_CODES:
+                raise TransportError(f"HTTP {e.code}: {detail}") from e
+            last_error = f"HTTP {e.code}: {detail}"
         except URLError as e:
-            raise TransportError(f"network error: {e}") from e
+            if not _is_timeout_error(e):
+                raise TransportError(f"network error: {e}") from e
+            last_error = f"network timeout: {e}"
+        except (TimeoutError, socket.timeout) as e:
+            last_error = f"network timeout: {e}"
         except json.JSONDecodeError as e:
             raise TransportError(f"non-JSON response: {e}") from e
-    raise TransportError(f"HTTP 429: exhausted {HTTP_429_MAX_RETRIES} retries: {last_detail}")
+
+        if attempt >= TRANSIENT_MAX_ATTEMPTS - 1:
+            break
+        remaining = TRANSIENT_MAX_ELAPSED_S - (time.monotonic() - started)
+        if remaining <= 0:
+            break
+        delay = min(_retry_delay(attempt), remaining)
+        print(
+            f"[openrouter] transient retry {attempt + 1}/{TRANSIENT_MAX_ATTEMPTS - 1} "
+            f"after {last_error.split(':', 1)[0]} sleep={delay:.1f}s "
+            f"remaining={remaining:.1f}s",
+            flush=True,
+        )
+        time.sleep(delay)
+
+    elapsed = time.monotonic() - started
+    raise TransportError(
+        f"provider unavailable after {requests_made} attempts/{elapsed:.1f}s: {last_error}"
+    )
 
 
 @dataclass

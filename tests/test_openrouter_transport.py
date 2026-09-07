@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -259,8 +260,8 @@ class TestOpenRouterChatTransport(unittest.TestCase):
                 self.assertNotIn("tools", body)
 
 
-class TestHttp429Retry(unittest.TestCase):
-    """Execution plumbing: bounded backoff on OpenRouter HTTP 429."""
+class TestTransientHttpRetry(unittest.TestCase):
+    """Execution plumbing: bounded retry of the same transient HTTP request."""
 
     def test_default_http_post_retries_429_then_succeeds(self):
         from generic_executor import openrouter_chat as orc
@@ -291,41 +292,33 @@ class TestHttp429Retry(unittest.TestCase):
                 )
             return _FakeResp()
 
-        sleeps = []
-        orig_sleep = __import__("time").sleep
-
-        def fake_sleep(s):
-            sleeps.append(s)
-
-        import time as _time
-
-        orig_urlopen = orc.urlopen
-        try:
-            orc.urlopen = fake_urlopen
-            _time.sleep = fake_sleep
+        sleeps: List[float] = []
+        with (
+            mock.patch.object(orc, "urlopen", fake_urlopen),
+            mock.patch.object(orc.random, "uniform", return_value=0.0),
+            mock.patch.object(orc.time, "sleep", side_effect=sleeps.append),
+        ):
             out = orc.default_http_post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 {"Authorization": "Bearer x", "Content-Type": "application/json"},
                 b"{}",
                 30.0,
             )
-        finally:
-            orc.urlopen = orig_urlopen
-            _time.sleep = orig_sleep
 
         self.assertEqual(out["choices"][0]["message"]["content"], "ok")
         self.assertEqual(calls["n"], 3)
-        self.assertEqual(sleeps, [2, 4])
-        self.assertEqual(orc.HTTP_429_MAX_RETRIES, 5)
-        self.assertEqual(orc.HTTP_429_BACKOFF_S, (2, 4, 8, 16, 32))
+        self.assertEqual(sleeps, [5.0, 10.0])
+        self.assertEqual(orc.TRANSIENT_MAX_ATTEMPTS, 15)
+        self.assertEqual(orc.TRANSIENT_MAX_ELAPSED_S, 600.0)
 
-    def test_default_http_post_exhausts_429(self):
+    def test_default_http_post_exhausts_429_after_15_identical_requests(self):
         from generic_executor import openrouter_chat as orc
         from urllib.error import HTTPError
         import io
-        import time as _time
 
+        calls = []
         def always_429(req, timeout=0):
+            calls.append((req.data, timeout))
             raise HTTPError(
                 "http://x",
                 429,
@@ -334,17 +327,81 @@ class TestHttp429Retry(unittest.TestCase):
                 fp=io.BytesIO(b"rate"),
             )
 
-        orig_urlopen = orc.urlopen
-        orig_sleep = _time.sleep
-        try:
-            orc.urlopen = always_429
-            _time.sleep = lambda s: None
+        with (
+            mock.patch.object(orc, "urlopen", always_429),
+            mock.patch.object(orc.random, "uniform", return_value=0.0),
+            mock.patch.object(orc.time, "sleep"),
+        ):
             with self.assertRaises(TransportError) as cm:
-                orc.default_http_post("http://x", {}, b"{}", 10.0)
-        finally:
-            orc.urlopen = orig_urlopen
-            _time.sleep = orig_sleep
+                orc.default_http_post("http://x", {}, b'{"same":"request"}', 10.0)
         self.assertIn("429", str(cm.exception))
+        self.assertIn("15 attempts", str(cm.exception))
+        self.assertEqual(len(calls), 15)
+        self.assertEqual({body for body, _ in calls}, {b'{"same":"request"}'})
+
+    def test_retries_503_then_timeout_without_rebuilding_request(self):
+        from generic_executor import openrouter_chat as orc
+        from urllib.error import HTTPError, URLError
+        import io
+        import socket
+
+        seen = []
+        outcomes = [
+            HTTPError("http://x", 503, "busy", None, io.BytesIO(b"busy")),
+            URLError(socket.timeout("timed out")),
+            None,
+        ]
+
+        class _FakeResp:
+            def read(self):
+                return json.dumps(_ok_response("recovered")).encode()
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+
+        def transient_then_ok(req, timeout=0):
+            seen.append(req.data)
+            outcome = outcomes.pop(0)
+            if outcome is not None:
+                raise outcome
+            return _FakeResp()
+
+        with (
+            mock.patch.object(orc, "urlopen", transient_then_ok),
+            mock.patch.object(orc.random, "uniform", return_value=0.0),
+            mock.patch.object(orc.time, "sleep"),
+        ):
+            out = orc.default_http_post("http://x", {}, b"fixed", 30.0)
+        self.assertEqual(out["choices"][0]["message"]["content"], "recovered")
+        self.assertEqual(seen, [b"fixed", b"fixed", b"fixed"])
+
+    def test_wall_clock_budget_stops_before_max_attempts(self):
+        from generic_executor import openrouter_chat as orc
+        from urllib.error import HTTPError
+        import io
+
+        clock = {"now": 0.0}
+        calls = {"n": 0}
+
+        def always_429(req, timeout=0):
+            calls["n"] += 1
+            raise HTTPError("http://x", 429, "busy", None, io.BytesIO(b"busy"))
+
+        def advance(seconds):
+            clock["now"] += seconds
+
+        with (
+            mock.patch.object(orc, "urlopen", always_429),
+            mock.patch.object(orc.random, "uniform", return_value=0.0),
+            mock.patch.object(orc.time, "monotonic", side_effect=lambda: clock["now"]),
+            mock.patch.object(orc.time, "sleep", side_effect=advance),
+            mock.patch.object(orc, "TRANSIENT_MAX_ELAPSED_S", 11.0),
+        ):
+            with self.assertRaises(TransportError) as cm:
+                orc.default_http_post("http://x", {}, b"fixed", 30.0)
+        self.assertEqual(calls["n"], 2)
+        self.assertIn("2 attempts/11.0s", str(cm.exception))
 
 
 if __name__ == "__main__":

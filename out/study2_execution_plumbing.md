@@ -24,24 +24,31 @@ before the service was reachable.
 Agent predict loop does **not** start until the gate passes (and post-gate
 `_prewarm_lazy_dbs` still runs as before).
 
-## 2. OpenRouter HTTP 429 handling
+## 2. OpenRouter transient-provider handling
 
 **Before:** First HTTP 429 from OpenRouter/upstream became `TransportError` →
 traj `PREDICT_CRASH` with no retry (false “model” failure under rate limit).
 
-**After:** `generic_executor.openrouter_chat.default_http_post` (shared by all
-Study 2 families via `OpenRouterChatCompletionsTransport`):
+**Current frozen instrument policy:** `generic_executor.openrouter_chat.default_http_post`
+(shared by all Study 2 families via `OpenRouterChatCompletionsTransport`):
 
 | Parameter | Value |
 |-----------|--------|
-| Max retries after first 429 | **5** (`HTTP_429_MAX_RETRIES`) |
-| Backoff seconds | **2, 4, 8, 16, 32** (`HTTP_429_BACKOFF_S`) |
-| Scope | HTTP **429** only |
-| Logging | `[openrouter] HTTP 429 retry i/5 sleep=…s` to stdout; final failure in `TransportError` + `requests_log` |
+| Retryable failures | HTTP **429**, HTTP **5xx**, network timeout |
+| Maximum attempts | **15 total**, including the initial request |
+| Wall-clock bound | **600s**, including request time and sleeps |
+| Backoff | Exponential from **5s**, capped at **60s**, + 0–20% jitter (final delay also capped at 60s) |
+| Request semantics | Retry the identical serialized request inside the same predict turn |
+| Logging | `[openrouter] transient retry i/14 …`; exhaustion → `provider unavailable` `TransportError` |
 
-Recoverable 429s that succeed mid-backoff do **not** become `PREDICT_CRASH`.
-Exhausted retries still fail closed as transport error (logged as provider
-failure after bounded policy).
+The retry does not restart a leg, advance an agent step, mutate history, or
+touch QEMU state. A recovered request therefore resumes the same trajectory
+turn. Non-transient HTTP errors and malformed responses still fail immediately.
+Exhaustion remains fail-closed after the bounded policy.
+
+The superseded 5-retry policy (2/4/8/16/32s, 429 only) was stopped after one
+Gate 0A instrument leg and archived as invalidated; it is not combinable with
+the fresh run.
 
 ## 3. Shared path (invariant)
 
