@@ -151,18 +151,36 @@ Runtime records `model=openai/gpt-5.5` with `agent=qwen_cuabash+OpenRouterChatCo
 
 An earlier draft of this section assumed the GPT lane was immune because it used typed `computer_call` items. **That assumption is withdrawn:** §0.2 establishes that `gpt-5.5` runs the *same generic XML executor* as the Qwen lanes, so the near-miss parser sits on the GPT path too. The hazard is not hypothetical instrument drift; it is a **known parser-availability difference between lanes**.
 
-What differs across lanes is not only parser *logic* but whether the near-miss module was **importable at launch**: the §0.3 patch wires `PYTHONPATH` in `scripts/paper2_exec_run.sh`, while the GPT lane launches through `scripts/study2_exec_run.sh` / `study2_run_mypcbench.py`. Whether near-miss classification was live in the GPT lane at `e8f6289` is therefore an **open verification item**, not an assumption in either direction.
+What differs across lanes is not only parser *logic* but whether the near-miss module was **importable and hooked at launch**. An earlier draft of this section guessed that the GPT lane lacked the wiring; **host verification reversed that** — the two launch scripts were the wrong way round:
 
-**Gate (run before Claude starts and before any coverage table).**
+| Fact (host-verified at `e8f6289`) | Status |
+| --- | --- |
+| `scripts/study2_exec_run.sh` L60 exports `PYTHONPATH="$H/agent-harness:$A/scripts:$A…"` | GPT lane **has** the wiring |
+| `scripts/study2_run_mypcbench.py` L154–158 calls `apply_all()` → `apply_near_miss_parser()` → monkeypatch of `agents.qwen_cua`, **before** `rmb.main` | Hook applied per cell |
+| Import failure behaviour | **Raises** — the cell cannot start, so a silent `ImportError` is impossible on this path |
+| Live GPT process `313088` env | `PYTHONPATH=…/agent-harness:…/scripts:…/agent` |
+| `paper2_exec_study2-gpt.log` | `near_miss_parser: True` from **leg 1** (`10:19:59Z`), 58 occurrences |
+| `scripts/paper2_exec_run.sh` at `e8f6289` | **No** `PYTHONPATH` export, no near-miss call — this was the unwired path the §0.3 patch fixed |
 
-1. For each lane — 9B, GPT (`study2-gpt`), Flash post-patch — record the parser SHA256 actually loaded at runtime and whether near-miss import succeeded. Absence of the module and silent `ImportError` must be distinguishable in the record.
-2. Replay every archived 9B and GPT trajectory through the post-patch parser and assert (i) zero `NEAR_MISS_CANONICALIZED` events and (ii) per-step parse results and terminal reasons **byte-identical** to pre-patch. Record as a first-class artifact.
+So the whole GPT lane is instrument-homogeneous with near-miss **ON**, and no cell of it silently lost the module.
 
-- **Pass** → the added shapes are proven unused by those lanes; GPT continues, 9B needs no rerun, and the proof goes in the appendix.
-- **Fail on 9B** (plausible — same dialect) → 9B reruns from leg 1 on the patched parser. Run 9B **first**, since it sets the scope before any rerun is launched.
-- **Fail on GPT** → the GPT lane is not poolable across the parser difference. Because GPT shares the XML scaffold, this is now a live possibility rather than a formality, and it compounds the §0.2 open decision.
+**Resulting pooling groups.**
+
+| Group | Lanes | Near-miss |
+| --- | --- | --- |
+| A | GPT `study2-gpt` (leg 1 → now) at `e8f6289`; Flash post-patch job `58369` from leg 1 | **ON** |
+| B | Flash pre-patch 26 checkpointed cells (finished `2026-09-07T05:58:52Z`, resume HEAD `aa060b2`, zero `near_miss_parser` lines) | **OFF** |
+| ? | Qwen 3.5-9B — status not yet verified | **open** |
+
+Group B is already invalidated by §0.3, so its exclusion costs nothing. **Group A pooling still needs one proof**, because `e8f6289` and `0773242` are different trees: the patch is claimed to add `classify_parse_event` audit labels only, so replay must show per-step parse results and terminal reasons **byte-identical** across the two parser versions. Audit labels may differ; decisions may not.
+
+**The remaining scope question is 9B, not GPT.** If the 9B lane ran with near-miss OFF it belongs to group B and is not poolable with GPT or post-patch Flash, which would force a 9B rerun. Verify 9B **first** — it decides the rerun scope, exactly as before, but for the opposite reason from the one this section originally gave.
+
+**Do not resume the remaining Flash legs.** Continuing the pre-patch output root under `e8f6289` would produce a corpus split across two parser configurations inside one lane — precisely what archiving the pre-patch corpus was meant to prevent. The fresh job `58369` from leg 1 is the correct construction; §0.3's no-resume rule and `DO_NOT_RESUME.txt` stand.
 
 Claude is covered by the same replay proof, or by showing the canonicalisation cannot execute on the Claude path — whichever is evidenced, not asserted.
+
+**One identifier to pin.** Earlier host reporting named the patch as `0773242` (*Wire near-miss parser on paper2_exec PYTHONPATH*, parser SHA256 `fa7263d6…`), while this round refers to a near-miss patch `e74ff99` @ `08:21Z`. These are presumably the implementation and the wiring commits, but the parser version per lane must be recorded by **SHA256 of the loaded module**, not by commit subject.
 
 ### 0.5 Dated amendment — two hosts in parallel (2026-09-08)
 
@@ -278,7 +296,7 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.1 | 2026-09-06 | GPT paused — OpenRouter transport invalid, native 403 |
 | 0.2 | 2026-09-08 | GPT lane ran a **substituted substrate** (generic XML protocol / chat-completions); no adapter exists; native Gate 0 FAILED; §0.1 chain never closed; canonical reporting sentence + mandatory substrate footnote; seal not rewritten |
 | 0.3 | 2026-09-08 | Flash stopped as Gate 0A instrument defect; pre-patch corpus invalidated |
-| 0.4 | 2026-09-08 | Parser equivalence gate before Claude and the Flash rerun |
+| 0.4 | 2026-09-08 | Parser equivalence gate; GPT lane verified near-miss **ON** from leg 1; pooling groups; 9B status is the open scope question |
 | 0.5 | 2026-09-08 | Two hosts in parallel; per-lane parity check |
 | 0.6 | 2026-09-08 | Failure taxonomy, step metering, provider 400s, empty-action criterion |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
