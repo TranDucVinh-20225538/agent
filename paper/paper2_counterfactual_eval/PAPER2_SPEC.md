@@ -12,6 +12,36 @@ reliability metric.
 
 ---
 
+## 0. Claim boundary (strengthen Paper 2; leave Paper 1 alone)
+
+Advisor split of the story into two messages. Paper 2 **owns only (1)** as a
+*decision* question; it does **not** claim (2).
+
+| # | Message | Paper 2? |
+|---|---|---|
+| **(1)** | Benchmark score can overestimate / fail to certify grounding in the determining state that actually holds | **Yes** — Layer A (calibration) + Layer B (top-1 disagreement \(\arg\max \overline{S}\) vs \(\arg\max \overline{\mathrm{STS}}\)) on a frozen confirmatory universe |
+| **(2)** | In a live episode, the agent overlooks updated data and acts on a *stale* belief (revise mid-task / mid-memory) | **No** — out of scope. Base and CF remain **independent** episodes, same as Paper 1. Mid-episode update, memory invalidation, and adversarial stale-state attacks are Paper 3+ / adjacent literature (e.g. STALE, arXiv:2605.06527); pre-registration draft at `PAPER3_STALE_PILOT_SPEC.md` (DRAFT_NOT_FROZEN) |
+
+**How Paper 2 answers the scale critique of Paper 1.** Paper 1 was an
+existence / separability audit (small \(n\), few Type B cells). Paper 2 does
+**not** re-estimate a Type B rate from those 3 cells. It runs a
+**pre-registered selection experiment** on the frozen analysis universe
+(\(|\mathcal{M}|=4\), \(|\mathcal{T}|=25\), 228 legs after inject-probe;
+see `out/paper2_analysis_universe.md`). Nulls in §6 remain publishable:
+alignment of top-1 is a scientific answer, not a failed paper.
+
+**Adjacent, not the same object.** BenchJack / grader-gaming audits
+(arXiv:2605.12673) show high scores without solving via *reward hacks on the
+judge*. Paper 2 keeps the judge fixed and moves *task-relevant guest gold*
+\(D\); the failure mode is score–tracking disagreement and possible
+**model-selection** error, not exploit construction against the harness.
+
+**Deployment wording (keep narrow).** Target decision (§2): pick one CUA for
+a workflow where determining records can change **between episodes**. Do not
+sell Paper 2 as “agents ignore updates during an ongoing task.”
+
+---
+
 ## 1. Primary hypothesis
 
 **Decision question.** If a lab must pick one CUA for a stateful environment,
@@ -97,6 +127,30 @@ for any reason.
   hard-exclusion two bullets above — it is disclosed, not used to argue
   Flash is the scientifically preferable model. The original slot (A3B)
   is recorded, not silently dropped.
+
+- **2026-09-08 — `gpt-5.5` keeps its slot; its *execution substrate*
+  changes.** The sealed row (`agent_type: openai_cuabash`, OpenAI Responses)
+  describes the **Paper 1 / native** instrument. Study 2 measures
+  `openai/gpt-5.5` on the **frozen generic XML CUA protocol**
+  (`qwen_cuabash` + OpenRouter `chat/completions`, no `tools`, no
+  `previous_response_id`), because native CUA Gate 0 on the run host
+  **FAILED** — the provider pre-executed the tool
+  (`shell_call_output` inside turn 1), so client-side tool ownership could
+  not be established and that path was never used. Evidence, identity
+  split, and the claim boundary: `EXECUTION_MANIFEST.md` §0.2.
+
+  This is a change of **substrate**, not of the model list: \(\mathcal{M}\)
+  still contains the id `gpt-5.5`, and nothing was added, dropped, or
+  reordered after seeing an outcome. `registry/sealed_models.json` is
+  **not** rewritten to match runtime — a seal edited to agree with what
+  happened is no longer evidence of what was promised.
+
+  **Comparability consequence.** Study 2's roster is compared *within the
+  generic-executor instrument* (Flash / GPT / Claude on the same XML loop),
+  **not** against Paper 1's native GPT. Any \(\mathcal{M}\) table that
+  prints `openai_cuabash` without the substrate footnote invites a
+  native-CUA reading, which is not poolable with the generic lanes; the
+  footnote is mandatory wherever the roster appears.
 
 ---
 
@@ -216,6 +270,62 @@ rule is added to this file **before** run.
 
 Fishing: no post-hoc restriction of \(\mathcal{T}\) or \(\mathcal{M}\) to
 produce Case 3.
+
+### 6.1 Amendment log (§6) — power, rank stability, extension (2026-09-08)
+
+**Why now.** §6 pre-registers a *per-agent* inclusion threshold
+(\(n_{\min}=3\)) but no rule for the case where **every** agent is thin, and
+no rule against extending the run until a result appears. Partial execution
+coverage has made both cases plausible, so the rules are fixed here before
+any STS, \(Y\), or cross-agent rank exists.
+
+**Disclosed state at the time of writing.** *Observed:* per-leg terminal
+reasons and per-leg judge scores \(S\) for the in-progress GPT lane
+(25/57 checkpointed, 11 `DONE`); the pre-patch Flash lane (stopped and
+archived as an invalidated instrument corpus); GPT valid-pair yield of **2**
+on the first 12 tasks touched. *Not observed and not computed:* any
+\(D\)-matching, any \(Y\), any STS, any \(\overline{S}\), any rank, any
+cross-agent comparison. No agent has been added, dropped, or reordered, and
+\(\mathcal{T}\), \(D\), and the interventions are untouched.
+
+**(a) Per-agent inclusion — unchanged.** \(n_{\min}=3\) valid pairs to be
+ranked; below that the agent is reported, not ranked. §3 hard exclusions
+still apply.
+
+**(b) Confirmatory Layer B requires rank stability, not a larger \(n\).**
+A disagreement (§6 primary) is **confirmatory** only if it survives
+leave-one-pair-out: for every ranked agent \(i\) and every pair
+\((i,j)\in\mathcal{A}\), recomputing both means without that pair still
+gives \(\arg\max\overline{S}\neq\arg\max\overline{\mathrm{STS}}\).
+Also report a paired bootstrap over tasks within agent (\(B=10{,}000\))
+frequency of disagreement. A disagreement that a single pair can erase is
+reported as **exploratory**, with the leave-one-out result stated.
+The rule is symmetric: if *agreement* flips under leave-one-pair-out, top-1
+is called **indeterminate at this \(n\)** — not "aligned".
+
+**(c) If fewer than three agents reach \(n_{\min}\).** Layer B is not
+evaluated. The paper reports Layer A, coverage, and the instrument, and the
+§6 null table gains the reading *under-powered for the selection test at
+this scale*. That is a stated outcome, not a failed experiment.
+
+**(d) No optional stopping.** Low yield does not license extending the
+current experiment. Any extension — more tasks, larger step budget, or
+re-running non-`DONE` cells — is a **separate, newly pre-registered**
+experiment with its own dated section and seed, reported alongside and
+never merged into the frozen leg set. An extension may be motivated by
+coverage/yield only, never by which agent is currently \(\arg\max\).
+
+**(e) Completion-conditional bias must be reported.** \(\mathcal{A}\)
+conditions on both legs being `DONE`, and `DONE` correlates with task
+difficulty and agent capability, so \(\overline{\mathrm{STS}}\) is a
+completion-conditional quantity. Report these pre-registered descriptive
+companions to Layer A: (i) valid-pair count and `DONE` rate per agent;
+(ii) mean \(S\) on cells excluded from \(\mathcal{A}\), split by terminal
+reason; (iii) the count of excluded cells scoring \(S\ge 0.9\) with no
+canonical `DONE`. Item (iii) is descriptive evidence about score
+attachment — the valid-pair filter removes exactly the cells where the
+rubric is most detached from completion, which makes Layer A
+**conservative**. None of (i)–(iii) is STS and none enters \(\arg\max\).
 
 ---
 

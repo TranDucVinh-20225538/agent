@@ -13,8 +13,13 @@ The deliverable of this phase is a **closed measurement object** and a
 **gold-matching protocol**. Validation runs, a larger registry, and other
 harnesses are out of scope until the object is frozen.
 
-Working title (not locked): *How Should We Evaluate Computer-Use Agents When
-Completion Scores Are Not Enough?*
+Working title (not locked): *Does Benchmark Score Pick the Same CUA as
+State Tracking When Determining State Moves?*
+
+**Claim boundary.** Paper 2 answers whether the Paper 1 measurement gap has
+**decision consequence** (score-based vs STS-based selection). It does **not**
+demonstrate mid-episode stale-state revision; that is a different object
+(see `PAPER2_SPEC.md` §0).
 
 ---
 

@@ -1,20 +1,19 @@
-# Paper 2 — design freeze (no runs)
+# Paper 2 — counterfactual evaluation (decision experiment)
 
-**Status:** Phase 1–2 only. Paper 1 is frozen. Do not run agents, APIs, QEMU, or OpenRouter.
+**Status:** Analysis universe frozen (`out/paper2_analysis_universe.md`);
+execution manifest in `EXECUTION_MANIFEST.md`. Paper 1 left as-is.
 
-**Object:** a measurement protocol for the three variables Paper 1 separated
-(completion ≠ tracking ≠ score sensitivity), plus a graded State Tracking Score
-(STS) with an explicit gold-matching protocol.
-
-**Not this paper:** a new OSWorld-scale harness, cross-harness baselines, or
-“30–50 more tasks” as a KPI.
+**Owns:** claim (1) — does \(\arg\max \overline{S}\) equal \(\arg\max\) STS on
+a confirmatory universe? **Does not own:** claim (2) mid-episode stale
+revision (STALE-like). Details: `PAPER2_SPEC.md` §0.
 
 | Doc | What |
 |---|---|
+| `PAPER2_SPEC.md` | Hypothesis, inclusion, STS, disagreement, claim boundary §0 |
 | `DESIGN.md` | Measurement object, matching, anti-goals |
-| `PAPER2_SPEC.md` | Decision experiment: hypothesis, inclusion, STS, disagreement |
+| `EXECUTION_MANIFEST.md` | Harness / seed / API lanes before cell 1 |
 | `protocol/` | Executable matching + STS |
-| `registry/paper1_replay.json` | Paper 1 \(D\) replay, not confirmatory \(\mathcal{T}\) |
+| `registry/` | Sealed \(\mathcal{M}\)/\(\mathcal{T}\), semantic \(D\) |
 
 ```
 python3 -m unittest discover -s paper/paper2_counterfactual_eval/protocol -q
