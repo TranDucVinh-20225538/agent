@@ -35,10 +35,10 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 
 | # | Model | Lane / host | Status |
 | --- | --- | --- | --- |
-| 1 | Qwen 3.5-9B | SMALL (key now dead) | **COMPLETE, pre-patch instrument** — §0.4 outcome is now an in/out decision, not a rerun (§0.7) |
-| 2 | Qwen 3.8-Flash | SMALL → `008`, both unfunded | **UNRUNNABLE — no valid legs** (pre-patch invalidated §0.3; post-patch job `58369` died on key exhaustion). Excluded-with-reason per §0.7 |
-| 3 | GPT-5.5 | `008` (now gone), node30, `results/paper2_exec/study2-gpt` | **COMPLETE** — 57/57, `LANE_COMPLETE`, 2026-09-09T06:37 ICT; 32 `DONE` / 25 `TERMINAL_FAIL`; substituted substrate, §0.2 |
-| 4 | Claude Opus 4.6 | Anthropic native (only funded lane) | **NEXT — run now** (§0.7) |
+| 1 | Qwen 3.5-9B | SMALL (exhausted) | **COMPLETE, pre-patch instrument** — §0.4 replay gate pending; rerun purchasable again on `008` (§0.8) |
+| 2 | Qwen 3.8-Flash | SMALL exhausted; `008` funded | **NO VALID LEGS YET** — pre-patch invalidated (§0.3), post-patch `58369` died on key exhaustion (§0.7). §0.7 exclusion **withdrawn**; runnable as a fresh lane from leg 1 after Claude (§0.8) |
+| 3 | GPT-5.5 | `008`, node30, `results/paper2_exec/study2-gpt` | **COMPLETE + FROZEN** — 57/57, 32 `DONE` / 25 `TERMINAL_FAIL`, 2026-09-09T06:37 ICT; `GPT_FROZEN.txt`, `out/study2_gpt_freeze.json`, archive `chmod a-w`; substituted substrate §0.2 |
+| 4 | Claude Opus 4.6 | `008…9dd` **via generic XML bridge, not Anthropic native** | **RUNNING** — fresh 57 legs from leg 1, PID `920150`; substrate disclosure §0.8 |
 
 Original order (9B → Flash → Claude → GPT) is superseded for **scheduling only** by §0.5. \(\mathcal{M}\), \(\mathcal{T}\), \(D\), and per-cell policy are unchanged.
 
@@ -213,6 +213,24 @@ Comparability is only preserved if every lane, on every host, is verified identi
 
 **Action.** Run the Claude lane now on the Anthropic key, full 57 legs from leg 1, all other frozen knobs unchanged (§1–§3). Do not substitute a cheaper model for Flash's slot: adding an agent at this stage, after outcomes exist for two lanes, is exactly the post-hoc roster editing §3 forbids. If OpenRouter funding returns, Flash may be run **only** as a fresh lane from leg 1, disclosed with its funding gap and its own parity record.
 
+### 0.8 Dated amendment — `008` is funded after all; Claude also runs the generic substrate (2026-09-09)
+
+Two facts from the run host supersede parts of §0.7, which was written from a chat report of the funding state rather than from a balance record.
+
+**(a) OpenRouter `008…9dd` is live with ≈ $1013.** §0.7's premise — "no funded transport" — therefore does **not** hold for Flash. Consequences: Flash is **runnable again as a fresh lane from leg 1** (never a resume of `58337`/`58369`), so its exclusion in §0.7 is **withdrawn as premature**; and the §0.4 gate for 9B reverts to a *rerun-scope* question, since a 9B rerun is purchasable again. Roster can be four. **Funding status must be read from a recorded balance at lane start, not from prose** — this section exists because the reverse happened.
+
+**(b) The Claude lane is not Anthropic native.** As launched: `model=anthropic/claude-opus-4.6` through the **same generic XML bridge over OpenRouter chat-completions** (`qwen_cuabash`, key `008…9dd`), PID `920150`, log `results/paper2_exec_study2-claude.log`, leg 1 `retrieval-f010` G0, `max_steps=80`, seed `20260904`, 57 legs, no partial filter, no resume of Flash/GPT state. §1's frozen row (`claude-opus-4-6` / `claude_cuabash` / Anthropic) describes the **Paper 1** instrument, exactly as the seal does for GPT; it is **not** rewritten to match runtime.
+
+**What this buys and what it costs.** All Study 2 lanes now share one instrument — generic XML protocol over OpenRouter chat-completions — so the roster is compared with the **harness held constant**, which is cleaner than the sealed plan and is the honest way to describe it. The cost is that `PAPER2_SPEC.md` §3's design minimum "at least two provider APIs" is satisfied only by counting **upstream** providers (Alibaba, OpenAI, Anthropic) behind a **single API surface**. State it that way; do not claim two API surfaces.
+
+**Canonical sentence for the Claude lane** (parallel to §0.2, mandatory wherever the roster appears):
+
+> The Study 2 Claude lane measures **`anthropic/claude-opus-4.6` on the frozen generic XML CUA protocol** (OpenRouter `chat/completions`, no `tools`). It is **not** the sealed Paper 1 instrument (`claude-opus-4-6` / `claude_cuabash` / Anthropic native). Comparability is within the Study 2 generic-executor roster.
+
+**Budget hazard to monitor (operational, not a design change).** On chat-completions the client resends the whole trajectory each step, so per-leg cost grows roughly with the square of step count, and Opus-class pricing with screenshots makes 57 × up to 80 steps the most expensive lane by a wide margin. Record spend after the first ~5 legs and extrapolate before assuming 57 legs fit in $1013. If the balance cannot cover both, **Claude is the primary lane and takes priority**; Flash is cheap and can be secured afterwards from whatever remains. Do **not** run Flash concurrently on the same key while Claude is live: shared-key 429s would be charged to Claude's legs as infra retries under §3, and the primary lane must not be degraded to save queue time.
+
+**Unchanged by this section.** GPT stays frozen and complete (57/57, `GPT_FROZEN.txt`, checksums in `out/study2_gpt_freeze.json`, archive `chmod a-w`); the invalidated Flash corpora stay invalid; §0.6 taxonomy and §6.1 analysis rules stand.
+
 ---
 
 ## 1. Harness freeze
@@ -313,4 +331,5 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.5 | 2026-09-08 | Two hosts in parallel; per-lane parity check |
 | 0.6 | 2026-09-08 | Failure taxonomy, step metering, provider 400s, empty-action criterion |
 | 0.7 | 2026-09-09 | OpenRouter funding lost; Flash excluded-with-reason; 9B gate becomes in/out; roster = 3 (or 2 → Layer B not evaluated); run Claude |
+| 0.8 | 2026-09-09 | `008` funded after all → §0.7 exclusion of Flash **withdrawn**; Claude also runs the generic XML substrate, not Anthropic native; single API surface; budget hazard |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
