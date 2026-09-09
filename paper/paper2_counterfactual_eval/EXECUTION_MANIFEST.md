@@ -248,6 +248,10 @@ Legs 1–4 of the Claude lane all burned the full budget (81, 80, 80, 80 steps) 
 
 **Roster consequence.** If non-termination persists across the lane, Claude has 0 valid pairs, is **reported but not ranked** (§3, \(n_{\min}=3\)), and the primary lane contributes nothing to Layer B. Ranked agents would then be 9B + GPT (+ Flash if it runs), which makes the §0.4 gate on 9B and the Flash lane decisive for whether Layer B is evaluable at all under `PAPER2_SPEC.md` §6.1(c). Running all 57 legs is still correct: 0/57 is a far stronger statement than 0/4, and the schedule is pre-registered.
 
+**Update, same day — the lane-wide reading is withdrawn.** Leg 8 `counterfactual-f013` G0 terminated: `DONE` at **21 steps** with rubric **1.00**. So Claude does emit the canonical terminate form inside the matrix, and the finding is **not** "Claude never terminates under this protocol". Through 8 legs the pattern is that termination coincides with *solving*: the one `DONE` is short and perfect, while the seven non-terminating legs each ran the full budget at 0.00–0.75. Provisional reading, to be settled on the full 57: **non-termination is a symptom of not solving, not a protocol quirk** — the agent keeps verifying when it has not converged. That is a weaker claim about the protocol and a more ordinary one about the agent, and it must replace the earlier wording wherever the finding is written.
+
+**Analysis consequence, and it cuts against Claude's own numbers.** If termination coincides with solving, then for Claude the valid-pair filter selects its *successful* subset far more sharply than it does for GPT, whose `DONE` legs span a wide score range. Claude could therefore enter Layer B with very few pairs, all scoring near 1.00, and take \(\arg\max\overline{S}\) purely because it was scored only on its wins. This is exactly the failure mode §6.1(f) was pre-registered for, so the common-support analysis and the printed \(|\mathcal{A}_i|\) are not optional here — they are what stops that artefact from being read as a result. §6.1(e)'s completion-conditional reporting applies with extra force to this lane.
+
 ---
 
 ## 1. Harness freeze
