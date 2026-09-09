@@ -35,10 +35,10 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 
 | # | Model | Lane / host | Status |
 | --- | --- | --- | --- |
-| 1 | Qwen 3.5-9B | SMALL | **DONE / pre-patch instrument** — subject to the §0.4 replay proof |
-| 2 | Qwen 3.8-Flash | SMALL, HPC job `58337` → **`58369`** (node002) | Pre-patch lane stopped at 29/57 and invalidated (§0.3); **post-patch rerun LIVE from leg 1** at `0773242` |
-| 3 | GPT-5.5 | LARGE `008`, node30, `results/paper2_exec/study2-gpt` | **RUNNING** — 26/57 at 2026-09-08T05:26:30Z; scaffold substituted, see §0.2 |
-| 4 | Claude Opus 4.6 | LARGE | **NOT OPENED** — gated on §0.4 |
+| 1 | Qwen 3.5-9B | SMALL (key now dead) | **COMPLETE, pre-patch instrument** — §0.4 outcome is now an in/out decision, not a rerun (§0.7) |
+| 2 | Qwen 3.8-Flash | SMALL → `008`, both unfunded | **UNRUNNABLE — no valid legs** (pre-patch invalidated §0.3; post-patch job `58369` died on key exhaustion). Excluded-with-reason per §0.7 |
+| 3 | GPT-5.5 | `008` (now gone), node30, `results/paper2_exec/study2-gpt` | **COMPLETE** — 57/57, `LANE_COMPLETE`, 2026-09-09T06:37 ICT; 32 `DONE` / 25 `TERMINAL_FAIL`; substituted substrate, §0.2 |
+| 4 | Claude Opus 4.6 | Anthropic native (only funded lane) | **NEXT — run now** (§0.7) |
 
 Original order (9B → Flash → Claude → GPT) is superseded for **scheduling only** by §0.5. \(\mathcal{M}\), \(\mathcal{T}\), \(D\), and per-cell policy are unchanged.
 
@@ -200,6 +200,19 @@ Comparability is only preserved if every lane, on every host, is verified identi
 
 **Criterion (not the verdict) for the residual empty-action label.** The choice between *agent execution failure* and *model–harness incompatibility* for residual `NO_ACTION_ABORT` will be made from the post-rerun **taxonomy** — the share of `MALFORMED_REJECTED` shapes still unambiguous versus genuinely empty or ambiguous responses — and made **before** any STS, \(Y\), or rank is computed for that model. It may not be decided from the model's STS or its position in a ranking. Consequences of each label (coverage-only versus excluded-with-reason) follow `PAPER2_SPEC.md` §3 and §6.1.
 
+### 0.7 Dated amendment — OpenRouter funding lost; Flash excluded, roster shrinks to three (2026-09-09)
+
+**Facts (billing, not outcomes).** `SMALL_KEY` was exhausted mid-run, which is what produced the burst of 1-step `TERMINAL_FAIL` legs in post-patch Flash job `58369` (legs 5, 16, 17, 18 and neighbours). The LARGE OpenRouter key `008` is no longer available either. The only funded lane is **Anthropic native**. None of this derives from any score, STS, or rank — no analysis has been computed.
+
+**Consequences, in order of importance.**
+
+1. **The 1-step Flash legs are `INVALID_INFRASTRUCTURE`**, not agent failures and not evidence about the §0.3 patch. Key exhaustion, not the parser, killed them; the patch is not implicated. They are archived and excluded.
+2. **Qwen 3.8-Flash has zero valid legs and no funded transport.** Pre-patch corpus invalidated (§0.3), post-patch run dead on billing. Flash is therefore **excluded-with-reason** — transport/billing unavailable, the same reproducible category §0.1 applied to GPT — not dropped for its scores, which were never computed. Its pre-patch corpus stays as **instrument-attrition evidence**, which the paper can report as a finding about the harness rather than about the model.
+3. **The §0.4 gate changes meaning for 9B.** It was a *rerun-scope* question while SMALL was funded. With SMALL dead and `008` gone, a 9B rerun is impossible, so the gate now decides **whether 9B is poolable at all**: pass → 9B stays in the roster; fail → 9B is disclosed as instrument-incompatible and excluded.
+4. **Roster arithmetic.** Ranked agents become 9B + GPT + Claude = **exactly three**, the minimum for a top-1 comparison. If 9B fails the §0.4 gate the roster is **two**, and per `PAPER2_SPEC.md` §6.1(c) Layer B is **not evaluated** and the paper reports Layer A, coverage, and the instrument with an under-powered reading. That is a stated outcome, reached by billing and instrument facts, not by looking at ranks.
+
+**Action.** Run the Claude lane now on the Anthropic key, full 57 legs from leg 1, all other frozen knobs unchanged (§1–§3). Do not substitute a cheaper model for Flash's slot: adding an agent at this stage, after outcomes exist for two lanes, is exactly the post-hoc roster editing §3 forbids. If OpenRouter funding returns, Flash may be run **only** as a fresh lane from leg 1, disclosed with its funding gap and its own parity record.
+
 ---
 
 ## 1. Harness freeze
@@ -299,4 +312,5 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.4 | 2026-09-08 | Parser equivalence gate; GPT lane verified near-miss **ON** from leg 1; pooling groups; 9B status is the open scope question |
 | 0.5 | 2026-09-08 | Two hosts in parallel; per-lane parity check |
 | 0.6 | 2026-09-08 | Failure taxonomy, step metering, provider 400s, empty-action criterion |
+| 0.7 | 2026-09-09 | OpenRouter funding lost; Flash excluded-with-reason; 9B gate becomes in/out; roster = 3 (or 2 → Layer B not evaluated); run Claude |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
