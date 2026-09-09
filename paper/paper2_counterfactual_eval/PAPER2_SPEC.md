@@ -315,6 +315,12 @@ experiment with its own dated section and seed, reported alongside and
 never merged into the frozen leg set. An extension may be motivated by
 coverage/yield only, never by which agent is currently \(\arg\max\).
 
+**(f) Common-support secondary, because \(\mathcal{A}\) is per-agent.** §5 defines \(\mathcal{A}\) as the valid pairs *of that agent*, so \(\overline{S}_i\) and \(\overline{\mathrm{STS}}_i\) are computed on **different task subsets for different agents**. At the yields being observed this is not a detail: an agent that completes few tasks is scored only on the subset it managed to finish — its easier subset — and can therefore show a *higher* \(\overline{S}\) than a stronger agent evaluated over a broader subset. A top-1 comparison across non-overlapping subsets compares different things.
+
+Pre-registered here, before any STS exists: alongside the §6 primary, report both means recomputed on the **common support** \(\mathcal{A}^\cap = \{j : (i,j)\in\mathcal{A}\ \forall i \text{ ranked}\}\), together with \(|\mathcal{A}_i|\) and \(|\mathcal{A}^\cap|\) printed next to every mean. The leave-one-pair-out and bootstrap rules of (b) apply to the common-support version as well.
+
+Reading: agreement between the per-agent and common-support top-1 strengthens whichever conclusion §6 reaches; **disagreement between them is a reported result**, read as the selection question being sensitive to which tasks each agent finished, not as licence to pick the version that looks better. If \(|\mathcal{A}^\cap| < 3\), the common-support analysis is reported as uninformative rather than quietly dropped.
+
 **(e) Completion-conditional bias must be reported.** \(\mathcal{A}\)
 conditions on both legs being `DONE`, and `DONE` correlates with task
 difficulty and agent capability, so \(\overline{\mathrm{STS}}\) is a
