@@ -35,7 +35,7 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 
 | # | Model | Lane / host | Status |
 | --- | --- | --- | --- |
-| 1 | Qwen 3.5-9B | SMALL (exhausted) | **COMPLETE, pre-patch instrument** — §0.4 replay gate pending; rerun purchasable again on `008` (§0.8) |
+| 1 | Qwen 3.5-9B | SMALL (exhausted), Study 1 runner | **COMPLETE but OUT of Layer B** — §0.4 replay PASS (0 hits / 0 parse changes); excluded for instrument + transport mismatch and \(\lvert\mathcal{A}\rvert=0\); coverage only (§0.10) |
 | 2 | Qwen 3.8-Flash | SMALL exhausted; `008` funded | **NO VALID LEGS YET** — pre-patch invalidated (§0.3), post-patch `58369` died on key exhaustion (§0.7). §0.7 exclusion **withdrawn**; runnable as a fresh lane from leg 1 after Claude (§0.8) |
 | 3 | GPT-5.5 | `008`, node30, `results/paper2_exec/study2-gpt` | **COMPLETE + FROZEN** — 57/57, 32 `DONE` / 25 `TERMINAL_FAIL`, 2026-09-09T06:37 ICT; `GPT_FROZEN.txt`, `out/study2_gpt_freeze.json`, archive `chmod a-w`; substituted substrate §0.2 |
 | 4 | Claude Opus 4.6 | `008…9dd` **via generic XML bridge, not Anthropic native** | **RUNNING** — fresh 57 legs from leg 1, PID `920150`; substrate disclosure §0.8 |
@@ -252,6 +252,42 @@ Legs 1–4 of the Claude lane all burned the full budget (81, 80, 80, 80 steps) 
 
 **Analysis consequence, and it cuts against Claude's own numbers.** If termination coincides with solving, then for Claude the valid-pair filter selects its *successful* subset far more sharply than it does for GPT, whose `DONE` legs span a wide score range. Claude could therefore enter Layer B with very few pairs, all scoring near 1.00, and take \(\arg\max\overline{S}\) purely because it was scored only on its wins. This is exactly the failure mode §6.1(f) was pre-registered for, so the common-support analysis and the printed \(|\mathcal{A}_i|\) are not optional here — they are what stops that artefact from being read as a result. §6.1(e)'s completion-conditional reporting applies with extra force to this lane.
 
+### 0.10 Dated resolution — 9B is out of Layer B; §0.4 replay PASS with one half inconclusive (2026-09-09)
+
+Offline, no API, Claude untouched (PID `920150`, 18/57). Artifacts: `out/study2_section0_notes.md`, `out/study2_gate04_9b_nearmiss.json`.
+
+**§0.4 replay on 9B.** 57 trajectories, 480 steps carrying a `response`, replayed OFF (`qwen35vl_agent.py` `f478ebe6…`, Gate −1 pin) against ON at `e8f6289` (`near_miss_xml.py` `c0723e43…`): **0 near-miss hits, 0 parse changes → PASS**. Adding near-miss does not change 9B's parses, so no lane needs rerunning on that account. **One half is inconclusive:** commit `0773242` — reported earlier as the Flash patch with parser SHA256 `fa7263d6…` — **is not present on the host**, so `e8f6289` vs `0773242` could not be compared. That is the second time this identifier has not survived checking, which is why §0.4 requires parser identity by **SHA256 of the loaded module**, never by commit subject. Until it resolves, no parity claim may cite `0773242`.
+
+**9B does not enter Layer B**, on two independent grounds. Seven-item check:
+
+| # | Check | 9B vs Study 2 |
+| ---: | --- | --- |
+| 1 | Universe \(\mathcal{T}\) | same (25 tasks / 57 legs) |
+| 2 | Instrument | **different** — Study 1 runner, not the Study 2 bridge |
+| 3 | Transport | **different** — SMALL / `call_llm`, not `008` chat-completions |
+| 4 | Judge | same pin `cd88a37c…` |
+| 5 | Terminal rule | same Gate −1.5; 0 mismatches |
+| 6 | Gold | same analysis universe |
+| 7 | \(\mathcal{A}\) definition | same (G0 ∧ G1 `VALID_DONE`) — but 9B has **0 valid pairs** |
+
+Sharing \(\mathcal{T}\), judge, and gold does not repair an instrument and transport mismatch, and \(|\mathcal{A}_{9B}|=0\) makes the question moot regardless. 9B is **coverage, reported not ranked**.
+
+**Roster arithmetic, and it now rests on Flash.** Ranked candidates are GPT (9 valid pairs) and Claude (≈3 projected). With 9B out, **Flash decides whether Layer B exists at all**: Flash with ≥3 valid pairs gives three ranked agents; Flash without them leaves two, and `PAPER2_SPEC.md` §6.1(c) then applies — Layer B is not evaluated and the paper reports Layer A, coverage, and the instrument. Flash has moved from "robustness" to load-bearing.
+
+**§0.9 addendum — the prompt.** The `qwen_cuabash` path does tell the agent *how* to stop (`action=terminate`, `status=success|failure`, final answer written before the stop signal) but carries **no** `COMPLETION_DISCIPLINE` injection telling it not to stop early. So §0.9 may not be written as "the protocol pushed the model to exhaust the budget"; the modest wording stands. The 3-step aborts are an XML envelope problem, unrelated to the terminate instruction.
+
+### 0.11 Dated issue — near-miss coverage is asymmetric across dialects (2026-09-09)
+
+**Fact.** Claude's two 3-step legs (`counterfactual-f002` G0 and G2) are `EMPTY_XML` ×2 → `NO_ACTION_ABORT`, labelled **`EMPTY_XML_ABORT`**: the model emitted `<function=left_click>` and `<function=triple_click>` instead of the `computer_use` envelope, the parser closed, no action issued, rubric 0.0. G1 of the same task ran the full 80 steps, so the environment was alive. Near-miss did **not** rescue these (`codes = []`).
+
+**Why this is more than a label.** §0.3 licensed stopping and patching Flash precisely because *an unambiguously intended action was being discarded on an envelope technicality*. `<function=left_click>` is the same category. But the enumerated canonicalisation was built from **Flash-derived fixtures**, so the parser is now more forgiving of Flash's dialect than of Claude's. That is a **per-model instrument advantage**, the exact hazard §0.4 exists to prevent, and it would flow straight into \(\overline{S}\) and \(\overline{\mathrm{STS}}\) through which legs reach `DONE`.
+
+**Not resolved by patching now.** Extending the enumeration to Claude's shapes would require rerunning Claude from leg 1 (§0.3 terms), and patching mid-lane is forbidden. Consistency is therefore restored in **analysis**, not in the harness.
+
+**Pre-registered, before any pair count.** Report per lane the count of `NEAR_MISS_CANONICALIZED` actions and of `MALFORMED_REJECTED` shapes with unambiguous intent, and run Layer A/B **twice**: once as executed, and once with near-miss rescues **treated as rejected**, recomputing terminal outcomes from the archived trajectories with the replay machinery. If the two agree, the asymmetry is immaterial and that is stated. If they disagree, the as-executed ranking is **not** reported as confirmatory, because part of it would rest on which model's dialect happened to be in the fixture set. Neither version may be chosen after seeing which is more favourable.
+
+**Also required:** the same replay must report the rescue count for the **GPT** lane, which ran with near-miss ON. A large GPT rescue count against zero for Claude is the same asymmetry in a second place.
+
 ---
 
 ## 1. Harness freeze
@@ -354,4 +390,6 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.7 | 2026-09-09 | OpenRouter funding lost; Flash excluded-with-reason; 9B gate becomes in/out; roster = 3 (or 2 → Layer B not evaluated); run Claude |
 | 0.8 | 2026-09-09 | `008` funded after all → §0.7 exclusion of Flash **withdrawn**; Claude also runs the generic XML substrate, not Anthropic native; single API surface; budget hazard |
 | 0.9 | 2026-09-09 | Claude non-termination diagnosed as behaviour, not a swallowed `DONE`; no patch; model × protocol reporting rule; roster consequence if it persists |
+| 0.10 | 2026-09-09 | 9B replay PASS but excluded from Layer B (instrument + transport mismatch, \(\lvert\mathcal{A}\rvert=0\)); `0773242` absent on host → that half inconclusive; Flash becomes load-bearing; prompt has no completion-discipline injection |
+| 0.11 | 2026-09-09 | Near-miss enumeration is Flash-derived, so Claude's `EMPTY_XML_ABORT` dialect is unrescued → per-model instrument advantage; mandatory dual analysis with rescues treated as rejected |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
