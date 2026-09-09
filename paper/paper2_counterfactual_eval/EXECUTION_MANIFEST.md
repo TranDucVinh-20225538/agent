@@ -231,6 +231,23 @@ Two facts from the run host supersede parts of §0.7, which was written from a c
 
 **Unchanged by this section.** GPT stays frozen and complete (57/57, `GPT_FROZEN.txt`, checksums in `out/study2_gpt_freeze.json`, archive `chmod a-w`); the invalidated Flash corpora stay invalid; §0.6 taxonomy and §6.1 analysis rules stand.
 
+### 0.9 Dated finding — Claude does not terminate; diagnosed as behaviour, not parser (2026-09-09)
+
+Legs 1–4 of the Claude lane all burned the full budget (81, 80, 80, 80 steps) with rubric scores 0.00, 0.75, 0.75, 0.30 and **zero** `DONE`. Because an agent that scores while never closing the episode is exactly the shape of a terminal-detection defect, the lane was diagnosed read-only before accumulating more legs.
+
+**Verdict: genuine non-termination, not a swallowed `DONE`.** Across those legs: 0 occurrences of `action=terminate`, 0 of `action=answer` (which also maps to `DONE`), 0 literal `DONE` in any raw response, 0 `traj.action == "DONE"`. The last five steps of every leg are still `left_click` / `key` / `type` / `wait` / bash — navigating, opening consoles, scraping — with no prose completion claim and no malformed terminate tag. An initial "complete" hit was a false positive from an autocomplete widget.
+
+**The bridge is not blind to Claude.** The canonical form the parser accepts is `<function=computer_use><parameter=action>terminate</parameter><parameter=status>success</parameter>`, and **Claude emitted exactly that in its Gate 0A smoke** (`results/paper2_exec/gate0a-claude/`, P4 `valid_done=true`, step 3 `action: DONE`). GPT emits it too on the same task (`retrieval-f017` G0, step 25). So the failure is Claude-in-this-matrix declining to terminate, not a parser gap.
+
+**Actions: none.** The lane keeps running to 57. `DONE` semantics, `inspect_last_action`, and Gate −1.5 parity are untouched, and near-miss is **not** extended to prose "finished/complete" — §0.3's prohibition on converting a missing action into `DONE` stands. Only a **malformed `terminate` XML** would reopen hypothesis (b); no such case exists.
+
+**Reporting rule (pre-registered here, before any pair count).** The rubric is judged per-step from screenshots and is independent of `VALID_DONE`, so these legs are the sharpest instance in the project of *score without completion* — an agent earning 0.75 while never closing the episode. Two constraints on how it is written:
+
+1. It is a statement about **model × protocol**, not about Claude's capability: the generic XML prompt and its termination instruction were not authored for Claude. Any claim must read "Claude Opus 4.6 under the Study 2 generic XML protocol did not terminate", never "Claude cannot complete these tasks". Whether the system prompt instructs termination explicitly is an **open read-only check**; the answer changes how strong the statement may be, and it must be resolved before the finding is written up.
+2. Legs without `DONE` remain **invalid pairs**. They are coverage, not \(Y=0\), and no pair is manufactured from a high rubric score.
+
+**Roster consequence.** If non-termination persists across the lane, Claude has 0 valid pairs, is **reported but not ranked** (§3, \(n_{\min}=3\)), and the primary lane contributes nothing to Layer B. Ranked agents would then be 9B + GPT (+ Flash if it runs), which makes the §0.4 gate on 9B and the Flash lane decisive for whether Layer B is evaluable at all under `PAPER2_SPEC.md` §6.1(c). Running all 57 legs is still correct: 0/57 is a far stronger statement than 0/4, and the schedule is pre-registered.
+
 ---
 
 ## 1. Harness freeze
@@ -332,4 +349,5 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.6 | 2026-09-08 | Failure taxonomy, step metering, provider 400s, empty-action criterion |
 | 0.7 | 2026-09-09 | OpenRouter funding lost; Flash excluded-with-reason; 9B gate becomes in/out; roster = 3 (or 2 → Layer B not evaluated); run Claude |
 | 0.8 | 2026-09-09 | `008` funded after all → §0.7 exclusion of Flash **withdrawn**; Claude also runs the generic XML substrate, not Anthropic native; single API surface; budget hazard |
+| 0.9 | 2026-09-09 | Claude non-termination diagnosed as behaviour, not a swallowed `DONE`; no patch; model × protocol reporting rule; roster consequence if it persists |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
