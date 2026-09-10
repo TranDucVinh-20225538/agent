@@ -288,6 +288,36 @@ Sharing \(\mathcal{T}\), judge, and gold does not repair an instrument and trans
 
 **Also required:** the same replay must report the rescue count for the **GPT** lane, which ran with near-miss ON. A large GPT rescue count against zero for Claude is the same asymmetry in a second place.
 
+### 0.12 Dated verification — judge frame handling is sound, and \(S\) is exactly re-derivable offline (2026-09-09)
+
+**Why this was checked.** §0.11 established that per-model instrument advantages flow into \(\overline{S}\). The score itself is produced by `MYPCBENCH_JUDGE_FLAVOR=per_step` from screenshots, so the *frame-selection* path is part of the instrument and had never been audited. Three failure modes were plausible and all would have moved \(S\) silently: lexicographic frame ordering, frame-count asymmetry under a max-reduce, and step-budget asymmetry under a max-reduce.
+
+**Frame ordering — clean.** Host-reported code path: `build_rubric_bundle` → `_index_steps_traj_layout` reads `traj.jsonl` line by line and takes each row's own `screenshot_file` as authoritative, falling back to a directory glob only when that field is empty; it then sorts **numerically** on `step_num` with a stable sort, so rows sharing a `step_num` keep trajectory order. The lexicographically-sorted `artifacts.screenshots` list belongs to the legacy `context/` layout and is **empty** on Paper 2 lanes. There is therefore no `step_10 < step_2` hazard. `step_num` is **not unique** — one `predict()` emitting several GUI actions writes one traj row and one PNG per action at the same `step_idx` — so any downstream re-measurement must join on `screenshot_file`, never on `step_num` alone (recorded in `P3_HARNESS_CONSTRAINTS.md`).
+
+**Frame-count asymmetry — mechanism real, effect exactly zero.** Frames per distinct step differ materially by model across the 94 locally-archived Paper 1 / Phase-B cells that carry `per_step_scores`: `openai` 1.224, `qwen35-9b` 1.183, `qwen35-a3b` 1.066, `qwen38-flash` 1.013, `claude` 1.007. Because scoring is a max-reduce, extra frames are weakly score-increasing, which is a per-model advantage of the §0.11 class. Re-reducing every cell with **one frame per `step_num`** (first-frame and last-frame policies both) changes \(S\) in **0 of 94 cells**, mean shift 0.00 for every model. The duplicate frames are intra-`predict()` pairs such as `moveTo`+`scroll`, i.e. near-identical screens, so no rubric item was ever carried by the extra frame alone. Recorded as immaterial; no analysis branch needed.
+
+**Step-budget asymmetry — no inflation.** A max-reduce over 80 steps grants more draws than one over 9, which would reward long flailing episodes. It does not: \(\mathrm{corr}(\text{steps}, S) = -0.275\) over the 94 cells, and cells in the 61+ step bucket average \(S = 23.3\) against 62–67 for the 1–10, 11–30 and 31–60 buckets. Long episodes are long because the agent is failing, and the max-reduce does not overturn that. This is the opposite sign of the hazard, so `MAX_STEPS_NO_DONE` legs are **not** score-inflated.
+
+**Score formula, reproduced exactly.** \(S = 100 \sum_i w_i \max_{\text{frames}} s_i\), with \(w_i\) from `rubrics[i].weight` and \(s_i\) the per-frame binary item score. This reproduces the stored `score` on **94/94 cells with zero deviation**. Consequence: every re-reduction robustness analysis — dropping frames, restricting to pre-`DONE` steps, reweighting, dropping items — is computable from the archived `rubric_result.json` at **zero judge cost**. §0.11's dual analysis needs replay only for terminal-outcome recomputation, not for rescoring.
+
+**Scope.** These numbers come from the 94 locally-archived Paper 1 / Phase-B cells, not the Study 2 corpus, which lives on the run hosts. The harness is the same, so the mechanism findings carry; the three quantities (frames per step by lane, dedup shift, step–score correlation) must be recomputed on the Study 2 archives after `LANE_COMPLETE`, which is free and requires no API calls.
+
+### 0.13 Dated amendment — roster arithmetic at 35/57, recorded before the Claude lane closes (2026-09-10)
+
+**Why now.** §0.9's "roster consequence" paragraph was written when 9B was still a candidate for ranking. §0.10 then removed 9B from Layer B. The arithmetic in §0.9 is therefore stale, and the correct arithmetic must be on paper **before** the Claude lane reaches `LANE_COMPLETE`, so that whichever branch of `PAPER2_SPEC.md` §6.1(c) fires was fixed in advance of the count.
+
+**Host-reported state, 2026-09-10 ~02:21 UTC.** Claude lane 35/57: **2 `DONE`**, 33 `TERMINAL_FAIL`. The two `DONE` legs are legs 8 and 9, both on `counterfactual-f013` (G0 and G1) — i.e. **one** valid pair, not two. Legs 10–35 added **zero** `DONE`; legs 21–35 all burned the budget. Now on leg 36 (`aggregation-f040` G0), ~21 legs and ~14 h remaining at the observed pace.
+
+**Not a `max_steps` breach.** `counterfactual-f003` G0/G1/G2 report 87–91 steps against `max_steps = 80`. This is the §0.6 metering difference: the checkpoint counts `traj.jsonl` rows, which include tool-rounds, while the budget is enforced on `step_idx`. §0.12 confirmed the same one-row-per-round layout. No knob moved.
+
+**Consequence, stated in advance.** \(n_{\min} = 3\) valid pairs is required to rank. Claude currently holds 1. Its `DONE` events are clustered by task rather than independent (§0.9: termination coincides with solving), so reaching 3 would require **two further tasks with both G0 and G1 terminating** inside the remaining ~7 tasks, after 26 consecutive legs with none. The realistic landing point is **Claude below \(n_{\min}\), reported but not ranked**.
+
+With 9B out (§0.10), the ranked roster is then **GPT + Flash = 2 agents**, which is fewer than three and therefore triggers `PAPER2_SPEC.md` §6.1(c): **Layer B is not evaluated.** Paper 2 in that branch reports Layer A, coverage, the completion-conditional bias analysis, and the instrument findings of §§0.2–0.12, and states that agent *selection* could not be tested at this \(n\) — it does not report a two-agent ranking as if it were the pre-registered Layer B result.
+
+**What is forbidden here.** Lowering \(n_{\min}\), counting G2 into pairs, admitting non-`DONE` legs as \(Y = 0\), re-ranking on \(\overline{S}\) alone, or stopping the Claude lane early to reallocate budget. `PAPER2_SPEC.md` §6.1 bars optional stopping, and 1/57 is a far stronger reported number than 1/35. The lane runs to 57.
+
+**Still live.** Flash has not started its fresh lane. If Flash lands \(\ge n_{\min}\) and Claude unexpectedly reaches 3, the roster is 3 and Layer B is evaluated normally under §6.1(c)–(f), with §0.9's warning about Claude being scored only on its wins handled by the §6.1(f) common-support analysis. Both branches are now written down; neither may be selected after the count.
+
 ---
 
 ## 1. Harness freeze
@@ -392,4 +422,7 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.9 | 2026-09-09 | Claude non-termination diagnosed as behaviour, not a swallowed `DONE`; no patch; model × protocol reporting rule; roster consequence if it persists |
 | 0.10 | 2026-09-09 | 9B replay PASS but excluded from Layer B (instrument + transport mismatch, \(\lvert\mathcal{A}\rvert=0\)); `0773242` absent on host → that half inconclusive; Flash becomes load-bearing; prompt has no completion-discipline injection |
 | 0.11 | 2026-09-09 | Near-miss enumeration is Flash-derived, so Claude's `EMPTY_XML_ABORT` dialect is unrescued → per-model instrument advantage; mandatory dual analysis with rescues treated as rejected |
+| 0.12 | 2026-09-09 | Judge frame path audited: ordering clean (join on `screenshot_file`, not `step_num`); frame-count asymmetry real but shifts \(S\) in 0/94 cells; \(\mathrm{corr}(\text{steps},S)=-0.275\) so no max-reduce inflation; \(S\) re-derived exactly on 94/94 → all re-reductions are free |
+| 0.13 | 2026-09-10 | Roster arithmetic corrected for 9B's exclusion, recorded at 35/57: Claude's 2 `DONE` are one pair; likely below \(n_{\min}\) → ranked roster GPT + Flash = 2 → §6.1(c) fires, **Layer B not evaluated**; 87–91-step legs are §0.6 metering, not a breach; both branches fixed in advance |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
+| `PAPER2_SPEC.md` §6.1(g) | 2026-09-10 | Two-ranked-agent branch fixed in advance: §6.1(c) unchanged (Layer B not evaluated), but a signed-difference comparison on common support with paired bootstrap may be reported as **exploratory**; void if ≥3 agents reach \(n_{\min}\); written before the Flash lane and before any STS exists |

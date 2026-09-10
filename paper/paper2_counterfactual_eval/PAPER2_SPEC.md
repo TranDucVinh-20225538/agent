@@ -333,6 +333,33 @@ attachment — the valid-pair filter removes exactly the cells where the
 rubric is most detached from completion, which makes Layer A
 **conservative**. None of (i)–(iii) is STS and none enters \(\arg\max\).
 
+**(g) Two ranked agents — signed-difference comparison, exploratory only (added 2026-09-10).**
+
+*Why now.* `EXECUTION_MANIFEST.md` §0.10 removed 9B from Layer B and §0.13 records the Claude lane at 35/57 holding **one** valid pair, so the ranked roster may land at two agents. This clause is written **before** the Flash lane starts, **before** the Claude lane closes, and before any STS value exists anywhere in the project: no \(|\mathcal{A}_i|\), no \(\overline{S}\), and no \(\overline{\mathrm{STS}}\) is known for any candidate pair of agents at the time of writing. It therefore fixes in advance the *only* form in which a two-agent result may appear.
+
+*(c) is unchanged.* With fewer than three agents at \(n_{\min}\), **Layer B is not evaluated** and the paper carries the *under-powered for the selection test at this scale* reading. Nothing below is Layer B, may be labelled Layer B, or may stand as the paper's answer to its title question.
+
+*What may additionally be reported.* Let \(i,k\) be the two agents reaching \(n_{\min}\) — determined by (a), never chosen — and let \(\mathcal{A}^\cap\) be the common support of (f). On \(\mathcal{A}^\cap\) define
+
+\[
+\Delta S = \overline{S}_i - \overline{S}_k,
+\qquad
+\Delta \mathrm{STS} = \overline{\mathrm{STS}}_i - \overline{\mathrm{STS}}_k .
+\]
+
+Report both magnitudes, a paired bootstrap over tasks in \(\mathcal{A}^\cap\) (\(B=10{,}000\), resampling tasks, both metrics recomputed on each resample), and the bootstrap frequency of \(\operatorname{sign}(\Delta S)\neq\operatorname{sign}(\Delta\mathrm{STS})\).
+
+*Why this is not the same as a two-agent \(\arg\max\).* An \(\arg\max\) over two agents is a bare pairwise comparison: it carries no uncertainty, its null frequency is roughly one half, and (b)'s leave-one-pair-out can be flipped by a single pair. The signed differences attach an interval to each quantity, so "the two metrics order this pair oppositely" arrives with a quantified frequency instead of a coin flip. That is genuinely weaker evidence than the \(\ge 3\)-agent design and must be described as such; it is not zero.
+
+*Binding constraints.*
+
+1. Labelled **exploratory** at every appearance, including abstract, tables and figure captions. The confirmatory selection claim stays unmade.
+2. If \(|\mathcal{A}^\cap| < 3\), report as **uninformative** rather than dropped, mirroring (f).
+3. If either \(\Delta\) is zero, or its bootstrap interval spans zero, the reading is **indeterminate at this \(n\)** — never "the two metrics agree".
+4. Opposite signs here do **not** discharge the §6 null table's `Top-1 disagrees` row and do not by themselves constitute the pre-registered justification for Paper 3.
+5. If three or more agents reach \(n_{\min}\), (g) is **not used at all**: the §6 primary applies and this clause is void. The two branches may not be compared and the more favourable one chosen.
+6. (d) still binds. Two agents is not a licence to extend the frozen leg set.
+
 ---
 
 ## 7. Inject-probe gate
