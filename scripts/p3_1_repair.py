@@ -741,10 +741,20 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
               "control; recovering one means a repair reached outside its layer.")
     else:
         print(f"K3  no configuration recovers any of the {len(m2_keys)} M2 rows -> PASS")
+    # K0 is evaluated first: if the implementation is unfaithful, K3's verdict is not
+    # trustworthy either. Both abort, and neither writes an artefact -- a voided run must
+    # not leave a file behind that later reads as a valid result.
     if k0 != K0_MODAL_GOLD_M1A:
         print("\nABORT on K0: fix the implementation before reading any other number.",
               file=sys.stderr)
         return 9
+    if leaks:
+        print(f"\nABORT on K3: the run is VOID per spec 7. Nothing is written.",
+              file=sys.stderr)
+        for c, v in leaks.items():
+            for k in v[:5]:
+                print(f"  ! {c} recovered M2 row {k}", file=sys.stderr)
+        return 10
 
     # --- section 3 quantities ------------------------------------------------------
     print()

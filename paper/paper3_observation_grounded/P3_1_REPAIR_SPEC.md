@@ -1017,3 +1017,26 @@ before `run`. The gate pin of A-6.3 forces this anyway.
 Nothing has been measured. `run` has never executed against the archive: locally there is
 no archive, and on the host it is refused until both gates are re-recorded with dependency
 pins. Synthetic re-verified 10/10 after all changes.
+
+---
+
+## 15. Amendment A-7 — 2026-09-12, K3's consequence was printed but not enforced
+
+Both gates passed on the host at `4e31323` with dependency pins recorded, so `run` was
+authorised. A final read of `cmd_run` before running it found that `K3` printed
+"the run is VOID" and then **continued**: it computed the §3 quantities, wrote
+`out/p3_1_run_development.json` and exited 0.
+
+That is the wrong direction of the principle this document is built on. A voided run would
+have left behind an artefact that later reads as a valid result, with the voiding recorded
+only in console output nobody keeps.
+
+`K3` now aborts with exit 10 and writes nothing, naming the configuration and the recovered
+`M2` rows. `K0` is evaluated first and aborts with exit 9, because if the implementation is
+unfaithful then `K3`'s verdict is not trustworthy either.
+
+Exit codes, so an abort is never ambiguous: 3 population, 5 gates, 6 module provenance,
+7 instrumentation not pass-through, 8 taxonomy does not reproduce 0.7, 9 `K0`, 10 `K3`.
+
+No repair rule, configuration, quantity, fixture or criterion changes. Nothing has been
+measured.
