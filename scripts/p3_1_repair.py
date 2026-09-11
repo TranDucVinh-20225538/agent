@@ -41,6 +41,7 @@ sys.path.insert(0, str(ROOT / "paper" / "paper2_counterfactual_eval" / "protocol
 import study2_hatd_extract as ex  # noqa: E402  the frozen extractor, imported not copied
 from study2_hatd_apply import match_one  # noqa: E402  the frozen comparison, imported not copied
 from matching import Kind  # noqa: E402
+import p3_0_identification_audit as idaud  # noqa: E402  0.7's cause classifier, reused
 
 # ---------------------------------------------------------------------------
 # Module provenance, checked rather than assumed. 2.0 parity applied to the
@@ -58,6 +59,11 @@ from matching import Kind  # noqa: E402
 FROZEN_BLOBS = {
     "study2_hatd_extract": "438a4eafb175785376fa714a3cbc1a8564f327ba",
     "study2_hatd_apply": "cafd8a6252febd0bf2fb88b7376884a5c5ff0484",
+    # The P3-0 cause classifier. Imported, not reimplemented, for the same reason
+    # match_one is: the per-configuration taxonomy must be compared against 0.7's own
+    # classifier rather than a look-alike of mine. That makes it load-bearing, so it is
+    # pinned too.
+    "p3_0_identification_audit": "86820e4a63870256154b7b71c5e1af4e7685bcf8",
 }
 
 
@@ -72,6 +78,7 @@ def git_blob(path: Path) -> str:
 
 def check_provenance() -> None:
     import study2_hatd_apply as ap
+    import p3_0_identification_audit as _id
     bad = []
     for mod, want in FROZEN_BLOBS.items():
         p = Path(sys.modules[mod].__file__).resolve()
@@ -84,9 +91,10 @@ def check_provenance() -> None:
         for b in bad:
             print(f"  - {b}", file=sys.stderr)
         raise SystemExit(6)
-    _ = ap  # imported for sys.modules registration only
+    _ = (ap, _id)  # imported for sys.modules registration only
 
 GATES = ROOT / "out" / "p3_1_gates.json"
+OUT_RUN = ROOT / "out" / "p3_1_run_development.json"
 RECALL_AUDIT = ROOT / "out" / "p3_0_recall_audit.jsonl"
 IDENT_AUDIT = ROOT / "out" / "p3_0_identification_audit.jsonl"
 
@@ -311,15 +319,37 @@ def match_with_config(spec: dict[str, Any], gold: Any, reported: Any, cfg: set[s
 # ---------------------------------------------------------------------------
 # Configuration application. FROZEN patches nothing.
 # ---------------------------------------------------------------------------
+# Every aggregation decision made during one extraction, in call order. 0.7's classifier
+# needs `filtered` and `returned` per call to separate M1 from M2/M3, so the same
+# observation is recorded here. The wrapper returns fn(vals) untouched, and `run` proves
+# it is pass-through by re-verifying FROZEN against 0.6 with instrumentation active.
+AGG_CALLS: list[dict] = []
+
+
+def _instrumented(fn):
+    def wrapped(vals):
+        filtered = _frozen_filter(vals)
+        out = fn(vals)
+        AGG_CALLS.append({"filtered": filtered, "returned": out})
+        return out
+    return wrapped
+
+
 class Configured:
-    def __init__(self, cfg: set[str]):
+    def __init__(self, cfg: set[str], instrument: bool = False):
         self.cfg = cfg
+        self.instrument = instrument
         self.saved: dict[str, Any] = {}
 
     def __enter__(self):
         if "R-AGG" in self.cfg:
             self.saved["_unique_or_none"] = ex._unique_or_none
             ex._unique_or_none = plurality_or_none
+        if self.instrument:
+            # Wrap whichever decision rule this configuration installed, so the recorded
+            # calls describe the configuration actually under test.
+            self.saved.setdefault("_unique_or_none", ex._unique_or_none)
+            ex._unique_or_none = _instrumented(ex._unique_or_none)
         if "R-SCOPE" in self.cfg:
             for name, fn in (("extract_money", scope_money), ("extract_int", scope_int),
                              ("extract_date", scope_date), ("extract_entity", scope_entity)):
@@ -379,12 +409,17 @@ def category_diff(observed: dict[str, int], frozen: dict[str, int]) -> list[tupl
             if observed.get(k, 0) != frozen.get(k, 0)]
 
 
-def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
+def load_population(audit: Path, a_legs: Path, p3_legs: Path):
+    """Rows, answers, guests and the lock, or None if the population is not the frozen one.
+
+    `run` uses this same loader, so the sweep cannot operate on a population that differs
+    from the one parity verified.
+    """
     for p in (audit, a_legs, p3_legs):
         if not p.exists():
-            print(f"ABORT: {p} not found. Parity requires the 0.6 record and the Study 2 "
+            print(f"ABORT: {p} not found. This requires the 0.6 record and the Study 2 "
                   f"archive it points at; run this on the host.", file=sys.stderr)
-            return False
+            return None
     rows = [json.loads(l) for l in audit.read_text().splitlines() if l.strip()]
     # Paths are not in the audit file; they are rejoined on (lane, task, leg),
     # exactly as P3_0_IDENTIFICATION_AUDIT_SPEC section 3 requires.
@@ -413,7 +448,7 @@ def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
         print("ABORT: population disagrees with the frozen baseline", file=sys.stderr)
         for b in bad:
             print(f"  - {b}", file=sys.stderr)
-        return False
+        return None
     print(f"population verified       : {len(rows)} rows over {len(legs)} legs, "
           f"categories {dict(sorted(cats.items()))}")
 
@@ -431,23 +466,33 @@ def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
               f"must run where the Study 2 archive lives.", file=sys.stderr)
         for u in unreachable[:10]:
             print(f"  - {u}", file=sys.stderr)
-        return False
+        return None
     print(f"archive reachable         : {len(legs)} legs, traj + guest both present")
 
     lock = ex.load_lock()
     answers: dict[tuple, str] = {}
     guests: dict[tuple, dict] = {}
+    for key in sorted(legs):
+        traj_s, guest_s = paths[key]
+        tp = Path(traj_s) if traj_s else None
+        answers[key] = ex.final_answer_from_traj(tp) if tp and tp.exists() else ""
+        gp = Path(guest_s) if guest_s else None
+        guests[key] = ex.load_guest(gp) if gp and gp.exists() else {}
+    rows = sorted(rows, key=lambda x: (x["stratum"], x["lane"], x["task"],
+                                       x["leg"], x["component_id"]))
+    return rows, answers, guests, lock
+
+
+def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
+    pop = load_population(audit, a_legs, p3_legs)
+    if pop is None:
+        return False
+    rows, answers, guests, lock = pop
+    bad: list[str] = []
     checked = 0
     with Configured(set()):
-        for r in sorted(rows, key=lambda x: (x["stratum"], x["lane"], x["task"],
-                                             x["leg"], x["component_id"])):
+        for r in rows:
             key = (r["lane"], r["task"], r["leg"])
-            if key not in answers:
-                traj_s, guest_s = paths[key]
-                tp = Path(traj_s) if traj_s else None
-                answers[key] = ex.final_answer_from_traj(tp) if tp and tp.exists() else ""
-                gp = Path(guest_s) if guest_s else None
-                guests[key] = ex.load_guest(gp) if gp and gp.exists() else {}
             task, cid = r["task"], r["component_id"]
             spec = lock["components"][task][cid]
             gold = ex.gold_for_component(guests[key], task, cid, lock)
@@ -556,11 +601,255 @@ def gate_synthetic() -> bool:
     return True
 
 
-def _write_gate(name: str, ok: bool) -> None:
+# ---------------------------------------------------------------------------
+# The measurement run: section 3 quantities and the residual cause decomposition over
+# the six configurations of section 2.2, with the K0 and K3 guards.
+# ---------------------------------------------------------------------------
+
+# Section 1.1 as published from 0.7. The taxonomy implementation must reproduce these
+# under FROZEN before any repaired number is printed. Without that, every
+# per-configuration delta is a delta against an unknown baseline.
+FROZEN_TAXONOMY = {
+    "RECALL_MISS": {"M1": 20, "M1a": 13, "M1b": 7, "M2": 9, "M3": 5, "M4": 5},
+    "ABSENT": {"M1": 25, "M2": 19, "M3": 2, "M4": 15},
+}
+K0_MODAL_GOLD_M1A = 7  # of 13, from 0.7. A guard on the implementation, not a result.
+
+
+def is_m1c(dis: list[dict]) -> bool:
+    """A-2.3: an M1 row whose disagreeing values are equal under R1 after stripping
+    leading punctuation -- the instrument disagreeing with itself about formatting.
+
+    Orthogonal to the M1a/M1b split, which stays as published, and reported beside it.
+    """
+    vals = [v for c in dis for v in c["filtered"]]
+    if len(vals) < 2:
+        return False
+    return len({norm_r1(str(v).lstrip(" :;,.-\u2013\u2014")) for v in vals}) == 1
+
+
+def evaluate(r: dict, spec: dict, gold: Any, answer: str, cfg: set[str]) -> dict:
+    """One row under one configuration: what was reported, whether it matched, and why."""
+    AGG_CALLS.clear()
+    with Configured(cfg, instrument=True):
+        rep = extract_for(r["task"], r["component_id"], spec["kind"], answer, cfg)
+        matched = match_with_config(spec, gold, rep, cfg)
+    calls = list(AGG_CALLS)
+    # The classifier decides M3 vs M2 by searching the text for a label, so it must see
+    # the same text the extractor saw. Under FROZEN that is the raw answer, which is what
+    # 0.7 classified.
+    seen = chan_clean(answer) if "R-CHAN" in cfg else answer
+    cause, dis = idaud.classify(spec, r["task"], r["component_id"], gold, rep,
+                                matched, seen, calls)
+    form = cause
+    if cause == "M1":
+        form = "M1a" if idaud.gold_among(
+            spec, gold, [v for c in dis for v in c["filtered"]]) else "M1b"
+    return {"reported": rep, "matched": bool(matched), "cause": cause,
+            "form": form, "m1c": cause == "M1" and is_m1c(dis)}
+
+
+def taxonomy_of(res: dict, rows: list[dict]) -> dict:
+    """Cause counts split by the row's frozen baseline category, as 0.7 reported them."""
+    out: dict[str, dict[str, int]] = {}
+    for r in rows:
+        cat = r["category"]
+        key = (r["lane"], r["task"], r["leg"], r["component_id"])
+        e = res[key]
+        b = out.setdefault(cat, {})
+        b[e["cause"]] = b.get(e["cause"], 0) + 1
+        if e["cause"] == "M1":
+            b[e["form"]] = b.get(e["form"], 0) + 1
+    return out
+
+
+def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
+    pop = load_population(audit, a_legs, p3_legs)
+    if pop is None:
+        return 3
+    rows, answers, guests, lock = pop
+
+    specs, golds = {}, {}
+    for r in rows:
+        key = (r["lane"], r["task"], r["leg"], r["component_id"])
+        specs[key] = lock["components"][r["task"]][r["component_id"]]
+        golds[key] = ex.gold_for_component(guests[(r["lane"], r["task"], r["leg"])],
+                                           r["task"], r["component_id"], lock)
+
+    results: dict[str, dict] = {}
+    for cfgname in CONFIGS:
+        cfg = config_set(cfgname)
+        res = {}
+        for r in rows:
+            key = (r["lane"], r["task"], r["leg"], r["component_id"])
+            res[key] = evaluate(r, specs[key], golds[key],
+                                answers[(r["lane"], r["task"], r["leg"])], cfg)
+        results[cfgname] = res
+
+    # --- faithfulness of the instrumented FROZEN pass, before anything is interpreted ---
+    fz = results["FROZEN"]
+    bad = []
+    for r in rows:
+        key = (r["lane"], r["task"], r["leg"], r["component_id"])
+        if _j(ex._jsonable(fz[key]["reported"])) != _j(r["reported"]):
+            bad.append(f"reported {key}: {fz[key]['reported']!r} != 0.6 {r['reported']!r}")
+        if fz[key]["matched"] != bool(r["extractor_match"]):
+            bad.append(f"match {key}: {fz[key]['matched']} != 0.6 {r['extractor_match']}")
+    if bad:
+        print(f"ABORT: instrumentation is not pass-through; {len(bad)} FROZEN rows differ "
+              f"from 0.6.", file=sys.stderr)
+        for b in bad[:20]:
+            print("  !", b, file=sys.stderr)
+        return 7
+    print(f"FROZEN reproduces 0.6 with instrumentation active : {len(rows)} rows")
+
+    fz_tax = taxonomy_of(fz, rows)
+    tdiff = []
+    for cat, want in FROZEN_TAXONOMY.items():
+        got = fz_tax.get(cat, {})
+        for k, n in want.items():
+            if got.get(k, 0) != n:
+                tdiff.append(f"{cat}/{k}: {got.get(k, 0)} != published {n}")
+    if tdiff:
+        print("ABORT: the cause taxonomy does not reproduce 0.7 under FROZEN. Every "
+              "per-configuration delta would be measured against an unknown baseline.",
+              file=sys.stderr)
+        for t in tdiff:
+            print("  !", t, file=sys.stderr)
+        return 8
+    print("cause taxonomy reproduces 0.7 under FROZEN        : "
+          f"RECALL_MISS {dict(sorted(fz_tax['RECALL_MISS'].items()))}")
+    print("                                                   "
+          f"ABSENT {dict(sorted(fz_tax['ABSENT'].items()))}")
+
+    # --- K3 leakage guard, and K0 --------------------------------------------------
+    r1_rows = [r for r in rows if r["category"] in ("MATCH", "RECALL_MISS")]
+    m2_keys = [k for k, e in fz.items() if e["cause"] == "M2"]
+    m1a_keys = [k for k, e in fz.items() if e["form"] == "M1a"]
+    leaks = {c: sorted(k for k in m2_keys if results[c][k]["matched"]) for c in CONFIGS}
+    leaks = {c: v for c, v in leaks.items() if v}
+    k0 = sum(1 for k in m1a_keys if results["R-AGG"][k]["matched"])
+
+    print()
+    print(f"K0  R-AGG recovers {k0} of {len(m1a_keys)} M1a rows; 0.7 says "
+          f"{K0_MODAL_GOLD_M1A} have modal gold -> "
+          f"{'PASS' if k0 == K0_MODAL_GOLD_M1A else 'FAIL, implementation unfaithful'}")
+    if leaks:
+        print(f"K3  FIRES: {ilen(leaks)} M2 row(s) recovered: "
+              f"{ {c: len(v) for c, v in leaks.items()} }")
+        print("    Per spec 7 K3 the run is VOID. M2 rows are the internal negative "
+              "control; recovering one means a repair reached outside its layer.")
+    else:
+        print(f"K3  no configuration recovers any of the {len(m2_keys)} M2 rows -> PASS")
+    if k0 != K0_MODAL_GOLD_M1A:
+        print("\nABORT on K0: fix the implementation before reading any other number.",
+              file=sys.stderr)
+        return 9
+
+    # --- section 3 quantities ------------------------------------------------------
+    print()
+    hdr = (f"{'config':8s} {'sens (MATCH/59)':>20s} {'abstain/134':>18s} "
+           f"{'conf-wrong M4/rep':>22s}")
+    print(hdr)
+    print("-" * len(hdr))
+    summary = {}
+    for c in CONFIGS:
+        res = results[c]
+        sens_k = sum(1 for r in r1_rows
+                     if res[(r["lane"], r["task"], r["leg"], r["component_id"])]["matched"])
+        abst_k = sum(1 for e in res.values() if e["reported"] is None)
+        rep_n = len(rows) - abst_k
+        m4_k = sum(1 for e in res.values() if e["reported"] is not None and not e["matched"])
+        summary[c] = {
+            "sensitivity": [sens_k, len(r1_rows), idaud.wilson(sens_k, len(r1_rows))],
+            "abstention": [abst_k, len(rows), idaud.wilson(abst_k, len(rows))],
+            "confident_wrong": [m4_k, rep_n, idaud.wilson(m4_k, rep_n) if rep_n else None],
+            "taxonomy": taxonomy_of(res, rows),
+            "m1c": sum(1 for e in res.values() if e["m1c"]),
+        }
+        s, a, w = (summary[c]["sensitivity"], summary[c]["abstention"],
+                   summary[c]["confident_wrong"])
+        print(f"{c:8s} {fmt_ci(s):>20s} {fmt_ci(a):>18s} {fmt_ci(w):>22s}")
+
+    print()
+    print("residual cause decomposition (RECALL_MISS | ABSENT), M1c flagged separately")
+    for c in CONFIGS:
+        t = summary[c]["taxonomy"]
+        print(f"  {c:8s} RECALL_MISS {dict(sorted(t.get('RECALL_MISS', {}).items()))}")
+        print(f"  {'':8s} ABSENT      {dict(sorted(t.get('ABSENT', {}).items()))}"
+              f"   M1c={summary[c]['m1c']}")
+
+    OUT_RUN.parent.mkdir(parents=True, exist_ok=True)
+    OUT_RUN.write_text(json.dumps({
+        "corpus": "development", "rows": len(rows), "r1_rows": len(r1_rows),
+        "k0": {"recovered": k0, "m1a": len(m1a_keys), "expected": K0_MODAL_GOLD_M1A},
+        "k3": {"m2_rows": len(m2_keys), "leaks": {c: len(v) for c, v in leaks.items()}},
+        "frozen_taxonomy_reproduced": True,
+        "configurations": summary,
+    }, indent=1, default=str))
+    print(f"\nwritten: {OUT_RUN}")
+    print("Development corpus only. Sections 4 and 6 are separate invocations so the "
+          "sealed corpus stays a single deliberate run.")
+    return 0
+
+
+def ilen(d: dict) -> int:
+    return sum(len(v) for v in d.values())
+
+
+def fmt_ci(t) -> str:
+    k, n, ci = t
+    if not n:
+        return "n/a"
+    c = f"[{ci[0]:.3f},{ci[1]:.3f}]" if ci else ""
+    return f"{k}/{n}={k / n:.3f} {c}"
+
+
+def gate_deps(paths: tuple | None) -> dict:
+    """What a gate result actually depends on: the frozen modules and, for parity, the
+    input bytes. Deliberately not this harness's own hash -- that changes whenever the
+    run path is extended, and it is not what parity proved.
+    """
+    d: dict[str, Any] = {"frozen_blobs": {
+        m: git_blob(Path(sys.modules[m].__file__).resolve()) for m in FROZEN_BLOBS}}
+    if paths:
+        d["inputs"] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+    return d
+
+
+def _write_gate(name: str, ok: bool, deps: dict) -> None:
     d = json.loads(GATES.read_text()) if GATES.exists() else {}
-    d[name] = ok
+    d[name] = {"ok": ok, "deps": deps}
     GATES.parent.mkdir(parents=True, exist_ok=True)
     GATES.write_text(json.dumps(d, indent=1))
+
+
+def gates_ok(paths: tuple) -> tuple[bool, str]:
+    """Both gates must have passed *on the dependencies now present*.
+
+    out/p3_1_gates.json is untracked, so it survives `git checkout`. A bare
+    {"parity": true} therefore cannot authorise a run: it does not record what was
+    verified. Stale or bool-only records require re-running the gates.
+    """
+    if not GATES.exists():
+        return False, "out/p3_1_gates.json absent; run parity then synthetic"
+    absent = [str(p) for p in paths if not p.exists()]
+    if absent:
+        return False, ("input(s) absent, so the gate pin cannot even be evaluated: "
+                       + ", ".join(absent))
+    g = json.loads(GATES.read_text())
+    for name, want in (("parity", gate_deps(paths)), ("synthetic", gate_deps(None))):
+        rec = g.get(name)
+        if not isinstance(rec, dict):
+            return False, (f"gate '{name}' is recorded in the pre-A-6 format with no "
+                           f"dependency pin; re-run it")
+        if not rec.get("ok"):
+            return False, f"gate '{name}' did not pass"
+        for k, v in want.items():
+            if rec["deps"].get(k) != v:
+                return False, (f"gate '{name}' was recorded against different {k}; "
+                               f"re-run it")
+    return True, ""
 
 
 def main() -> int:
@@ -571,22 +860,24 @@ def main() -> int:
     ap.add_argument("--p3-legs", default="out/p3_0_extracted.jsonl")
     a = ap.parse_args()
     check_provenance()
+    paths = (Path(a.audit), Path(a.a_legs), Path(a.p3_legs))
     if a.cmd == "parity":
-        ok = gate_parity(Path(a.audit), Path(a.a_legs), Path(a.p3_legs))
-        _write_gate("parity", ok)
+        ok = gate_parity(*paths)
+        if ok:
+            _write_gate("parity", True, gate_deps(paths))
         return 0 if ok else 3
     if a.cmd == "synthetic":
         ok = gate_synthetic()
-        _write_gate("synthetic", ok)
+        if ok:
+            _write_gate("synthetic", True, gate_deps(None))
         return 0 if ok else 4
-    g = json.loads(GATES.read_text()) if GATES.exists() else {}
-    if not (g.get("parity") and g.get("synthetic")):
-        print(f"ABORT: `run` requires both gates passed. out/p3_1_gates.json = {g}", file=sys.stderr)
+    ok, why = gates_ok(paths)
+    if not ok:
+        print(f"ABORT: `run` requires both gates passed on the present dependencies. {why}",
+              file=sys.stderr)
         print("Order is parity -> synthetic -> run. No exceptions.", file=sys.stderr)
         return 5
-    print("both gates passed; the repair run is not implemented in this commit by design.")
-    print("Implementing it now would precede the amendment that records SPEC-NOTE 1 and 2.")
-    return 0
+    return cmd_run(*paths)
 
 
 if __name__ == "__main__":

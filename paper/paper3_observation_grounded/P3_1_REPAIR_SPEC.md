@@ -933,3 +933,87 @@ reproduces 0.6/0.7 output. Synthetic re-verified at **10/10** after the change. 
 are pinned by the host's sha256: `p3_0_recall_audit.jsonl` `3afd3316…69b71`,
 `p3_0_extracted.jsonl` `fb6d0891…6b6ce`, `study2_hatd_legs.jsonl` `c42b14ce…6da7d`. No
 repair rule, configuration, quantity, fixture or kill criterion is changed.
+
+---
+
+## 14. Amendment A-6 — 2026-09-12, the measurement run is implemented
+
+Both gates are green on the host at `c2d5612`: parity reproduced every gold, reported and
+matched value of 0.6 across 134 rows over 57 legs with the archive reachable, and the
+synthetic suite returned 10/10 with per-fixture reported values identical to the local run,
+which also confirms cross-machine determinism.
+
+`run` was a stub until now, and deliberately so — `f79042a` shipped the gates without the
+measurement because implementing it then would have preceded the amendment recording
+SPEC-NOTE 1 and 2. One consequence is worth stating because it is stronger than a promise:
+both gates, **including the two defects in my own code that they exposed**, were fixed while
+no result could exist. Not by self-discipline but by construction. The four repairs have been
+frozen since `f79042a`; `run` only measures them.
+
+### A-6.1 Two faithfulness gates inside `run`, before any repaired number is printed
+
+Both are checks against numbers 0.7 already published, so neither is author discretion.
+
+1. **Instrumentation is pass-through.** The cause taxonomy needs the `filtered` and
+   `returned` value of every aggregation decision, so `_unique_or_none` is wrapped. The
+   wrapper returns `fn(vals)` untouched, and `run` proves it by re-verifying that FROZEN
+   reproduces 0.6's reported and matched values for all 134 rows **with instrumentation
+   active**. Mismatch exits 7.
+2. **The taxonomy reproduces 0.7.** Under FROZEN the decomposition must equal §1.1 as
+   published — `RECALL_MISS`: `M1` 20 (`M1a` 13, `M1b` 7), `M2` 9, `M3` 5, `M4` 5;
+   `ABSENT`: `M1` 25, `M2` 19, `M3` 2, `M4` 15. Mismatch exits 8, because every
+   per-configuration delta would otherwise be a delta against an unknown baseline.
+
+`K0` is then checked before anything else is read, and `K3` is evaluated over the FROZEN
+`M2` set for all six configurations.
+
+### A-6.2 0.7's classifier is imported, not reimplemented
+
+`classify`, `gold_among` and `wilson` come from `p3_0_identification_audit`, for the same
+reason `match_one` is imported: the taxonomy must be compared against 0.7's own classifier
+rather than a look-alike of mine. That makes it load-bearing, so its blob is pinned beside
+the other two — `86820e4a63870256154b7b71c5e1af4e7685bcf8` — and `check_provenance` now
+covers three modules.
+
+One decision worth recording: the classifier separates `M3` from `M2` by searching the text
+for a label, so it is given **the text the extractor actually saw** — `chan_clean(answer)`
+under R-CHAN, the raw answer otherwise. Under FROZEN that is the raw answer, which is what
+0.7 classified.
+
+`M1c` is implemented per A-2.3 as an orthogonal flag reported beside the `M1a`/`M1b` split,
+which stands as published.
+
+### A-6.3 Gate records now pin what they verified
+
+`out/p3_1_gates.json` is untracked, so it survives `git checkout`. A bare
+`{"parity": true, "synthetic": true}` therefore could authorise a run on a tree whose
+instrument or inputs had changed — the same disease as A-4, one layer up. Each gate now
+records the blob hashes of the three frozen modules and, for parity, the sha256 of the
+three inputs; `run` recomputes and refuses on any difference.
+
+Deliberately **not** pinned: this harness's own hash, which changes whenever the run path
+is extended and is not what parity proved.
+
+Verified against the real threat model — a gate recorded while a different module was
+loaded, or against different input bytes — and each case refuses by name. The host's
+existing bool-format record is rejected as unpinned, so **both gates must be re-run**.
+
+### A-6.4 The invocation boundary is split; no quantity changes
+
+`run` covers §3 on the development corpus. §4 ordering and §6 sealed validation are
+separate invocations. This changes no quantity, no repair rule and no criterion; it
+*strengthens* the once-only constraint by making the sealed corpus a distinct deliberate
+run rather than a side effect of the development sweep.
+
+### A-6.5 A refactor that requires parity to be re-run
+
+Population loading is now shared between `parity` and `run`, so the sweep cannot operate
+on a population differing from the one parity verified. The logic is unchanged, but because
+a gate that has already passed was touched, parity must be re-run as a regression check
+before `run`. The gate pin of A-6.3 forces this anyway.
+
+### A-6.6 State
+
+Nothing has been measured. `run` has never executed against the archive: locally there is
+no archive, and on the host it is refused until both gates are re-recorded with dependency
+pins. Synthetic re-verified 10/10 after all changes.
