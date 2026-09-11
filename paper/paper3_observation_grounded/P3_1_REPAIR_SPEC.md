@@ -867,3 +867,69 @@ is not a guard.
 The lineage is self-contained: the synthetic suite now runs with no import-path help and
 still passes **10/10**. Parity remains **unrun**; §A-2.4 stands. No repair rule,
 configuration, quantity, fixture or kill criterion is changed by this amendment.
+
+---
+
+## 13. Amendment A-5 — 2026-09-12, the parity gate aborted on its own comparison
+
+Parity aborted with exit 3 on the host at `fe845a9`:
+
+```
+ABORT: population disagrees with the frozen baseline
+  - categories {'ABSENT': 61, 'MATCH': 20, 'RECALL_MISS': 39, 'VACUOUS_GOLD': 14}
+      != {'MATCH': 20, 'RECALL_MISS': 39, 'ABSENT': 61, 'VACUOUS_GOLD': 14, 'ANOMALY': 0}
+```
+
+### A-5.1 The population does not disagree
+
+Every category present matches the frozen baseline exactly — `MATCH` 20, `RECALL_MISS` 39,
+`ABSENT` 61, `VACUOUS_GOLD` 14, summing to 134 over the audit's 134 lines. The sole
+difference is that the frozen dict carries `ANOMALY: 0` while the observed dict has **no
+`ANOMALY` key**. A count of zero and an absent key denote the same fact.
+
+The defect was in the comparison, not the data: the observed counts were built by
+incrementing, so a category with no rows never acquired a key, and the check then used
+`!=` on whole dicts. The gate was aborting on its own representation choice.
+
+This is a correction of code to the criterion, not of the criterion to the code. §3 requires
+`ANOMALY = 0`; the data satisfies it, with zero rows so categorised; the gate evaluated a
+satisfied criterion as violated.
+
+### A-5.2 What the abort simultaneously confirmed
+
+Three other guards did **not** fire, which is positive evidence:
+
+- `len(rows) == 134` and `len(legs) == 57`.
+- no leg lacked a traj/guest path, so the A-3 two-file rejoin is correct. The 57 legs are
+  split 36 in `study2_hatd_legs.jsonl` and 21 in `p3_0_extracted.jsonl`; reading only one,
+  as the pre-A-3 code did, would have failed here.
+
+### A-5.3 `ANOMALY = 0` has teeth, and keeps them
+
+Worth recording because §3 leans on it. 0.6 computes
+`ANOMALY = extractor_match and not text_present` per row — the instrument matching where R1
+cannot locate the gold, precisely the condition that would break `MATCH ⊆ R1-positive` and
+collapse the denominator 59. So `ANOMALY = 0` is an empirical result over 134 rows, not a
+constant true by construction.
+
+The replacement compares per category over the union of keys with absent meaning zero, so
+the assertion is preserved at full strength. Verified against three adversarial populations,
+each of which must and does abort:
+
+| perturbation | reported |
+|---|---|
+| `ANOMALY` 3, taken from `MATCH` | `ANOMALY 3 vs 0`, `MATCH 17 vs 20` |
+| `RECALL_MISS` 39 to 38 | `RECALL_MISS 38 vs 39`, `ABSENT 62 vs 61` |
+| a category 0.6 has never emitted | `NEW 1 vs 0`, `VACUOUS_GOLD 13 vs 14` |
+
+The message now names the differing category and both counts instead of printing two dicts
+for the reader to diff by eye — the reason this cost a round trip to identify.
+
+### A-5.4 State
+
+Parity is still **unrun** in substance: it aborted in the population precheck and never
+reached the per-row faithfulness replay, so nothing is yet known about whether `FROZEN`
+reproduces 0.6/0.7 output. Synthetic re-verified at **10/10** after the change. Input bytes
+are pinned by the host's sha256: `p3_0_recall_audit.jsonl` `3afd3316…69b71`,
+`p3_0_extracted.jsonl` `fb6d0891…6b6ce`, `study2_hatd_legs.jsonl` `c42b14ce…6da7d`. No
+repair rule, configuration, quantity, fixture or kill criterion is changed.

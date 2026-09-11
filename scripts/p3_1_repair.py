@@ -355,6 +355,30 @@ def _j(x: Any) -> str:
     return json.dumps(x, sort_keys=True, default=str)
 
 
+def count_categories(rows: list[dict]) -> dict[str, int]:
+    """Count over the full frozen category set, so a zero-count category still has a key.
+
+    0.6's categorize() can emit any of BASELINE_CATEGORIES; a category with no rows is a
+    finding, not an absence, so it must be representable as 0.
+    """
+    cats = {k: 0 for k in BASELINE_CATEGORIES}
+    for r in rows:
+        cats[r["category"]] = cats.get(r["category"], 0) + 1
+    return cats
+
+
+def category_diff(observed: dict[str, int], frozen: dict[str, int]) -> list[tuple]:
+    """Per-category disagreement over the union of keys, absent meaning zero.
+
+    A count of 0 and an absent key denote the same fact, so they must compare equal. This
+    does not weaken the criterion: every category count must still equal the frozen
+    baseline, ANOMALY included, and a category 0.6 never emitted before still aborts.
+    """
+    return [(k, observed.get(k, 0), frozen.get(k, 0))
+            for k in sorted(set(observed) | set(frozen))
+            if observed.get(k, 0) != frozen.get(k, 0)]
+
+
 def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
     for p in (audit, a_legs, p3_legs):
         if not p.exists():
@@ -371,17 +395,17 @@ def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
                 r = json.loads(line)
                 paths[(r["lane"], r["task"], r["leg"])] = (r.get("traj"), r.get("guest"))
 
-    cats: dict[str, int] = {}
-    for r in rows:
-        cats[r["category"]] = cats.get(r["category"], 0) + 1
+    cats = count_categories(rows)
     legs = {(r["lane"], r["task"], r["leg"]) for r in rows}
     bad: list[str] = []
     if len(rows) != BASELINE_ROWS:
         bad.append(f"{len(rows)} rows, expected {BASELINE_ROWS}")
     if len(legs) != BASELINE_LEGS:
         bad.append(f"{len(legs)} legs, expected {BASELINE_LEGS}")
-    if cats != BASELINE_CATEGORIES:
-        bad.append(f"categories {dict(sorted(cats.items()))} != {BASELINE_CATEGORIES}")
+    cat_diff = category_diff(cats, BASELINE_CATEGORIES)
+    if cat_diff:
+        bad.append("categories differ from frozen (observed vs frozen): "
+                   + ", ".join(f"{k} {o} vs {f}" for k, o, f in cat_diff))
     missing = sorted(k for k in legs if k not in paths)
     if missing:
         bad.append(f"no traj/guest path for {len(missing)} leg(s): {missing[:3]}")
