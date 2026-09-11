@@ -1116,3 +1116,98 @@ invoke the decision rule more than once, `M1a` is defined on the pooled candidat
 R-AGG decides per call. That gap is itself a candidate explanation and must be visible.
 
 Nothing has been measured. No repair rule, configuration, quantity or fixture changes.
+
+---
+
+## 17. Amendment A-9 — 2026-09-12, the prediction held, after a bug in the diagnostic itself
+
+A-8.4 predicted strict-majority 7, recovered 8, tolerance-only 0. All three are correct.
+They became visible only after finding that the diagnostic written to test them was wrong.
+
+### A-9.1 The diagnostic's own defect
+
+`diag-k0` reported strict-majority 3 and tolerance-only 5. Both were artefacts. Gold
+arrives from the guest JSON as a **float** — `66493.59`, `3282.656`, `170.0`, `420.0` — while
+candidates arrive from the extractor as **`Decimal`**. `_group_key` is type-sensitive by
+design, being the frozen equivalence relation: it returns a `Decimal` unchanged but
+stringifies a float. So `tally.get(_group_key(gold))` could never find gold among
+`money_usd` or `integer` candidates, and every such row printed `gold_group=0`.
+
+The footprint confirms the diagnosis exactly: the three rows the diagnostic did score as
+majorities are precisely the three `entity` rows, where gold and candidates are both
+strings. The five rows labelled "matched via tolerance only" were exact matches compared
+across types.
+
+`same_group` replaces the lookup: value equality with gold coerced into the candidate
+domain, and **no** money tolerance, per §2 R-AGG. Verified on all thirteen host values,
+including the two that must not collapse — `3282.656` against `Decimal('3282.66')` is
+**not** the same group, and `420.0` against `Decimal('420.00')` **is**.
+
+### A-9.2 Scope: no measured quantity was affected
+
+The defect was confined to `diag-k0`'s display columns. It did not touch
+`plurality_or_none`, which groups candidates among themselves and never sees gold; nor
+`match_one`; nor `gold_among`, which routes through `match_one`, so `M1a` membership was
+always correct — independently confirmed by the taxonomy reproducing 0.7 exactly; nor `K0`'s
+count, which is computed from `matched`.
+
+### A-9.3 The thirteen `M1a` rows
+
+`gold/n` is gold's group against the pooled candidates of the deciding call.
+
+| row | kind | gold | gold/n | maj | mode | R-AGG |
+|---|---|---|---|---|---|---|
+| `flash/counterfactual-f010/G0/liquid_cash` | money | 66493.59 | 3/4 | yes | yes | recovered |
+| `flash/counterfactual-f013/G0/batbucks_dividends` | money | 64.88 | 1/3 | no | no | **picked 12.0, wrong** |
+| `flash/counterfactual-f013/G0/gringotts_savings` | money | 16413.28 | 3/6 | no | yes | recovered |
+| `flash/counterfactual-f013/G1/gringotts_savings` | money | 3282.656 | 0/5 | no | no | **picked 7231.0, wrong** |
+| `flash/retrieval-f009/G1/nyc_flight_confirmation` | entity | DN-87856 | 10/12 | yes | yes | recovered |
+| `flash/retrieval-f010/G1/host_name` | entity | Sandals Resorts Concierge | 2/5 | no | no | abstained, tie |
+| `gpt/aggregation-f020/G0/batbucks_cash` | money | 420.0 | 1/2 | no | no | abstained, tie |
+| `gpt/retrieval-f009/G0/nyc_hotel_confirmation` | entity | GH-29481 | 3/4 | yes | yes | recovered |
+| `gpt/retrieval-f009/G1/nyc_flight_confirmation` | entity | DN-87856 | 5/7 | yes | yes | recovered |
+| `flash/counterfactual-f005/G1/gme_shares` | integer | 170.0 | 2/3 | yes | yes | recovered |
+| `claude/counterfactual-f005/G0/gme_avg_cost` | money | 42.12 | 1/2 | no | no | abstained, tie |
+| `claude/counterfactual-f005/G0/gme_shares` | integer | 85.0 | 3/4 | yes | yes | recovered |
+| `flash/aggregation-f020/G1/batbucks_cash` | money | 420.0 | 4/5 | yes | yes | recovered |
+
+Strict majority 7, unique mode 8, recovered 8, tolerance-only 0.
+
+**Row-level agreement with 0.7, not merely a matching count.** P3-0 named
+`flash/retrieval-f009/G1/nyc_flight_confirmation` at 10 of 12 and
+`flash/aggregation-f020/G1/batbucks_cash` at 4 of 5, and said "3 of 4 on three further
+rows" — there are exactly three rows at 3/4. The two it did not enumerate are 5/7 and 2/3,
+consistent with its "including".
+
+The eighth recovered row is `flash/counterfactual-f013/G0/gringotts_savings` at 3 of 6:
+the unique mode without being a majority, which is explanation 1 of A-8.3. R-AGG is
+faithful.
+
+### A-9.4 K0 restated against the predicate 0.7 established
+
+`K0`'s expected value is **not** changed from 7 to 8. `K0` now pins what P3-0 actually
+measured, at row granularity rather than as a single number:
+
+* the strict-majority set among the `M1a` rows has size **7**;
+* its tallies are exactly `[(10,12), (5,7), (4,5), (3,4), (3,4), (3,4), (2,3)]`;
+* R-AGG recovers **every** member of that set;
+* the recovered total is **reported, not pre-set**, since plurality legitimately recovers
+  unique-mode rows that are not majorities.
+
+It also re-derives `M1a` independently and aborts if the count disagrees with the taxonomy.
+This is a stricter guard than the one it replaces, and nothing in it is fitted to an
+observed result.
+
+### A-9.5 A substantive observation, not a guard
+
+The five unrecovered rows decompose cleanly: **three exact ties**, where R-AGG abstains
+exactly as §2 R-AGG requires, and **two where the modal group is a wrong value** —
+`batbucks_dividends` commits to `12.0` over gold `64.88`, and `gringotts_savings/G1` to
+`7231.0` over gold `3282.656`.
+
+Those two are plurality committing to a wrong value where unanimity abstained: the
+abstention-for-commitment trade §3 quantity 3 exists to measure, visible in the development
+corpus at n=2. Reported as an observation. It is not evidence about the sealed corpus and
+is not a result.
+
+Nothing has been measured. No repair rule, configuration, quantity or fixture changes.

@@ -613,7 +613,83 @@ FROZEN_TAXONOMY = {
     "RECALL_MISS": {"M1": 20, "M1a": 13, "M1b": 7, "M2": 9, "M3": 5, "M4": 5},
     "ABSENT": {"M1": 25, "M2": 19, "M3": 2, "M4": 15},
 }
-K0_MODAL_GOLD_M1A = 7  # of 13, from 0.7. A guard on the implementation, not a result.
+# K0, restated in A-9 against the predicate 0.7 actually established. P3_0_CONCLUSION
+# counts the M1a rows in which gold was a **strict majority** of the accumulated
+# candidates, naming tallies 10/12, 4/5 and three further rows at 3/4. Plurality recovers a
+# superset of those rows -- a strict majority is necessarily the unique mode, never the
+# converse -- so the recovered total is reported, not pre-set. Pinning the tallies rather
+# than only the count makes this a row-level check against published data.
+K0_STRICT_MAJORITY = 7
+K0_TALLIES = [(10, 12), (5, 7), (4, 5), (3, 4), (3, 4), (3, 4), (2, 3)]
+
+
+def same_group(a: Any, b: Any) -> bool:
+    """Exact equality in the frozen equivalence sense, tolerant of gold's *type*.
+
+    Gold arrives from the guest JSON as a float or str; candidates arrive from the
+    extractor as Decimal, int or str. `_group_key` is type-sensitive by design, being the
+    frozen relation, so a float gold could never be found among Decimal candidates -- the
+    bug A-9 corrects. Value equality only: the money tolerance is deliberately not used
+    here, per §2 R-AGG.
+    """
+    if isinstance(a, (Decimal, int, float)) and isinstance(b, (Decimal, int, float)):
+        try:
+            return Decimal(str(a)) == Decimal(str(b))
+        except ArithmeticError:
+            return False
+    return str(a).casefold() == str(b).casefold()
+
+
+def tally_groups(vals: list[Any]) -> list[list]:
+    """[count, representative] per frozen equivalence class, in first-seen order."""
+    groups: list[list] = []
+    for v in vals:
+        for g in groups:
+            if _group_key(v) == _group_key(g[1]):
+                g[0] += 1
+                break
+        else:
+            groups.append([1, v])
+    return groups
+
+
+def m1a_detail(rows: list[dict], specs: dict, golds: dict, answers: dict) -> list[dict]:
+    """Per M1a row: the per-call candidate tallies, and whether gold is a majority or mode.
+
+    Shared by K0 and by `diag-k0`, so the guard and the diagnostic cannot disagree.
+    """
+    out = []
+    for r in rows:
+        key = (r["lane"], r["task"], r["leg"], r["component_id"])
+        spec, gold = specs[key], golds[key]
+        answer = answers[(r["lane"], r["task"], r["leg"])]
+        AGG_CALLS.clear()
+        with Configured(set(), instrument=True):
+            rep0 = extract_for(r["task"], r["component_id"], spec["kind"], answer, set())
+            m0 = match_with_config(spec, gold, rep0, set())
+        calls = list(AGG_CALLS)
+        cause, dis = idaud.classify(spec, r["task"], r["component_id"], gold, rep0, m0,
+                                    answer, calls)
+        if cause != "M1" or not idaud.gold_among(
+                spec, gold, [v for c in dis for v in c["filtered"]]):
+            continue
+        per_call = []
+        for c in dis:
+            groups = tally_groups(c["filtered"])
+            n = sum(g[0] for g in groups)
+            top = max(g[0] for g in groups)
+            gc = next((g[0] for g in groups if same_group(gold, g[1])), 0)
+            per_call.append({"n": n, "gold": gc, "top": top,
+                             "n_top": sum(1 for g in groups if g[0] == top),
+                             "groups": groups})
+        best = max(per_call, key=lambda pc: (pc["gold"], -pc["n"]))
+        out.append({
+            "key": key, "kind": spec["kind"], "gold": gold, "per_call": per_call,
+            "best": best,
+            "majority": best["gold"] * 2 > best["n"],
+            "mode": any(pc["gold"] == pc["top"] and pc["n_top"] == 1 for pc in per_call),
+        })
+    return out
 
 
 def is_m1c(dis: list[dict]) -> bool:
@@ -728,12 +804,31 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     m1a_keys = [k for k, e in fz.items() if e["form"] == "M1a"]
     leaks = {c: sorted(k for k in m2_keys if results[c][k]["matched"]) for c in CONFIGS}
     leaks = {c: v for c, v in leaks.items() if v}
-    k0 = sum(1 for k in m1a_keys if results["R-AGG"][k]["matched"])
+    det = m1a_detail(rows, specs, golds, answers)
+    maj = [d for d in det if d["majority"]]
+    tallies = sorted(((d["best"]["gold"], d["best"]["n"]) for d in maj), reverse=True)
+    unrec = [d["key"] for d in maj if not results["R-AGG"][d["key"]]["matched"]]
+    k0_rec = sum(1 for k in m1a_keys if results["R-AGG"][k]["matched"])
+    k0_fail = []
+    if len(det) != len(m1a_keys):
+        k0_fail.append(f"{len(det)} rows re-derived as M1a, taxonomy says {len(m1a_keys)}")
+    if len(maj) != K0_STRICT_MAJORITY:
+        k0_fail.append(f"{len(maj)} strict-majority rows, 0.7 records "
+                       f"{K0_STRICT_MAJORITY}")
+    if tallies != sorted(K0_TALLIES, reverse=True):
+        k0_fail.append(f"tallies {tallies} != published "
+                       f"{sorted(K0_TALLIES, reverse=True)}")
+    if unrec:
+        k0_fail.append(f"R-AGG does not recover {len(unrec)} strict-majority row(s): "
+                       f"{unrec[:3]}")
 
     print()
-    print(f"K0  R-AGG recovers {k0} of {len(m1a_keys)} M1a rows; 0.7 says "
-          f"{K0_MODAL_GOLD_M1A} have modal gold -> "
-          f"{'PASS' if k0 == K0_MODAL_GOLD_M1A else 'FAIL, implementation unfaithful'}")
+    print(f"K0  strict-majority M1a rows {len(maj)}/{len(m1a_keys)}, tallies {tallies}")
+    print(f"    R-AGG recovers all of them: {not unrec}; recovered in total {k0_rec} "
+          f"(the surplus is unique-mode-but-not-majority, reported not pre-set) -> "
+          f"{'PASS' if not k0_fail else 'FAIL'}")
+    for f in k0_fail:
+        print(f"    ! {f}")
     if leaks:
         print(f"K3  FIRES: {ilen(leaks)} M2 row(s) recovered: "
               f"{ {c: len(v) for c, v in leaks.items()} }")
@@ -744,9 +839,11 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     # K0 is evaluated first: if the implementation is unfaithful, K3's verdict is not
     # trustworthy either. Both abort, and neither writes an artefact -- a voided run must
     # not leave a file behind that later reads as a valid result.
-    if k0 != K0_MODAL_GOLD_M1A:
+    if k0_fail:
         print("\nABORT on K0: fix the implementation before reading any other number.",
               file=sys.stderr)
+        for f in k0_fail:
+            print("  !", f, file=sys.stderr)
         return 9
     if leaks:
         print(f"\nABORT on K3: the run is VOID per spec 7. Nothing is written.",
@@ -792,7 +889,10 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     OUT_RUN.parent.mkdir(parents=True, exist_ok=True)
     OUT_RUN.write_text(json.dumps({
         "corpus": "development", "rows": len(rows), "r1_rows": len(r1_rows),
-        "k0": {"recovered": k0, "m1a": len(m1a_keys), "expected": K0_MODAL_GOLD_M1A},
+        "k0": {"m1a": len(m1a_keys), "strict_majority": len(maj),
+               "published_strict_majority": K0_STRICT_MAJORITY,
+               "tallies": tallies, "recovered": k0_rec,
+               "surplus_unique_mode_not_majority": k0_rec - len(maj)},
         "k3": {"m2_rows": len(m2_keys), "leaks": {c: len(v) for c, v in leaks.items()}},
         "frozen_taxonomy_reproduced": True,
         "configurations": summary,
@@ -821,55 +921,40 @@ def cmd_diag_k0(audit: Path, a_legs: Path, p3_legs: Path) -> int:
         return 3
     rows, answers, guests, lock = pop
 
-    n_maj = n_mode = n_rec = n_tol = 0
-    print()
-    print("13 M1a rows: per-call candidate tallies under FROZEN, then the R-AGG outcome")
-    print("=" * 100)
+    specs, golds = {}, {}
     for r in rows:
         key = (r["lane"], r["task"], r["leg"], r["component_id"])
-        spec = lock["components"][r["task"]][r["component_id"]]
-        gold = ex.gold_for_component(guests[(r["lane"], r["task"], r["leg"])],
-                                     r["task"], r["component_id"], lock)
-        answer = answers[(r["lane"], r["task"], r["leg"])]
-        AGG_CALLS.clear()
-        with Configured(set(), instrument=True):
-            rep0 = extract_for(r["task"], r["component_id"], spec["kind"], answer, set())
-            m0 = match_with_config(spec, gold, rep0, set())
-        calls = list(AGG_CALLS)
-        cause, dis = idaud.classify(spec, r["task"], r["component_id"], gold, rep0, m0,
-                                    answer, calls)
-        if cause != "M1" or not idaud.gold_among(
-                spec, gold, [v for c in dis for v in c["filtered"]]):
-            continue
+        specs[key] = lock["components"][r["task"]][r["component_id"]]
+        golds[key] = ex.gold_for_component(guests[(r["lane"], r["task"], r["leg"])],
+                                           r["task"], r["component_id"], lock)
+    det = m1a_detail(rows, specs, golds, answers)
 
-        gk = _group_key(gold)
-        maj = mode = False
-        print(f"\n{r['lane']}/{r['task']}/{r['leg']}/{r['component_id']}  "
-              f"kind={spec['kind']}  gold={ex._jsonable(gold)!r}")
-        for i, c in enumerate(dis):
-            tally: dict[Any, int] = {}
-            for v in c["filtered"]:
-                tally[_group_key(v)] = tally.get(_group_key(v), 0) + 1
-            n = sum(tally.values())
-            gc = tally.get(gk, 0)
-            top = max(tally.values())
-            is_maj = gc * 2 > n
-            is_mode = gc == top and sum(1 for t in tally.values() if t == top) == 1
-            maj = maj or is_maj
-            mode = mode or is_mode
-            print(f"  call {i}: n={n:>3d} gold_group={gc:>3d} top={top:>3d} "
-                  f"groups={len(tally)}  strict_majority={is_maj}  unique_mode={is_mode}")
-            if len(tally) <= 6:
-                print(f"           tally={ {str(k)[:18]: v for k, v in tally.items()} }")
+    n_maj = n_mode = n_rec = n_tol = 0
+    print()
+    print(f"{len(det)} M1a rows: per-call candidate tallies under FROZEN, then R-AGG")
+    print("=" * 100)
+    for d in det:
+        gold = d["gold"]
+        print(f"\n{'/'.join(d['key'])}  kind={d['kind']}  "
+              f"gold={ex._jsonable(gold)!r}")
+        for i, pc in enumerate(d["per_call"]):
+            is_maj = pc["gold"] * 2 > pc["n"]
+            is_mode = pc["gold"] == pc["top"] and pc["n_top"] == 1
+            print(f"  call {i}: n={pc['n']:>3d} gold_group={pc['gold']:>3d} "
+                  f"top={pc['top']:>3d} groups={len(pc['groups'])}  "
+                  f"strict_majority={is_maj}  unique_mode={is_mode}")
+            if len(pc["groups"]) <= 6:
+                print("           tally="
+                      f"{ {str(g[1])[:18]: g[0] for g in pc['groups']} }")
         AGG_CALLS.clear()
         with Configured({"R-AGG"}, instrument=True):
-            rep1 = extract_for(r["task"], r["component_id"], spec["kind"], answer,
-                               {"R-AGG"})
-            m1 = match_with_config(spec, gold, rep1, {"R-AGG"})
-        exact = _group_key(rep1) == gk if rep1 is not None else False
+            rep1 = extract_for(d["key"][1], d["key"][3], d["kind"],
+                               answers[d["key"][:3]], {"R-AGG"})
+            m1 = match_with_config(specs[d["key"]], gold, rep1, {"R-AGG"})
+        exact = rep1 is not None and same_group(gold, rep1)
         tol = bool(m1) and not exact
-        n_maj += maj
-        n_mode += mode
+        n_maj += d["majority"]
+        n_mode += d["mode"]
         n_rec += bool(m1)
         n_tol += tol
         print(f"  R-AGG -> {ex._jsonable(rep1)!r} matched={bool(m1)} "
@@ -877,14 +962,18 @@ def cmd_diag_k0(audit: Path, a_legs: Path, p3_legs: Path) -> int:
 
     print()
     print("=" * 100)
-    print(f"gold a strict majority in at least one call : {n_maj}   <- 0.7 records 7")
-    print(f"gold the unique mode in at least one call   : {n_mode}")
-    print(f"R-AGG recovers                              : {n_rec}   <- K0 observed 8")
-    print(f"  of which matched only via money tolerance : {n_tol}")
+    print(f"gold a strict majority          : {n_maj}   <- 0.7 records "
+          f"{K0_STRICT_MAJORITY}")
+    print(f"gold the unique mode            : {n_mode}")
+    print(f"R-AGG recovers                  : {n_rec}")
+    print(f"  matched only via tolerance    : {n_tol}")
+    print(f"tallies of the majority rows    : "
+          f"{sorted(((d['best']['gold'], d['best']['n']) for d in det if d['majority']), reverse=True)}")
+    print(f"published tallies               : {sorted(K0_TALLIES, reverse=True)}")
     print()
-    print("Strict majority implies unique mode, never the converse, so recovered >= 7 is")
-    print("required of a faithful implementation. Nothing is written; no quantity of "
-          "section 3 is computed.")
+    print("Strict majority implies unique mode, never the converse, so a faithful "
+          "plurality\nimplementation recovers at least the majority rows. Nothing is "
+          "written; no quantity\nof section 3 is computed.")
     return 0
 
 
