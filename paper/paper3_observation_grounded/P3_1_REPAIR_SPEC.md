@@ -1,0 +1,541 @@
+# P3-1 — Auditable measurement repair (pre-registration)
+
+Status: **FROZEN BEFORE IMPLEMENTATION. NOTHING HAS BEEN RUN.** No code exists for this
+gate. Every decision rule, quantity, fixture and kill criterion below is fixed at the
+commit that carries this file, and none may be altered afterwards except by a dated
+amendment recorded in this document.
+
+Follows `P3_0_CONCLUSION.md`, which closed P3-0. P3-1 modifies nothing that P3-0 touched:
+not the frozen extractor at `3242c30`, not `protocol/matching.py`, not
+`out/study2_gold_path_lock.json`, not any archive or trajectory, not any Paper 1 or
+Paper 2 number. The repaired instrument is a **new, separately named** measurement layer
+evaluated *against* the frozen one; the frozen one remains the published instrument.
+
+The §1 terminology lock of `P3_0_SPEC.md` and §7 of `P3_0_CONCLUSION.md` apply in full.
+
+---
+
+## 0. Disclosures that bound what may be pre-registered
+
+Pre-registration is worthless if the author already knows the answer and pretends not to.
+Two specific contaminations exist and are recorded here so that §3, §4 and §6 can be
+written around them rather than over them.
+
+**D-1 — the ordering direction is partially known.** While assessing whether §4 was worth
+designing, a partial hand computation was made on the Paper 2 common support. It was not
+completed to an aggregate, but it indicated that plurality-style aggregation repair raises
+GPT more than Flash on `retrieval-f009`, i.e. tends to **widen** GPT's STS advantage
+rather than invert the ordering. Consequence, binding: **no directional hypothesis about
+the ordering may be stated by this author, here or later.** §4 is two-sided, secondary,
+and descriptive. The paper's headline may not depend on the ordering outcome.
+
+**D-2 — the sealed set's prose has been read once.** `tracking_evidence.md` was read while
+establishing that component-level human labels exist at all (§6). At least three legs were
+noticed a priori in which the human coder scored an answer **correct** although it states
+two different values for one quantity and explains the discrepancy — `aggregation-f018`
+Claude CF, `retrieval-f030` GPT CF, `preference_inference-f004` Claude CF — together with
+one contrast leg where an agent's cross-check produced the **same** value twice
+(`retrieval-f029` Claude). No count, rate, or instrument output on that corpus has been
+computed. Consequence: the §6.3 prediction is stated as a **quantified** claim whose count
+is unknown, and it is explicitly labelled as informed by three observed instances. It is
+not presented as a blind prediction.
+
+**D-3 — all 134 Study 2 rows have been seen.** Nothing in the Study 2 archive is sealed.
+The archive is therefore the **development** corpus only, and no claim of generalisation
+may rest on it. §6 exists because of this.
+
+---
+
+## 1. Construct
+
+P3-0 established that the quantity Paper 2 reported is not separable from the instrument
+that produced it. A single reliability score confounds at least four distinct losses:
+
+```
+gold specification  ->  observation channel  ->  extraction  ->  comparison  ->  score
+```
+
+At each boundary information can be destroyed, and in the frozen instrument each boundary
+was demonstrated to destroy some: unresolvable gold scored as agent error (14/134 vacuous
+rows; `preference_inference-f010` vacuous on every leg of every lane); tool-call
+scaffolding and runtime-generated spans of unidentifiable provenance entering the answer
+channel (see §2, R-CHAN — these are *not* verbatim prompt echo, and the distinction is
+load-bearing); label coverage, window scope and fail-closed aggregation losing recoverable
+values; exact equality converting a correct-but-over-long extraction into a miss.
+
+**The construct of P3-1 is the separability of observation failure from measurement
+failure.** Observation failure means the agent did not put the evidence in the channel.
+Measurement failure means the instrument did not recover evidence that was in the channel.
+A non-auditable instrument returns one number in which these are indistinguishable. An
+auditable instrument returns a decomposition in which they are distinguishable, and the
+decomposition can itself be checked.
+
+**What P3-1 claims.** That the decomposition is achievable by a repair family specified in
+advance at the level of *failure categories*, not individual defects; and that the
+decomposition's components can be estimated with sensitivity and precision measured
+against human labels on a corpus the repair family never saw.
+
+### 1.0 Why the requirement is not already satisfied
+
+The underlying benchmark's own grading is `"type": "llm_judge"` on **every** rubric
+criterion, and its task schema records that "Grading is rubric-only (LLM-as-judge);
+programmatic checks were retired in an earlier revision."
+
+This is citable, local, and is the motivation in one line: the field did not fail to adopt
+auditable measurement, it **retired** it. The instrument whose intermediate state P3-0 was
+able to read existed only because Paper 2 built a separate deterministic tracking layer
+beside the judge. Had Paper 2 used the benchmark's own grading, every quantity in §1.1
+would be unobtainable.
+
+**What P3-1 does not claim.** Not that agents are more or less reliable than Paper 2
+reported. Not that the repaired instrument is correct. Not that `text_present` is
+correctness. The repaired instrument is a *better-characterised* instrument, not a true
+one, and its own residual loss is reported rather than assumed away.
+
+### 1.1 Frozen baseline, carried forward
+
+From `P3_0_IDENTIFICATION_AUDIT_SPEC.md` §1 and `P3_0_CONCLUSION.md`, on 57 legs and 134
+leg×component rows: `MATCH` 20, `RECALL_MISS` 39, `ABSENT` 61, `VACUOUS_GOLD` 14,
+`ANOMALY` 0; five rows structurally unreadable, all five `ABSENT`.
+
+`ANOMALY = 0` is load-bearing and must be restated wherever the denominator 59 appears.
+It is the only evidence that `MATCH ⊆ R1-positive`. Were any row matched without the gold
+string being R1-recoverable — possible in principle, since `match_money_usd` carries a
+±1 tolerance — the denominator 59 would be invalid.
+
+Three quantities, kept **separate** and never merged:
+
+| quantity | frozen value | reading |
+|---|---|---|
+| R1 recoverable-evidence share among readable non-matches | 39/95 = **0.411** | *lower bound* on the share of the instrument's readable negatives that are provably false; 61 `ABSENT` rows are excluded from the numerator because their truth status is unknown, not because they are correct |
+| instrument sensitivity on R1-recoverable evidence | 20/59 = **0.339** | of rows where the gold value is literally present in the answer, the instrument recovers one third |
+| proven aggregation-discard rate | 13/59 = **0.220** | gold entered `found` and was discarded; `M1a` |
+
+Cause decomposition among the 39 misses: `M1` 20 (of which `M1a` 13, `M1b` 7), `M2` 9,
+`M3` 5, `M4` 5. Among the 61 absences: `M1` 25, `M2` 19, `M3` 2, `M4` 15. In 7 of 13 `M1a`
+rows gold was a strict majority of accumulated candidates and was discarded anyway.
+
+None of these is a false-negative *rate* in the statistical sense, and the phrase must not
+be used for 0.411.
+
+---
+
+## 2. The repair family
+
+Four repairs, one per layer boundary, each addressing a **category** in the P3-0 taxonomy.
+Each is a decision rule stated completely here. None is parameterised, none is fit to
+data, and none may be altered after this document is frozen.
+
+### 2.0 Provenance parity — binding on every repair
+
+> **No repair may use provenance unavailable to the baseline evaluator, unless that
+> provenance is explicitly defined as part of the repaired instrument and declared here.**
+
+The reason is a specific attack a reviewer can make. R-CHAN must decide which spans are
+scaffolding and which are agent evidence. If it were permitted to consult a metadata field
+the frozen instrument never had — a recorded tool-call boundary, a role tag, a harness
+event log — then the repair would be receiving **oracle information** about provenance, and
+any gain it showed would be an artefact of privileged access rather than of the repair
+rule. The measured improvement would not be reproducible by anyone whose instrument reads
+the same channel the frozen one read.
+
+Applied to the four repairs as specified: R-AGG reads only the `found` list the frozen
+function already built; R-SCOPE reads only the answer string; R-CMP reads only `gold` and
+`reported`; R-CHAN reads only the answer string and the literal markup tokens inside it.
+**All four operate on strictly the same inputs as `FROZEN`.** No repair consults the
+trajectory, the task definition, the harness log, or any role/turn metadata.
+
+This is also why the dropped prompt-echo rule could not simply be rescued by reading
+`instruction` from the task registry. Even setting aside that the observed span is not the
+instruction (§2, R-CHAN), the frozen instrument never read the task definition, so a repair
+that did would violate parity. The correct conclusion is the one recorded: channel
+provenance is **not determinable from the channel**, which is an argument for exposing
+intermediate reads rather than for granting the repair extra inputs.
+
+### R-AGG — aggregation (targets `M1a`)
+
+Replace `_unique_or_none`'s unanimity requirement with **plurality over the frozen
+equivalence classes**.
+
+Group the filtered `found` list by the equivalence relation `_unique_or_none` already uses
+internally — `Decimal` equality for `money_usd` and `integer`, casefolded string equality
+otherwise — and return the modal group's value. **On an exact tie for the modal group,
+abstain and return `None`.** The equivalence relation is imported unchanged; only the
+decision rule changes.
+
+The frozen `match_money_usd` ±1 tolerance is *not* used for grouping, because it is not
+transitive and therefore not an equivalence relation. This is the reason the minimal
+change is to the decision rule and not to the relation.
+
+### R-SCOPE — observation scope (targets `M3`)
+
+Generate candidates over the **whole answer** instead of the ±120-character label window.
+This is the scope of rule R1, already frozen in `P3_0_RECALL_AUDIT_SPEC.md` §4.
+
+Rationale, established in 0.6 and not a conjecture: the window candidate set is not a
+subset of the whole-text set, because `MONEY_RE`'s `(?<![A-Z])` and `INT_RE`'s `(?<![\d.,])`
+lose context at a slice boundary — verified on `"SM-88431"`, which yields `+88431` from the
+full text and `−88431` from a window cut inside the token. Whole-answer scope removes the
+boundary artefact rather than trading one for another.
+
+### R-CMP — comparison (targets entity `M1b` segmentation)
+
+For `categorical`/entity components only, replace exact equality with **one-directional
+containment**: gold matches if `norm(gold)` is a contiguous substring of `norm(reported)`.
+
+The direction is asymmetric and the asymmetry is the principle: an agent that says more
+than gold has still reported gold, whereas an agent whose report is a strict prefix of
+gold has not. Consequently this repair does **not** rescue the three
+`designated_booking_property` rows, where `extract_entity`'s `re.split(r"[(\[]", s)[0]`
+truncates the candidate to a prefix of gold. Those rows remain structurally unreadable and
+remain excluded, exactly as in 0.6.
+
+### R-CHAN — observation channel (targets scaffolding contamination)
+
+Before extraction, delete from the answer text any span delimited by
+`<function`…`</function>`, `<tool`…`</tool>`, or their self-closing forms.
+
+R-CHAN is the only repair that can **reduce** the candidate set. It can therefore only
+lower sensitivity and raise precision, and its effect is reported separately from the
+other three for exactly that reason.
+
+**A prompt-echo rule was drafted and removed. The removal is a finding, not a
+simplification.** 0.7 recorded a `found` list on `gpt/retrieval-f010/G1` containing
+`"Provide the Jamaica booking total, host name, and amenities from the booking record"`,
+which was described as prompt echo. A read-only check of the local task definitions
+disproves that description. `retrieval-f010`'s actual `instruction` is:
+
+> "What was the total cost of my Jamaica trip — pull the trip total from the booking. Also
+> tell me the host name on file and what amenities the property comes with so I know what
+> I'm getting."
+
+The observed span appears in **none** of `all_tasks.json`,
+`all_tasks_with_grading.json` or `mypcbench_clean.json`, and is not a rubric criterion
+either. It is a runtime-generated restatement of **unidentifiable provenance**.
+
+Consequence for the repair: a literal-echo rule cannot match it, and matching a paraphrase
+would require semantic similarity, which is forbidden. Rule (1) is therefore dropped.
+
+Consequence for the construct, which is the larger point: **the observation channel cannot
+be deterministically cleaned, because the spans that contaminate it are generated at
+runtime and are not enumerable from the task definition.** A verbatim prompt echo would be
+trivially removable; a runtime paraphrase is not. This strengthens rather than weakens the
+construct-validity finding of `P3_0_CONCLUSION.md` §5, and it is a direct argument for the
+auditability requirement: since a clean channel cannot be guaranteed, the minimum
+obligation is that the instrument's reads be **visible**.
+
+### 2.1 What is deliberately NOT repaired, and why this is the point
+
+Three known defects are left in place:
+
+| defect | why not repaired |
+|---|---|
+| `avg(erage)? cost` does not match `average cost` | a typo in one label; no category-level generalisation. Fixing it is "finding a bug in an extractor" and is precisely the objection P3-1 must not invite. |
+| `_DATE_RE` is ISO-only | a coverage gap in one kind's parser; same reason. |
+| `extract_entity` truncates at `(` / `[` | a defect in one candidate generator; R-CMP's asymmetry is what keeps it out of scope. |
+
+These three become an **internal negative control**. `M2` rows are caused by label
+coverage, and no repair in the family addresses label coverage. Therefore:
+
+> **Leakage guard.** If any configuration recovers an `M2` row, the repair family is not
+> operating at the category level it claims, the implementation is wrong or the taxonomy
+> is wrong, and the run is void. This fires on 9 development rows and is checkable before
+> any headline quantity is read.
+
+### 2.2 Configurations, fixed in advance
+
+Six, and only six. No post-hoc subset, no additional ablation.
+
+`FROZEN` · `R-AGG` · `R-SCOPE` · `R-CMP` · `R-CHAN` · `ALL`
+
+---
+
+## 3. Primary quantities
+
+All computed for all six configurations, on the development corpus (134 rows) and on the
+sealed corpus (§6). Wilson 95% throughout. No threshold is declared here and none may be
+invented afterwards.
+
+**Instrument properties — primary.**
+
+1. Sensitivity on R1-recoverable evidence: `MATCH / (MATCH + RECALL_MISS)`. Frozen 0.339.
+2. Abstention rate: share of rows where the instrument returns `None`.
+3. Confident-wrong rate: `M4 / (rows where the instrument reports a value)`. Frozen: 20
+   `M4` rows in total across misses and absences, including `3570.0` reported where gold
+   was `42.12`.
+4. Residual cause decomposition `M1a`/`M1b`/`M2`/`M3`/`M4` per configuration.
+
+Quantity 3 is as important as quantity 1 and is reported beside it in the same table.
+R-AGG trades abstention for commitment; a repair that raises sensitivity by reporting more
+wrong values is not a repair, and the design must be able to say so.
+
+**Precision — only measurable on the sealed corpus.** The development corpus has no
+component-level human label, so precision is not estimable on it. This asymmetry is stated
+rather than papered over: on Study 2 the instrument's sensitivity can be bounded and its
+precision cannot.
+
+**Explicitly not a primary quantity:** any agent-level reliability estimate.
+
+---
+
+## 4. Ordering analysis — two-sided, secondary, descriptive
+
+Constrained by **D-1**. The hypothesis carries no sign:
+
+> The repaired instrument yields per-leg STS, pair STS, `Y`, and a model ordering on the
+> Paper 2 common support that differ from the frozen instrument.
+
+Pre-committed reporting, identical in all four outcomes (ordering unchanged / widened /
+narrowed / inverted): ΔSTS with Wilson or bootstrap 95% under `FROZEN` and under each
+configuration, the sign, and whether the argmax moved. The frozen value is
+ΔSTS = −0.042, CI [−0.125, 0.000], a margin that touches zero.
+
+Three statements fixed now so that no outcome can be spun:
+
+* ordering **inverts** → measurement artefact can invert agent selection. Strong, and
+  reported as secondary, not as the headline.
+* ordering **widens** → the artefact was *masking* disagreement, not creating it. This is
+  a result, not a disappointment, and is the outcome D-1 makes more likely.
+* ordering **unchanged** → the artefact does not propagate to selection at this n. Also a
+  result, and the honest one to report if it occurs.
+
+`Y` is computed but is expected to remain degenerate; it is reported, not interpreted.
+Paper 2's published numbers are not restated or corrected. Errata E-1 stands as recorded.
+
+---
+
+## 5. Synthetic control cases
+
+Authored **before** implementation, from the taxonomy, and frozen with this document. Each
+repair gets cases where it must help **and** cases where it must hurt; a suite that only
+contains cases favourable to the repair measures nothing. Ground truth is known by
+construction because the answer text is written here in full.
+
+### 5.0 What the suite is for
+
+The suite is **not a vote**. Every fixture carries a `required outcome` fixed below, and
+harm cases are *expected* to harm — that is their required outcome, and it prices the
+repair rather than vetoing it. The suite's only function is to verify that each repair,
+as implemented, behaves exactly as specified on inputs whose ground truth is known by
+construction. See K2, which fires on a **mismatch between actual and required outcome**,
+not on a tally of help versus harm. The decision to drop a repair belongs to §7 K4 on real
+data, never to a count of fixtures the author chose to write.
+
+### 5.1 Construction rules
+
+All fixtures use the synthetic task id `synthetic-s000`, which exists in no corpus.
+Component ids are chosen so that no entry exists in the frozen `LABELS` table and the
+documented default applies: `re.escape(component_id.replace("_", " "))`. Every label
+phrase and every entity name below was verified **corpus-absent** before freezing, by
+case-insensitive search over the whole repository — `settlement total`, `payout total`,
+`transfer total`, `rebate total`, `closing balance`, `wire total`, `lodging site`,
+`Cedarline Lodge`, `Cedar Lodge`, `Cedar Lodge Annex`, `Harbour Point`: zero files each.
+This is what prevents a reviewer from arguing the fixtures were reverse-engineered from an
+observed row. (`refund amount` and `booking property` were drafted first and rejected at
+54 and 2 files.)
+
+**Window arithmetic must be controlled explicitly, because the frozen extractor appends
+`ms[0]` — the *first* candidate in each ±120-character label window.** In short text the
+windows overlap and every window yields the same first candidate, which would silently
+turn an intended disagreement fixture into a unanimous one. Fixtures therefore separate
+label occurrences with a filler defined as
+
+```
+FILL(n) = ("the account notes contain no further figures. " * k)[:n]
+```
+
+which contains no digit, no currency symbol and no label substring. `FILL(250)` between
+consecutive labels makes the ±120 windows disjoint. `+` below denotes concatenation.
+
+### 5.2 The fixtures
+
+`+` = repair must help · `−` = repair must harm, and the harm is the priced cost ·
+`=` = repair must change nothing, verifying a rule
+
+| id | target | component / kind / gold | answer text | required outcome |
+|---|---|---|---|---|
+| **S1** | R-AGG **+** | `settlement_total` / `money_usd` / `4820.50` | `"Settlement total: $4,820.50."` + FILL(250) + `"Settlement total confirmed at $4,820.50."` + FILL(250) + `"An older draft lists settlement total $3,910.00 (stale)."` | `found=[4820.50, 4820.50, 3910.00]`. `FROZEN` not unanimous → `None` → miss. `R-AGG` modal 2-of-3 → `4820.50` → **match** |
+| **S2** | R-AGG **−** | `payout_total` / `money_usd` / `1205.00` | `"Payout total: $1,205.00."` + FILL(250) + `"Payout total shown as $990.00."` + FILL(250) + `"Payout total again $990.00."` | `found=[1205.00, 990.00, 990.00]`. `FROZEN` → `None`, abstains. `R-AGG` modal → `990.00` → **confident-wrong caused by the repair**. Gold was the minority and plurality cannot recover it |
+| **S3** | R-AGG **=** | `transfer_total` / `money_usd` / `700.00` | `"Transfer total $700.00."` + FILL(250) + `"Transfer total $700.00."` + FILL(250) + `"Transfer total $512.00."` + FILL(250) + `"Transfer total $512.00."` | exact 2–2 tie. Both `FROZEN` and `R-AGG` return `None`. Verifies the tie rule abstains rather than picking `found[0]` |
+| **S4** | R-SCOPE **+** | `rebate_total` / `money_usd` / `318.75` | `"Rebate total is stated below."` + FILL(260) + `"The credited figure is $318.75."` | no money inside the label window → `found=[]` → `FROZEN` `None`, cause `M3`. `R-SCOPE` scans the whole answer → `318.75` → **match** |
+| **S5** | R-SCOPE **−** | `closing_balance` / `money_usd` / `2450.00` | `"Unrelated invoice total $77.10."` + FILL(260) + `"Closing balance: $2,450.00."` | `FROZEN` window contains only `2450.00` → **HIT**. `R-SCOPE` appends the whole answer's *first* money → `77.10` → **turns a correct match into a confident-wrong**. See §5.3 |
+| **S6** | R-CMP **+** | `lodging_site` / `categorical` / `Cedarline Lodge` | `"Lodging site: Cedarline Lodge, amenities Pool, Wifi, Parking."` | candidate is gold plus a trailing list. `FROZEN` exact equality → miss (`M1b`-style). `R-CMP` `norm(gold) ⊆ norm(reported)` → **match** |
+| **S7** | R-CMP **−** | `lodging_site` / `categorical` / `Cedar Lodge` | `"Lodging site: Cedar Lodge Annex."` | a genuinely different property whose name contains gold. `FROZEN` correctly misses. `R-CMP` → **false positive caused by the repair**. Both names are invented and corpus-absent per §5.1 |
+| **S8** | R-CMP **=** | `lodging_site` / `categorical` / `Harbour Point (North Wing)` | `"Lodging site: Harbour Point (North Wing)."` | `extract_entity` splits at `(`, so `reported = "Harbour Point"`, a strict prefix of gold. `norm(gold) ⊄ norm(reported)`. **Neither recovers.** Verifies R-CMP's one-directional asymmetry and that the paren defect stays unrepaired per §2.1 |
+| **S9** | R-CHAN **+** | `wire_total` / `money_usd` / `6100.00` | `"I could not retrieve the figure."` + `"<function=lookup>{\"wire total\": \"$6,100.00\"}</function>"` | the only label hit and the only money are inside scaffolding. `FROZEN` reports `6100.00` → **spurious HIT on a value the agent never reported**. `R-CHAN` deletes the span → `None` → **correctly abstains** |
+| **S10** | R-CHAN **−** | `wire_total` / `money_usd` / `6100.00` | `"<function=lookup>{\"q\": \"wire\"}"` + `" The wire total is $6,100.00."` | unterminated opener, legitimate prose after it. `FROZEN` → **HIT**. `R-CHAN` deletes to end of text → `None` → **loses a recoverable value** |
+
+### 5.3 Two hazards the fixtures expose, recorded before implementation
+
+**S5 shows that R-SCOPE's benefit does not transfer from presence to selection, and this
+was not obvious.** Rule R1 in 0.6 asked only *"is gold anywhere in the answer"*, a
+presence question for which whole-answer scope is strictly better. Extraction asks a
+different question — *"which candidate do you pick"* — and the frozen `extract_money`
+answers it positionally, by `ms[0]`. Widening the window to the whole answer therefore
+makes the pick the **first money in the document**, which can be a distractor that the
+narrow window correctly excluded. R-SCOPE can convert a `HIT` into a wrong report.
+
+This hazard is recorded and the rule is **not changed**. Retuning R-SCOPE now — to a wider
+but still bounded window, or to a nearest-candidate pick — would be fitting the repair to
+a hazard the author just noticed, which is exactly the discipline P3-1 exists to avoid.
+S5 prices the rule as specified; if the price is high, that is the result.
+
+**S9 and S10 show that R-CHAN's two directions of error are both real and are driven by
+the same rule.** S9 is a spurious `HIT` the frozen instrument produces by reading
+scaffolding; S10 is a real value R-CHAN destroys by deleting an unterminated span to end
+of text. Unterminated openers are the **common** case on non-terminating legs, since such
+a leg stops mid-tool-call, so S10 is not an edge case. The deletion rule is fixed as
+stated in §2 and priced here rather than hidden.
+
+---
+
+## 6. Sealed validation
+
+### 6.1 The set
+
+`out/stage4_counterfactual_analysis_final/tracking_evidence.md` — Paper 1's hand-coded
+classification of all 24 valid pairs, read from the agent's final-answer text against
+guest gold (`probe_before`/`probe_after` in `*.guest.json`), described in Paper 1's
+Limitations section as "hand-coded from final-answer text against guest gold
+(`tracking_evidence.md`); traceable, not automated".
+
+It qualifies as sealed on four grounds, each of which must be stated in the paper:
+
+1. **Disjoint corpus.** Paper 1's Stage 4 cells, five models including Qwen3.5-9B,
+   Qwen3.5-35B-A3B and Qwen3.8-Flash, not the Study 2 archive from which the taxonomy was
+   derived.
+2. **Temporally sealed.** Hand-coded and published on arXiv before P3 existed. The labels
+   cannot have been influenced by the repair family.
+3. **Component-level, with values.** The prose transcribes what the agent reported *and*
+   what gold was, e.g. `"reports total cost basis $8,788.75 -- does not match true
+   baseline gold $8,213.25"` and `"reports 'Total Income $91,200' […] does not match true
+   CF gold $90,000 (off by exactly $1,200)"`.
+4. **Contains negatives with specified wrong values**, which is what makes precision
+   estimable at all — see §3.
+
+**Paper 1's rubric `score` is LLM-judged and is not ground truth.** Only the hand-coded
+Mechanism prose is. These must never be conflated, and the `score` column is not used.
+
+### 6.2 Transcription protocol
+
+The prose must be transcribed into a structured label table. This is the one place where
+author discretion enters a corpus that is otherwise sealed, so it is constrained:
+
+1. Transcription copies only values **literally stated** in the prose. No inference from
+   the trajectory, no re-reading of the archive, no judgement about correctness.
+2. A leg whose prose does not state a component value literally is marked
+   `UNTRANSCRIBABLE` and **excluded**, with the count reported.
+3. The mapping from Paper 1 component descriptions to component ids is written and frozen
+   **before** any instrument is run on this corpus.
+4. The table is committed and hashed before the first run. `tracking_evidence.md` is an
+   immutable committed artefact and the transcription is diffable against it and against
+   the arXiv PDF, so a third party can check step 1.
+5. **No subgroup analysis.** At roughly 50–80 transcribable component observations the
+   set supports one sensitivity and one precision estimate with wide intervals, nothing
+   more. By model, by task family, or by kind is forbidden.
+
+### 6.3 The prediction, informed by D-2
+
+Stated as a quantified claim whose count is unknown, and labelled as informed by three
+a-priori observed instances rather than as blind:
+
+> Among sealed-corpus legs that the human coder scored as **correctly tracking**, there is
+> a non-empty subset in which the answer states two or more disagreeing values for one
+> quantity — typically because the agent surfaced a channel inconsistency it was right to
+> surface. On that subset the frozen instrument abstains (`M1`) and R-AGG recovers.
+
+The contrast subset is legs where an agent's cross-check produced the *same* value twice,
+e.g. `retrieval-f029` Claude, on which the frozen instrument should not abstain and R-AGG
+should change nothing. Reporting both subsets is what distinguishes a mechanism from a
+one-sided illustration.
+
+If confirmed, the transferable statement is not about a regex. It is that **an agent which
+surfaces a data inconsistency — behaviour a human evaluator credits — is penalised by a
+fail-closed measurement layer.** That is a property of the measurement design, and it is
+what P3-1 would contribute beyond a defect report.
+
+---
+
+## 7. Kill criteria
+
+Pre-committed. Each is checkable, and each has a stated consequence that is not "weaken
+the claim and continue".
+
+* **K0 — faithfulness guard, not a finding.** R-AGG must recover exactly the `M1a` rows in
+  which gold is the modal group. That count is known from 0.7 to be **7 of 13**, so it is
+  used as an implementation guard, not as a result. A different set means the
+  implementation is unfaithful; abort and fix before anything else is read.
+* **K1 — stated on the sealed corpus, because on the development corpus it cannot fire.**
+  An earlier draft of K1 read "R-AGG does not drive `M1a` to zero". That was **incoherent
+  and is corrected here before freezing**: plurality recovers only those `M1a` rows in
+  which gold is the modal group, known from 0.7 to be 7 of 13, so `M1a` must fall to 6 and
+  not to 0, and the old K1 would have contradicted K0 and fired on a correct
+  implementation. More fundamentally, the mechanism is already *established* on the
+  development corpus, so no development-corpus outcome can falsify it. The real, currently
+  unknown question is whether it **generalises**. K1 therefore reads: if on the sealed
+  corpus R-AGG recovers **no** human-credited leg in which the agent stated disagreeing
+  values for one quantity, then §6.3 has failed and the mechanism does not generalise
+  beyond the corpus that produced it. Report that in one sentence; do not weaken it to a
+  contributing factor.
+* **K2 — a fixture-level outcome mismatch, not a tally.** K2 fires when any §5.2 fixture's
+  actual outcome differs from its stated `required outcome`, which means the repair is
+  mis-specified or mis-implemented. Fix the implementation, or amend the specification
+  *before* the archive is touched and record the amendment here. K2 explicitly does **not**
+  fire because harm cases outnumber help cases: harm is the required outcome of S2, S5, S7
+  and S10, and the suite's composition was chosen by the author, so a tally of it would
+  measure nothing but that choice.
+* **K3** — any configuration recovers an `M2` row → leakage per §2.1; the run is void.
+* **K4** — on the sealed corpus the family's sensitivity/precision is not better than
+  `FROZEN` → the repair family does not generalise beyond the corpus that produced the
+  taxonomy. Report as failed. Paper 3 scopes down to a diagnostic/methods contribution and
+  the prescriptive claim is dropped.
+* **K5** — transcription is impossible on more than 20% of sealed legs → sealed validation
+  is **not available**. Do not substitute a weaker set, do not hold out part of Study 2
+  (nothing there is sealed, per D-3), and do not run new models to manufacture one.
+  Paper 3 scopes down as in K4.
+
+**K4 and K5 are not failure modes of the paper.** A demonstration that no category-level
+repair dominates — that sensitivity and precision trade off and the instrument cannot be
+fixed without a cost — is itself the prescriptive finding, and is reportable as the main
+result. The paper must be written so that this outcome is publishable, otherwise §4 and §6
+are not really pre-registered.
+
+---
+
+## 8. Order of work and hard stops
+
+Everything required before freezing is closed, and each item is recorded rather than
+merely asserted:
+
+* **D-2 scope — decided.** §6.3 is retained and carries its informed-prediction label. It
+  is not presented as blind, and the three a-priori instances are named in D-2.
+* **R-CHAN implementability — checked, read-only, and it changed the repair.** The
+  prompt-echo rule is dropped and the reason is recorded in §2 under R-CHAN. No archive,
+  trajectory, extractor or lock was read or touched; only local task definitions under
+  `external/MyPCBench-main/tasks/final/`.
+* **§5 synthetic suite — authored.** All ten fixtures are concrete text in §5.2, with
+  label and entity corpus-absence verified in §5.1 and the two hazards they expose recorded
+  in §5.3.
+* **Two internal contradictions found in review and corrected before freezing**, recorded
+  so the correction is auditable: the old K1 would have fired on a correct implementation
+  because plurality cannot recover minority-gold `M1a` rows, and the old K2 would have
+  auto-dropped repairs by tallying fixtures the author chose to write. Both are restated in
+  §7.
+
+Remaining:
+
+1. Implement the repaired instrument as a **new module**, by wrapping the frozen one where
+   possible, with the same faithfulness discipline as 0.7: every `FROZEN` configuration
+   output must reproduce the 0.6/0.7 record exactly, or abort. Provenance parity per §2.0
+   is a hard constraint on the implementation, not a guideline.
+2. Run the synthetic suite. Apply K2.
+3. Freeze the §6.2 transcription and hash it.
+4. Run all six configurations once on the development corpus, then once on the sealed
+   corpus. Report whole.
+
+Do **not**: modify the frozen extractor, `matching.py`, the gold lock, any archive or any
+trajectory; modify Paper 1's or Paper 2's submission directories; run Gate 1 / `0.4`; run
+any model; use an LLM judge, semantic similarity, screenshots, or manual qualitative
+reading of trajectories; add cells, lanes, tasks or external labels; use a partner score
+to select or exclude cases; commit on the host; stop early or extend the run after seeing
+a partial result.
