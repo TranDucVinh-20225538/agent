@@ -334,15 +334,18 @@ opposite.
 
 ### Extraction population for 0.2
 
-| stratum | legs | note |
-|---|---:|---|
-| original Gate 0: excluded `VALID_DONE`, keyed | 16 | 11 orphan + 5 `G2` |
-| added: non-`DONE` partner legs of the 4 matched dissociation cells | 4 | new |
-| **total distinct legs** | **20** | |
+| stratum | id | legs | pooled with Gate 0? |
+|---|---|---:|---|
+| original Gate 0: excluded `VALID_DONE`, keyed | `gate0` | 16 | — (11 orphan + 5 `G2`) |
+| non-`DONE` partner legs of the 4 matched dissociation cells | `dissoc_nondone` | 4 | no |
+| unmatched high-`S` non-`DONE` leg (see below) | `unmatched_nondone` | 1 | no |
+| **total legs extracted** | | **21** | |
 
 The four `DONE` legs of the dissociation cells are **already inside the 16** — they are
-keyed orphans — so the population is 20 distinct legs, not 24. Counting the 8 dissociation
-legs as additional would double-count them.
+keyed orphans — so only their four non-`DONE` partners are new. The four dissociation
+*cells* thus involve 8 legs but contribute only 4 to the count; reporting the population as
+24 would double-count. Gate 0's own rate is computed on its 16 legs alone, and the two
+non-`DONE` strata are reported separately and never pooled into it.
 
 The four matched dissociation cells, each `S = 100` on both legs, both on keyed tasks:
 
@@ -359,9 +362,9 @@ What is held fixed is the task, the component set, the agent, the rubric, and th
 instrument. A non-`DONE` leg counts as matching only against **its own** post-intervention
 gold, never the partner's.
 
-A fifth stratum of `n = 1` is pre-registered now, reported separately and **never pooled**:
-`claude` / `retrieval-f002` `G0`, non-`DONE`, `S = 100`, on a keyed task, whose partner leg
-also failed to terminate. It is included at this point precisely so that it is not added
+The `unmatched_nondone` stratum is one leg: `claude` / `retrieval-f002` `G0`, non-`DONE`,
+`S = 100`, on a keyed task, whose partner leg also failed to terminate, so the cell has no
+terminating leg at all. It is included at this point precisely so that it is not added
 later after the matched cells' results are known, which would be the post-hoc move this
 spec exists to prevent. It cannot influence the matched-cell analysis because it is not
 pooled with it.
@@ -401,7 +404,7 @@ rest (for example `gpt` / `contradiction-f006` at `S = 64`, `flash` / `aggregati
 
 ### Stop point
 
-After 0.2 runs once on exactly these 20 legs, stop. Gate 1 / item timing is **not** run yet:
+After 0.2 runs once on exactly these 21 legs, stop. Gate 1 / item timing is **not** run yet:
 four of its five cells are the dissociation cells, so what the frozen extractor says about
 their legs must be known before item timing is used to explain a mechanism. No other cell,
 leg, or lane is added.
