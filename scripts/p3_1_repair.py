@@ -25,6 +25,7 @@ this same invocation chain, recorded in out/p3_1_gates.json.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -40,6 +41,50 @@ sys.path.insert(0, str(ROOT / "paper" / "paper2_counterfactual_eval" / "protocol
 import study2_hatd_extract as ex  # noqa: E402  the frozen extractor, imported not copied
 from study2_hatd_apply import match_one  # noqa: E402  the frozen comparison, imported not copied
 from matching import Kind  # noqa: E402
+
+# ---------------------------------------------------------------------------
+# Module provenance, checked rather than assumed. 2.0 parity applied to the
+# imports themselves.
+#
+# study2_hatd_apply hardcodes VINH = /data2/hpcshared/Vinh-/agent and inserts
+# VINH/scripts at sys.path[0] on import. Two host roots exist -- that module also
+# names VINH_FROZEN = /data2/hpcshared/Vinh/agent, which is where the recorded traj
+# paths live -- so "the frozen extractor" is not automatically the one in this tree.
+# This script happens to import study2_hatd_extract first, which puts it in
+# sys.modules before that path insert can take effect, but relying on import order
+# is precisely the kind of unstated dependency that has already cost one host run.
+# The blob hashes below make it a checked property: a different copy aborts.
+# ---------------------------------------------------------------------------
+FROZEN_BLOBS = {
+    "study2_hatd_extract": "438a4eafb175785376fa714a3cbc1a8564f327ba",
+    "study2_hatd_apply": "cafd8a6252febd0bf2fb88b7376884a5c5ff0484",
+}
+
+
+def git_blob(path: Path) -> str:
+    """Reproduce `git hash-object <path>` so the check is externally verifiable."""
+    data = path.read_bytes()
+    h = hashlib.sha1()
+    h.update(b"blob " + str(len(data)).encode() + b"\0")
+    h.update(data)
+    return h.hexdigest()
+
+
+def check_provenance() -> None:
+    import study2_hatd_apply as ap
+    bad = []
+    for mod, want in FROZEN_BLOBS.items():
+        p = Path(sys.modules[mod].__file__).resolve()
+        got = git_blob(p)
+        if got != want:
+            bad.append(f"{mod}: loaded {p}\n      blob {got}\n      frozen {want}")
+    if bad:
+        print("ABORT: a loaded module is not the frozen artifact. Refusing to produce "
+              "numbers against an unknown instrument.", file=sys.stderr)
+        for b in bad:
+            print(f"  - {b}", file=sys.stderr)
+        raise SystemExit(6)
+    _ = ap  # imported for sys.modules registration only
 
 GATES = ROOT / "out" / "p3_1_gates.json"
 RECALL_AUDIT = ROOT / "out" / "p3_0_recall_audit.jsonl"
@@ -501,6 +546,7 @@ def main() -> int:
     ap.add_argument("--a-legs", default="out/study2_hatd_legs.jsonl")
     ap.add_argument("--p3-legs", default="out/p3_0_extracted.jsonl")
     a = ap.parse_args()
+    check_provenance()
     if a.cmd == "parity":
         ok = gate_parity(Path(a.audit), Path(a.a_legs), Path(a.p3_legs))
         _write_gate("parity", ok)

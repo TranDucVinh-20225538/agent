@@ -794,3 +794,76 @@ Two further changes, neither affecting any rule:
 
 The synthetic gate was re-run after wiring in the frozen `match_one` and still passes
 **10/10**. Parity remains **unrun**; §A-2.4 stands in full.
+
+---
+
+## 12. Amendment A-4 — 2026-09-12, the lineage did not contain the instrument it cites
+
+The parity run aborted on the host with `ModuleNotFoundError: study2_hatd_extract`. The
+cause is structural and predates P3-1, and A-2.4 recorded the symptom without drawing the
+consequence — it noted the extractor was absent from this working tree and treated that as
+a local quirk instead of realising the host would hit the same absence. That error cost one
+host run and is recorded as such.
+
+### A-4.1 The facts, after correcting a misread of my own evidence
+
+An earlier check used the glob `*study2_hatd_extract*`, which also matches
+`out/study2_hatd_extractor_lock.*` and wrongly suggested the script was on this lineage.
+Checking the exact path instead:
+
+| question | answer |
+|---|---|
+| commits touching `scripts/study2_hatd_extract.py` | exactly one, `3242c30` |
+| branches containing `3242c30` | `generic-executor-phase1` only |
+| `3242c30` an ancestor of this lineage | **no** |
+| `4a2f6d6`, which is on this lineage | touched only `study2_hatd_extractor_lock.*` and `study2_hatd_legs.jsonl`, not the script |
+| script present at `65f384d` or at `b6edbba..6e8a44a` | **no, at neither** |
+
+So `out/study2_hatd_extractor_lock.json` on this lineage records
+`extractor: scripts/study2_hatd_extract.py`, `git_sha: 3242c30a...` while the lineage
+**does not carry that file**. 0.6 and 0.7 therefore did not run because the file was in the
+tree; they ran because the host had it by some other route. `git checkout` does not delete
+untracked files, so the instruction issued for this run cannot have removed the host's copy.
+
+### A-4.2 Fix: the exact frozen blobs are now on the lineage
+
+`scripts/study2_hatd_extract.py` and `scripts/study2_hatd_apply.py` are committed with
+content taken from `3242c30` and `71a405d`. This is **not** a modification of the frozen
+extractor: the blobs are content-addressed and verified byte-identical.
+
+```
+438a4eafb175785376fa714a3cbc1a8564f327ba  scripts/study2_hatd_extract.py   (= 3242c30:...)
+cafd8a6252febd0bf2fb88b7376884a5c5ff0484  scripts/study2_hatd_apply.py     (= 71a405d:...)
+```
+
+Anyone can check with `git hash-object`. Two files were needed, not one: `match_one` lives
+in the apply module, which is likewise off-lineage.
+
+### A-4.3 A second hazard found while fixing the first, and now checked
+
+`study2_hatd_apply` hardcodes two host roots and mutates the import path at module scope:
+
+```
+VINH        = Path("/data2/hpcshared/Vinh-/agent")
+VINH_FROZEN = Path("/data2/hpcshared/Vinh/agent")
+sys.path.insert(0, str(VINH / "scripts"))
+```
+
+This is the origin of the two-root discrepancy noted in A-3: recorded `traj` paths sit under
+`Vinh/` while `gold_lock` sits under `Vinh-/`. Consequence: **"the frozen extractor" is not
+automatically the copy in this tree.** This script imports `study2_hatd_extract` before
+`study2_hatd_apply`, so the former is already in `sys.modules` when that path insert runs —
+but that is import-order luck, not design, and import-order luck is exactly what cost the
+previous run.
+
+It is now a checked property. `check_provenance()` runs before any gate, recomputes the git
+blob hash of every loaded frozen module, and aborts with exit 6 if either differs from
+§A-4.2. Verified in both directions: it passes on the real blobs, and with a deliberately
+wrong expected hash it fires and names the file it actually loaded. A guard that cannot fail
+is not a guard.
+
+### A-4.4 State
+
+The lineage is self-contained: the synthetic suite now runs with no import-path help and
+still passes **10/10**. Parity remains **unrun**; §A-2.4 stands. No repair rule,
+configuration, quantity, fixture or kill criterion is changed by this amendment.
