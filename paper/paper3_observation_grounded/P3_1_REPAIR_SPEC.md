@@ -1500,3 +1500,99 @@ reported as such. Paper 2's published numbers are not restated or corrected; err
 stands.
 
 No repair rule, configuration, quantity, fixture or criterion changed. §6 remains uncoded.
+
+---
+
+## 21. Amendment A-13 — 2026-09-12, the §6.2 transcription is built and frozen
+
+§6.2 step 3 requires the transcription to exist and be frozen **before any instrument is
+run on this corpus**, and step 4 requires it committed and hashed before the first run.
+This amendment does that. No §6 runner exists yet.
+
+```
+scripts/p3_1_sealed_transcribe.py   -> builds and validates
+paper/paper3_observation_grounded/P3_1_SEALED_TRANSCRIPTION.json
+sha256 40a2bd895c79bf139613c1b57429c635e0bec2d9599ccd01f390e66007d15803
+source build_final.py::CLASS, sha256 f00dbcdd… — re-verified against A-1
+```
+
+`CLASS` is read statically with `ast`; Paper 1's generator is never executed. No
+trajectory, archive, guest file or rubric score was read.
+
+### A-13.1 Literalness is enforced, not promised
+
+§6.2 step 1 — "copies only values literally stated" — is the one place author discretion
+enters an otherwise sealed corpus, so it is made machine-checkable rather than asserted.
+Every transcribed value carries the exact substring it came from, and the build fails if
+that substring is absent from the cell's `gold` string (gold values) or `mech` string
+(reported values). All 82 observations pass.
+
+### A-13.2 It reproduces A-1.1's pre-check independently
+
+| | |
+|---|---|
+| cells / legs | 24 / 48 |
+| observations | 82 |
+| transcribable (STRICT) | **76** |
+| excluded observations | 6 |
+| legs with no transcribable observation | **2 → 46/48**, matching A-1.1 |
+
+The two excluded legs are exactly the two A-1.1 named: `Claude/preference_inference-f018/base`
+(values exist only via "byte-identical to the base row", LENIENT-only) and
+`GPT/counterfactual-f004/base` (gold-side: the pre-image is never literally given — the
+`VACUOUS_GOLD` failure mode of §1.1, observed independently in the sealed corpus).
+
+A-1.1's pre-check was run before this table existed, so the agreement is a genuine
+cross-check: had it differed, K5's PASS would not have covered the rule this table
+applies. 76 observations also falls inside §6.2 step 5's stated 50–80 range.
+
+### A-13.3 Precision is weakly estimable, and this is recorded before the run
+
+§6.1 point 4 claims the negatives make precision estimable. Quantified, they barely do.
+Only **5 of 76** transcribable observations are ones the human coder scored wrong:
+
+```
+Claude   /preference_inference-f018/cf  /oddsmarket_yes_shares  gold 0        reported 200
+GPT      /counterfactual-f004      /cf  /nec_1099_amount        gold 0        reported 1200
+Qwen3.5-9B/retrieval-f016          /base/cost_basis_total       gold 8213.25  reported 8788.75
+Qwen3.8-Flash/retrieval-f029       /cf  /w2_wages               gold 90000    reported 91200
+Claude   /retrieval-f030           /base/nec_1099_amount        gold 1200     reported 1080
+```
+
+False positives can only come from these five, so precision is floored at
+`1 − 5/|match|` **by corpus composition, not by instrument quality**: at 30 instrument
+matches precision is ≥ 0.833 whatever the instrument does, at 50 it is ≥ 0.900. The
+precision half of K4 therefore cannot separate configurations differing by fewer than
+about two false positives, while the sensitivity half rests on 71 observations and is
+genuinely estimable.
+
+K4 is **not** rewritten and no threshold is added. This is recorded so that a K4 verdict
+is read with the right asymmetry, and so the limitation cannot be introduced afterwards
+as a caveat on an inconvenient outcome — the same discipline as A-11.1.
+
+### A-13.4 A known prior disagreement between the coder and exact equality
+
+On `aggregation-f003` the gold is `4871.70` and three base legs (`Claude`, `Qwen3.5-9B`,
+`Qwen3.8-Flash`) are transcribed as reporting `$4,872`, which the coder credits as
+correct; `GPT` reports `$4,871.70`. These three observations are ones where a
+human-credited report and an exact-equality comparison **must** disagree, and they are
+recorded now rather than discovered in the results. The coder's verdict is the ground
+truth; the disagreement is the measurement, not an error to be tuned away.
+
+### A-13.5 §6.3 subsets marked from prose only
+
+`channel_inconsistency_flagged` is set where the coder states the agent surfaced a
+file/sqlite disagreement: `Claude/aggregation-f018/cf` and `GPT/retrieval-f030/cf`.
+`same_value_crosscheck` marks the contrast subset, `retrieval-f029` Claude and GPT on both
+legs — §6.3 names Claude there as its example.
+
+Whether an answer actually states two disagreeing values for one quantity is for the
+instrument to determine from the trajectory text. These flags are transcribed context, not
+a pre-classification, and no §6.3 outcome is decided here.
+
+### A-13.6 State
+
+Transcription frozen and hashed. Component-id and `kind` mapping frozen with it, since
+`kind` drives the extractor and must not become a later implementation choice. No repair
+rule, configuration, quantity, fixture or kill criterion changed. The §6 runner is not
+written, and nothing has been run on the sealed corpus.
