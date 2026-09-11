@@ -6,6 +6,7 @@
 - mean STS GPT=0.250 Flash=0.208 → argmax_STS=**gpt**
 - selection disagreement (argmax_S0 vs argmax_STS): **True**
 - sign(ΔS0)≠sign(ΔSTS) on 4/4 tasks: ['counterfactual-f010', 'preference_inference-f014', 'retrieval-f002', 'retrieval-f009']
+  - **DO NOT QUOTE the 4/4 as four disagreeing tasks.** This generator counts sign(0) ≠ sign(+) as a disagreement. Per the table below, ΔSTS = 0.000 on three of the four tasks (STS indifferent) and only `retrieval-f009` is strict opposition (ΔSTS = −0.167). Prose must say: STS strictly prefers GPT on 1 of 4, tied on 3. See manifest §0.16 correction (2026-09-12).
 - bootstrap mean(S0_Flash−S0_GPT)={'n_pairs': 4, 'observed_mean_diff': 46.5, 'ci95': [21.0, 72.0], 'n_boot': 5000, 'seed': 20260904}
 - bootstrap mean(STS_Flash−STS_GPT)={'n_pairs': 4, 'observed_mean_diff': -0.04166666666666666, 'ci95': [-0.12499999999999997, 0.0], 'n_boot': 5000, 'seed': 20260904}
 - LOPO argmax fragile: True

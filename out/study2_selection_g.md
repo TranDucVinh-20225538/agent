@@ -19,8 +19,8 @@ Common 4: `counterfactual-f010`, `preference_inference-f014`, `retrieval-f002`, 
 | mean pair-STS | **0.250** | 0.208 → \(\arg\max\) STS **GPT** |
 | \(Y\) (binary track) | 0/4 | 0/4 |
 
-- \(\operatorname{sign}(\Delta S^0)\neq\operatorname{sign}(\Delta\mathrm{STS})\) on **4/4** tasks (\(\Delta=\) Flash−GPT).
-- Paired bootstrap (seed 20260904, 5000): mean(\(S^0_\mathrm{Flash}-S^0_\mathrm{GPT}\)) = **+46.5** (95% CI 21.0–72.0); mean(\(\mathrm{STS}_\mathrm{Flash}-\mathrm{STS}_\mathrm{GPT}\)) = **−0.042** (95% CI −0.125–0.0).
+- \(\Delta=\) Flash−GPT. **STS strictly prefers GPT on 1 of 4 tasks** (`retrieval-f009`, \(\Delta\mathrm{STS}=-0.167\)) and is **tied on the other 3** (\(\Delta\mathrm{STS}=0.000\)). The raw "4/4" count in `out/study2_selection_g_sts.md` treats \(\operatorname{sign}(0)\neq\operatorname{sign}(+)\) as a disagreement and must not be quoted as four disagreeing tasks — see manifest §0.16 correction.
+- Paired bootstrap (seed 20260904, 5000): mean(\(S^0_\mathrm{Flash}-S^0_\mathrm{GPT}\)) = **+46.5**, 95% CI \([21.0,\,72.0]\); mean(\(\mathrm{STS}_\mathrm{Flash}-\mathrm{STS}_\mathrm{GPT}\)) = **−0.042**, 95% CI \([-0.125,\,0.000]\).
 - **LOPO fragile:** leave-out `retrieval-f009` → \(\arg\max\) STS = tie; other three leave-outs keep Flash on \(S^0\) and GPT on STS.
 
 Per-task: `out/study2_selection_g_sts.csv`.

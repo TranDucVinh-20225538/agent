@@ -10,7 +10,7 @@ Computer-use agents were ranked two ways on the same frozen Study 2 matrix: conv
 
 **§6.1(g).** Two supports, both reported:
 
-- Common 4 tasks: mean \(S^0\) Flash−GPT = +46.5 (bootstrap CI 21–72); mean STS Flash−GPT = −0.04 (CI −0.13–0). \(\arg\max S^0\) = Flash; \(\arg\max\) STS = GPT. Sign disagreement 4/4. LOPO fragile (leave-out retrieval-f009 ties STS).
+- Common 4 tasks: mean \(S^0\) Flash−GPT = +46.5, 95% CI \([21.0,\,72.0]\); mean STS Flash−GPT = −0.042, 95% CI \([-0.125,\,0.000]\). \(\arg\max S^0\) = Flash; \(\arg\max\) STS = GPT. **STS strictly prefers GPT on 1 of 4 tasks (`retrieval-f009`, \(\Delta\mathrm{STS}=-0.167\)) and is tied on the other 3** — the earlier "sign disagreement 4/4" counted \(\operatorname{sign}(0)\neq\operatorname{sign}(+)\) as disagreement and is not quoted (manifest §0.16 correction). The \(\arg\max\) flip therefore rests entirely on `retrieval-f009`, which is the same task whose leave-out ties STS (LOPO fragile).
 - Each agent’s own A: Flash higher on both \(S^0\) and STS. That **flips** relative to common-4 STS. Neither denominator is selected post hoc.
 
 STS is near the floor and \(Y=0\) everywhere, so the common-4 \(\arg\max\) disagreement is a ranking of small residuals, not a claim that GPT is more reliable than Flash.

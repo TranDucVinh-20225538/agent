@@ -345,7 +345,7 @@ With 9B out (§0.10), the ranked roster is then **GPT + Flash = 2 agents**, whic
 
 **Roster.** Exactly two agents at \(n_{\min}\) → `PAPER2_SPEC.md` §6.1(c): **Layer B not evaluated**. §6.1(g) applies.
 
-**§6.1(g) partial (host).** Common support \(\lvert\mathcal{A}^\cap\rvert=4\) tasks. Mean base-leg \(S\) difference Flash−GPT = **+46.5** (bootstrap CI 21–72). **\(\Delta\mathrm{STS}\) / \(Y\) not computed** — no locked \(\hat D\) extractor yet (`DESIGN.md` §3.1). Rubric \(S\) is on disk; matching code exists under `protocol/matching.py` but extraction from final-answer text is still coder-protocol, not sealed.
+**§6.1(g) partial (host).** Common support \(\lvert\mathcal{A}^\cap\rvert=4\) tasks. Mean base-leg \(S\) difference Flash−GPT = **+46.5**, 95% CI \([21.0,\,72.0]\). **\(\Delta\mathrm{STS}\) / \(Y\) not computed** — no locked \(\hat D\) extractor yet (`DESIGN.md` §3.1). Rubric \(S\) is on disk; matching code exists under `protocol/matching.py` but extraction from final-answer text is still coder-protocol, not sealed.
 
 **Next (blocking for a complete §6.1(g)).** Lock extractor → code \(\hat D\) on all valid-pair legs for GPT+Flash (+ Claude coverage) against guest gold → run `protocol/matching.py` → fill \(\Delta\mathrm{STS}\), sign disagreement frequency, LOPO. Do not invent STS from \(\Delta S\) or judge text.
 
@@ -363,7 +363,20 @@ With 9B out (§0.10), the ranked roster is then **GPT + Flash = 2 agents**, whic
 | mean pair-STS | **0.250** | 0.208 → \(\arg\max\) **GPT** |
 | \(Y\) (binary track) | 0/4 | 0/4 |
 
-\(\operatorname{sign}(\Delta S^0)\neq\operatorname{sign}(\Delta\mathrm{STS})\) on **4/4** tasks (\(\Delta=\) Flash−GPT). Paired bootstrap, seed `20260904`, \(B=5000\): \(\Delta S^0 = \mathbf{+46.5}\) (95% CI 21.0–72.0); \(\Delta\mathrm{STS} = \mathbf{-0.042}\) (95% CI −0.125–0.0). **LOPO fragile:** leaving out `retrieval-f009` makes \(\arg\max\) STS a **tie**; the other three leave-outs keep Flash on \(S^0\) and GPT on STS. Per §6.1(b)/(g) this is exploratory; Layer B remains **not evaluated** (§6.1(c)).
+Paired bootstrap, seed `20260904`, \(B=5000\): \(\Delta S^0 = \mathbf{+46.5}\), 95% CI \([21.0,\,72.0]\); \(\Delta\mathrm{STS} = \mathbf{-0.042}\), 95% CI \([-0.125,\,0.000]\). Per §6.1(b)/(g) this is exploratory; Layer B remains **not evaluated** (§6.1(c)).
+
+**Correction to the sign-disagreement count (2026-09-12, before any prose).** The host tables report \(\operatorname{sign}(\Delta S^0)\neq\operatorname{sign}(\Delta\mathrm{STS})\) on **4/4** tasks. That count is literally true only because the comparison treats \(\operatorname{sign}(0)=0\) as differing from \(\operatorname{sign}(+)\), and it is **not** what a reader takes "the two metrics disagree on all four tasks" to mean. The per-task values (`out/study2_selection_g_sts.md`) are:
+
+| task | \(\Delta S^0\) | \(\Delta\mathrm{STS}\) | reading |
+| --- | ---: | ---: | --- |
+| `counterfactual-f010` | +17 | **0.000** | STS indifferent |
+| `preference_inference-f014` | +84 | **0.000** | STS indifferent |
+| `retrieval-f002` | +25 | **0.000** | STS indifferent |
+| `retrieval-f009` | +60 | **−0.167** | strict opposition |
+
+So the honest statement is: **STS strictly prefers GPT on 1 of 4 tasks and is tied on the other 3**, and the common-4 \(\arg\max\) flip rests **entirely on `retrieval-f009`**. This is the same task whose leave-out turns \(\arg\max\) STS into a tie, so "LOPO fragile" and "one task carries the whole effect" are the same fact stated twice, not two pieces of corroboration. Prose must use the 1-strict / 3-tied decomposition; the bare "4/4" is not to be quoted. STS is also coarsely quantised on these pairs (observed values 0.000, 0.333, 0.500), which is why §6.1(g) is described as ranking small residuals.
+
+**Reporting convention for these two intervals, fixed here.** Data files keep full precision. Prose and tables use \(\Delta S^0 = +46.5\), 95% CI \([21.0,\,72.0]\) and \(\Delta\mathrm{STS} = -0.042\), 95% CI \([-0.125,\,0.000]\) — bracket notation, three decimals for STS, one for \(S^0\). If any table rounds to two decimals it must use \([-0.13,\,0.00]\) **everywhere**. The mixed forms previously present (`−0.04 (CI −0.13–0)` in `out/study2_paper_results.md`, `−0.125–0.0` in `out/study2_selection_g.md`) were normalised locally; the `.json`/`.csv` payloads were not touched.
 
 **Mandatory caveats (do not drop in write-up).**
 
@@ -394,6 +407,29 @@ So §0.3's characterisation stands, with one precision the earlier wording lacke
 This file stays the record of record. Host-only content is folded in **additively** below; the file is never resolved by a git merge of the two branches, because a careless resolution would silently drop one side's chain.
 
 **Imported from host, because it is materially about measurement — Gate −1.5 remediation (2026-09-06).** Not a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). False-`DONE` root cause: `cell_has_done` matched `"done": true`, which is **also** set by `FAIL` and `PREDICT_CRASH` rows in `traj`. Canonical rule adopted: \(\texttt{VALID\_DONE} \iff \texttt{canonical\_last\_action} = \texttt{DONE}\), via tracked `scripts/paper2_traj_terminal.py`. Offline reclassification (`scripts/canonical_audit_paper2.py` → `CHECKPOINT.canonical.jsonl`) moved **Flash from 27 to 23 `DONE`** with 4 mismatches; the original `CHECKPOINT.jsonl` is retained as historical. Later checkpoints call the canonical helper; harness pin in `out/paper2_harness_pin.json`. **Study 1 analysis must use `CHECKPOINT.canonical.jsonl`**, not raw pre-remediation `DONE` counts. This is the earliest instance in the project of the hazard §0.12 later audited on the judge side, and it belongs in any write-up of the instrument.
+
+**The canonical helper, read rather than cited.** `scripts/paper2_traj_terminal.py`, `scripts/canonical_audit_paper2.py` and `out/paper2_harness_pin.json` are absent from this branch's working tree but present in the imported host branch, so all three were read from `refs/remotes/hpc/generic-executor-phase1` rather than taken on trust. The helper's own header states the rule and two properties the host note did not mention, both of which matter for how Study 2 numbers may be described:
+
+1. **Fail-closed (its "Gate −1.5 Closure A").** Missing, malformed, unreadable, or absent final-action evidence **never** yields `VALID_DONE`. Every \(\lvert\mathcal{A}\rvert\) in §0.15/§0.16 is therefore a **lower bound**: instrument trouble can only push a leg out of \(\mathcal{A}\), never into it. The error direction is the conservative one, which is what lets Claude's \(\lvert\mathcal{A}\rvert=1\) be reported as a fact about coverage rather than a possible bookkeeping artefact.
+2. **The judge channel is structurally orthogonal.** The helper explicitly does **not** consult `rubric_bundle.json` when deciding `DONE`. Termination and scoring are read from different channels by construction, so §0.9's central observation — a leg earning rubric 0.75 while never closing the episode — cannot be an artefact of one channel leaking into the other. Combined with §0.12 (the judge reads frames from `traj.jsonl` rows, never a directory glob), both halves of the measurement gap are now traced to independent inputs.
+
+**Blast radius of the false-`DONE` hazard, checked locally.** The defective predicate lived in the **runner's checkpoint bookkeeping**. The Paper 1 analysis pipeline never consumed it: `out/stage4_counterfactual_analysis_final/_extract.py` derives `done` independently as `act == "DONE"` on the last `traj.jsonl` row (line 63), and `build_final.py` records the exclusion reason as *"not `DONE` (last `traj.jsonl` action != 'DONE'); `result.txt`/writer status/score are not substitutes"*. So Paper 1's tables were computed under the canonical rule by construction, before that rule was named, and the host's instruction that "Study 1 analysis must use `CHECKPOINT.canonical.jsonl`" is satisfied vacuously for this pipeline — it reads trajectories, not checkpoints. What the 27→23 reclassification corrected was the **checkpoint view** of the Flash Study 1 lane, not a published Paper 1 count.
+
+**Chronology of the instrument, now complete.** With Gate −1.5 imported, the terminal-detection story reads in one order. Note that it is recorded here, at §0.17, but happened **first** — §§0.1–0.16 were all written without it:
+
+| Date | Event | Where |
+| --- | --- | --- |
+| 2026-09-06 | False-`DONE` hazard found: `cell_has_done` matched `"done": true`, also set by `FAIL` / `PREDICT_CRASH` rows | §0.17 (imported) |
+| 2026-09-06 | Remediation: canonical terminal semantics \(\texttt{VALID\_DONE} \iff \texttt{canonical\_last\_action}=\texttt{DONE}\), tracked in `scripts/paper2_traj_terminal.py` | §0.17 (imported) |
+| 2026-09-06 | Study 1 reclassification: Flash 27 → 23 `DONE`, 4 mismatches; `CHECKPOINT.canonical.jsonl` written, raw retained | §0.17 (imported) |
+| 2026-09-06 | GPT hard-block and Claude SMALL smoke recorded — both later superseded | §0.17 (imported), superseded by §0.2 / §0.8 |
+| 2026-09-08 | Study 2 execution begins under the canonical rule; GPT substituted substrate; Flash instrument stop; `0773242` parser bind at 12:28+07; equivalence gate; two-host scheduling; failure taxonomy | §§0.2–0.6 |
+| 2026-09-09 | Funding reversals; Claude non-termination; 9B out of Layer B; asymmetric near-miss; judge-frame audit; GPT lane complete | §§0.7–0.12 |
+| 2026-09-10 | Roster arithmetic pre-registered **before** the Claude count; Claude frozen at \(\lvert\mathcal{A}\rvert=1\) | §§0.13–0.14 |
+| 2026-09-11 | Flash frozen; \(\hat D\) extractor locked `3242c30`; STS applied `71a405d`; write-up `8197110` | §§0.15–0.16 |
+| 2026-09-12 | Host history imported; §0.4/§0.10 debt closed; manifests reconciled | §0.17 |
+
+**The load-bearing ordering fact:** remediation is dated **2026-09-06** and the earliest Study 2 leg is **2026-09-08**. Every Study 2 lane therefore ran with canonical terminal semantics **from leg 1**, and every `DONE` count, every \(\lvert\mathcal{A}\rvert\), and every number in §0.16 is canonical by construction rather than by later correction. No Study 2 quantity was ever reclassified. The 27→23 correction belongs entirely to the Study 1 checkpoint view and must be cited as such — never as a Study 2 adjustment.
 
 **Imported but SUPERSEDED — host's GPT hard-block resume condition (2026-09-06).** That note lists a resume path through "frozen `ResponseStateAdapter` … this manifest amended with adapter freeze hash". §0.2 (2026-09-08) **withdrew** the adapter: none was ever built, and the GPT lane ran the substituted generic XML scaffold. The host row is retained here only as history and must not be cited as the GPT lane's provenance. Likewise its Claude row ("57 legs remain unstarted … official lane still planned as native") is superseded by §0.8.
 
