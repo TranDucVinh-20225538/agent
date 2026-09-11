@@ -1653,3 +1653,122 @@ Every subsequent gate accepts only the A-14 hash.
 No repair rule, configuration, quantity, fixture or kill criterion changes. No label,
 extractor or instrument content is added — that question is A-15's, and is not mixed in
 here.
+
+---
+
+## 23. Amendment A-15 — 2026-09-12, K4 is NOT EVALUABLE: instrument non-portability
+
+Separate from A-14 by design. A-14 fixed a defect in my transcription. This amendment
+records a property of the **instrument**, found before any sealed execution, that stops
+§6 from being run at all.
+
+### A-15.1 The measurement
+
+`scripts/p3_1_label_coverage_audit.py`, read-only, exits 4:
+
+```
+LABELS: 30 entries over 13 tasks
+
+Study 2 (development)    components  31 | LABELS 30 | bespoke  1 | fallback  0 | coverage 100.0%
+Paper 1 (sealed target)  components  17 | LABELS  0 | bespoke  0 | fallback 17 | coverage   0.0%
+```
+
+`extract_component` identifies evidence by matching hand-written regex labels near a
+candidate value, keyed `(task, component_id)`. On a missing key it falls back to the
+component id with underscores replaced by spaces — for this corpus `nec 1099 amount`,
+`w2 wages`, `combined filed refund`, strings that will essentially never occur in an
+agent's answer. It never raises.
+
+### A-15.2 Why the defect was invisible
+
+Every Study 2 component is covered: 30 by `LABELS` and the one remaining
+(`contradiction-f004/oddsmarket_gme_yes`) by a bespoke branch at the top of
+`extract_component`. **The generic fallback is exercised by zero components in 0.6, 0.7,
+A-10 and §4.** It is dead code in every measured result the programme has produced, and
+the sealed corpus would have been its first use — for 17 of 17 components.
+
+That is the whole reason this was not caught earlier, and it is the substance of the
+finding rather than an excuse for it.
+
+### A-15.3 The verdict
+
+**K4 is NOT EVALUABLE.** It may not be reported as PASS and may not be reported as FAIL.
+With zero coverage, FROZEN and all six configurations would return near-total
+non-detection, no configuration could exceed FROZEN, and "no repair beats the baseline"
+would print as a clean, plausible, entirely artefactual result. That is a false negative
+wearing the costume of a valid measurement.
+
+K4's text is **not** rewritten and no threshold is introduced. The criterion stands as
+frozen; what is recorded is that the instrument–corpus pair cannot support its evaluation.
+
+### A-15.4 Why labels are not written now
+
+Authoring 17 labels after inspecting the target corpus and then running the six
+configurations would silently replace the pre-registered question
+
+> does the repair family generalise beyond the corpus that produced the taxonomy?
+
+with a different one
+
+> having seen the target corpus, can I write an extractor good enough for it?
+
+Labels decide whether evidence is visible at all, so they sit upstream of every repair and
+would dominate the result. Accordingly, and recorded as prohibitions: no new `LABELS` under
+cover of the A-14 correction; no treating the fallback as adequate; no running §6 at zero
+coverage and reporting FAIL; no labels derived from answer text and then called frozen; no
+edit to the extractor that keeps the name "frozen instrument"; and no label chosen because
+it improves K4.
+
+### A-15.5 The finding
+
+The four-layer spine gains a failure mode upstream of all of it:
+
+```
+                          observation channel
+   same frozen extractor        │
+        ├── Study 2 vocabulary  │  evidence identified          -> repairs are testable
+        └── Paper 1 vocabulary  │  zero evidence identified     -> nothing downstream applies
+```
+
+Measurement error is not only "the instrument saw the evidence and handled it wrongly". It
+is also **"the instrument did not recognise the evidence as evidence once transported"**.
+An evaluator's evidence-identification vocabulary is corpus-specific, and transporting it
+to a disjoint corpus can cost observability *silently*: the output is zero detections,
+which is well-formed, and without a coverage audit it is indistinguishable from a genuine
+negative result.
+
+This is directly continuous with A-12.4. There, concordance with a judge was achievable by
+blinding the instrument; here, an apparently valid null is achievable the same way. Both
+say the same thing: **an evaluator's output cannot be read without evidence that the
+evaluator could see.**
+
+That the zero coverage was found *before* the sealed run, by an audit rather than by
+interpreting a suspicious result, is the point worth making in the paper.
+
+### A-15.6 A provenance consequence that cannot be undone
+
+To find this I inspected the sealed corpus's task and component vocabulary. The corpus is
+therefore **no longer blind** to whoever would write the labels. Any future validation must
+use a corpus withheld from the label designer; it cannot reuse this one and call it sealed.
+
+### A-15.7 What is unaffected
+
+A-10 and §4 stand: both ran on components with 100% coverage, and nothing here touches the
+development-corpus results, the four repair families, the six configurations or any frozen
+quantity. K5 also stands — it passed on the **corpus** side, 46/48 transcribable, and the
+blocker is on the instrument side. The sealed set is fine; the instrument cannot see it.
+A-14's transcription remains valid and hashed, and is simply not consumed.
+
+### A-15.8 Two routes, no decision taken here
+
+* **Route A — close K4 with non-portability.** Paper 3 reports the development repair
+  experiments, the §4 ordering analysis as secondary, and an attempted sealed validation
+  that was not evaluable because the frozen instrument had zero label coverage on the
+  target. Cleanest on provenance; gives up the controlled sealed validation.
+* **Route B — a new, separately pre-registered experiment.** Corpus first, label vocabulary
+  defined and frozen before any result is seen, instrument hashed, validation corpus
+  withheld from the designer per A-15.6, then the repairs run. It must be registered as new
+  work and must not be presented as a continuation of K4.
+
+No repair rule, configuration, quantity, fixture or kill criterion is altered. §6 is not
+coded and nothing has been run on the sealed corpus.
