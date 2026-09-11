@@ -1596,3 +1596,60 @@ Transcription frozen and hashed. Component-id and `kind` mapping frozen with it,
 `kind` drives the extractor and must not become a later implementation choice. No repair
 rule, configuration, quantity, fixture or kill criterion changed. The §6 runner is not
 written, and nothing has been run on the sealed corpus.
+
+---
+
+## 22. Amendment A-14 — 2026-09-12, A-13 correction: invalid component kinds
+
+**This amendment corrects an implementation defect and nothing else.** It is deliberately
+separate from A-15 so that a reviewer can tell an implementation correction from a
+question about the instrument's scientific scope.
+
+### A-14.1 The defect
+
+A-13 recorded component kinds as `money` and `int`. The frozen stack accepts only
+`money_usd`, `integer`, `categorical`, `entity`, `state` — the values of `matching.Kind`,
+which are also the values used throughout the gold lock. `money` and `int` are not among
+them.
+
+The consequence is deterministic and silent. `extract_component` dispatches on `kind` and
+falls off the end of its chain when nothing matches, returning `None` rather than raising:
+
+```python
+if kind == "money_usd":  return extract_money(text, labels)
+if kind == "integer":    return extract_int(text, labels)
+...
+return None
+```
+
+**15 of 17** component specs would have taken that path, so **62 of 76** transcribable
+observations would have been unextractable — for FROZEN and for all six configurations
+alike. Nothing in the stack would have reported it.
+
+### A-14.2 The correction
+
+`money` → `money_usd`, `int` → `integer`. `entity` was already valid. The mapping is now
+validated against `matching.Kind` at build time rather than written from memory, so an
+invalid identifier cannot be frozen again; the guard is negative-tested.
+
+Every other quantity is unchanged, which is the evidence that the correction touched only
+identifiers: 24 cells, 48 legs, 82 observations, **76** transcribable, **46/48** legs with
+the same two named exclusions, **5** negatives, all 82 literalness checks passing.
+
+### A-14.3 Supersession, not modification
+
+```
+superseded  sha256 40a2bd895c79bf139613c1b57429c635e0bec2d9599ccd01f390e66007d15803  (A-13)
+current     sha256 386941d50defc21ce1955d5e5547789f2c081bea20003a640d3c337ebb633359  (A-14)
+```
+
+A-13 is **not** reverted, rebased or edited. Its commit `1dcf47c` stands, its hash is
+retained above as the superseded artefact, and the JSON records the supersession and its
+reason inline. The history must show that the defect existed and when it was corrected.
+Every subsequent gate accepts only the A-14 hash.
+
+### A-14.4 Scope
+
+No repair rule, configuration, quantity, fixture or kill criterion changes. No label,
+extractor or instrument content is added — that question is A-15's, and is not mixed in
+here.

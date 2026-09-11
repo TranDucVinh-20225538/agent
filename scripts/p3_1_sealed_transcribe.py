@@ -28,18 +28,41 @@ OUT = ROOT / "paper" / "paper3_observation_grounded" / "P3_1_SEALED_TRANSCRIPTIO
 # Component ids and kinds. §6.2 step 3: this mapping is written and frozen before any
 # instrument is run on this corpus. `kind` drives the extractor, so it is part of the
 # mapping and not a later implementation choice.
+#
+# A-14: the first freeze of this mapping used `money` and `int`, which are not identifiers
+# the frozen stack accepts. They are corrected here to `money_usd` and `integer` and the
+# vocabulary is now validated against `matching.Kind` rather than written from memory.
 COMPONENTS = {
-    "retrieval-f001": {"loyalty_status": "entity", "loyalty_miles": "int"},
-    "aggregation-f003": {"combined_filed_refund": "money"},
-    "preference_inference-f018": {"gme_shares": "int", "oddsmarket_yes_shares": "int"},
-    "counterfactual-f004": {"nec_1099_amount": "money"},
-    "retrieval-f003": {"w2_wages": "money"},
-    "retrieval-f016": {"cost_basis_total": "money", "cash": "money"},
-    "retrieval-f029": {"w2_wages": "money", "fed_withheld": "money"},
-    "retrieval-f030": {"nec_1099_amount": "money", "charitable": "money"},
-    "aggregation-f018": {"charitable": "money", "home_office_days": "int"},
-    "preference_inference-f004": {"hd_winner": "entity", "hd_winner_count": "int"},
+    "retrieval-f001": {"loyalty_status": "entity", "loyalty_miles": "integer"},
+    "aggregation-f003": {"combined_filed_refund": "money_usd"},
+    "preference_inference-f018": {"gme_shares": "integer",
+                                  "oddsmarket_yes_shares": "integer"},
+    "counterfactual-f004": {"nec_1099_amount": "money_usd"},
+    "retrieval-f003": {"w2_wages": "money_usd"},
+    "retrieval-f016": {"cost_basis_total": "money_usd", "cash": "money_usd"},
+    "retrieval-f029": {"w2_wages": "money_usd", "fed_withheld": "money_usd"},
+    "retrieval-f030": {"nec_1099_amount": "money_usd", "charitable": "money_usd"},
+    "aggregation-f018": {"charitable": "money_usd", "home_office_days": "integer"},
+    "preference_inference-f004": {"hd_winner": "entity", "hd_winner_count": "integer"},
 }
+
+
+def check_kinds() -> None:
+    """Validate against the frozen enum so an invalid identifier cannot be frozen again.
+
+    The first freeze recorded `money` and `int`; both fall through every branch of
+    `extract_component`, which returns None silently rather than raising. Nothing in the
+    stack would have reported it.
+    """
+    sys.path.insert(0, str(ROOT / "paper" / "paper2_counterfactual_eval" / "protocol"))
+    from matching import Kind
+    allowed = {k.value for k in Kind}
+    bad = sorted({(t, c, k) for t, cs in COMPONENTS.items() for c, k in cs.items()
+                  if k not in allowed})
+    if bad:
+        raise SystemExit(f"ABORT: kinds not in matching.Kind {sorted(allowed)}: {bad}")
+    print(f"component kinds validated against matching.Kind: "
+          f"{sum(len(c) for c in COMPONENTS.values())} specs, all accepted")
 
 # (model, task, leg, component): (gold_value, gold_literal, reported_value,
 #                                 reported_literal, human_correct)
@@ -178,6 +201,7 @@ def load_class() -> dict:
 
 
 def main() -> int:
+    check_kinds()
     C = load_class()
     if set(TABLE) != set(C):
         raise SystemExit(f"ABORT: table covers {len(TABLE)} cells, CLASS has {len(C)}.")
@@ -249,7 +273,9 @@ def main() -> int:
     OUT.write_text(json.dumps({
         "source": "out/stage4_counterfactual_analysis_final/build_final.py::CLASS",
         "source_sha256": SRC_SHA, "rule": "STRICT",
-        "n_cells": len(TABLE), "n_legs": len(legs), "n_observations": len(rows),
+        "supersedes": {"amendment": "A-13", "sha256": "40a2bd895c79bf139613c1b57429c635e0bec2d9599ccd01f390e66007d15803",
+                "reason": "component kinds money/int are not identifiers the frozen extractor accepts"},
+  "n_cells": len(TABLE), "n_legs": len(legs), "n_observations": len(rows),
         "n_transcribable": len(tr), "n_negatives": len(neg),
         "excluded_legs": ["/".join(d) for d in dead],
         "components": COMPONENTS, "observations": rows,
