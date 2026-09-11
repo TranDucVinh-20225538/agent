@@ -57,7 +57,27 @@ for this corpus?* is not scientifically interesting and is not checkable. *Does 
 corpus-independent derivation rule, calibrated where ground truth exists, transfer to a
 corpus it was not calibrated on?* is both.
 
-### 3.1 Calibration and freeze order, which is the whole protocol
+### 3.1 Derivability is not observability
+
+These are two distinct failure modes and conflating them is what let A-15 go unnoticed:
+
+```
+task definition:  "Report the NEC 1099 amount."
+        │
+        ├─ R emits "NEC 1099 amount"        grounded    = 1   (G1 satisfied)
+        │
+agent answers:    "The filing reported $4,250."
+        └─                                  observable  = 0   (G3 violated)
+```
+
+The instrument knows *what* it is looking for and still cannot recognise *how* the agent
+expressed it. Groundedness is a property of the rule against the task definition;
+observability is a property of the rule against the agent's language. A rule can be 100% of
+the first and 0% of the second, which is precisely the shape of A-15 — and a rule gated
+only on groundedness would relocate that failure rather than prevent it. Hence G1 and G3
+are separate gates with separate thresholds.
+
+### 3.2 Calibration and freeze order, which is the whole protocol
 
 1. `R` is authored and calibrated **only** against Study 2, where 30 hand-written `LABELS`
    entries exist as a reference and where every P3-1 result is already frozen.
@@ -111,32 +131,102 @@ The only set presently meeting all four is Paper 1's Stage 4 corpus: 24 cells, 4
 ledger, and the precision limitation of A-13.3 — **5 negatives** — carries over unchanged
 and is a pre-stated reason the precision half of any verdict will be weak.
 
-## 6. Kill criteria
+## 6. Gates, fixed before `R` is designed
 
-Pre-committed, each with a consequence that is not "weaken the claim and continue".
+Four separate conditions, deliberately **not** bundled. An earlier draft placed a single
+80% floor on the calibration corpus; that was wrong twice over — it mixed a validity
+constraint with a coverage measure, and on the calibration corpus it could never fire,
+because G2 at tolerance 0 already forces 30 of 30. The numbers below are fixed here,
+before `R` exists and before anything about `R` is measured.
 
-* **P2-K0 — the derived instrument must be the same instrument.** With `R`'s labels
-  substituted for the hand-written ones, `FROZEN` must reproduce P3-1's development-corpus
-  taxonomy exactly. If it does not, `R` is a *different* instrument and any cross-corpus
-  difference confounds two changes at once. Report both taxonomies side by side and do not
-  attribute anything to the repairs.
-* **P2-K1 — coverage floor, pre-committed rather than discovered.** Run the A-15 coverage
-  audit before any configuration. Coverage below a floor fixed at freeze time returns
-  **NOT EVALUABLE**, never PASS or FAIL. This is A-15 institutionalised: a null from an
-  instrument that cannot see is not a null.
-* **P2-K2 — negatives floor.** Precision is floored at `1 − n_neg/|match|` by corpus
-  composition. Report the floor alongside every precision figure, and if the corpus cannot
-  separate configurations differing by fewer than two false positives, say so in the result
-  rather than in a limitations section.
-* **P2-K3 — leakage.** No configuration may recover an observation whose gold is absent.
-  Any recovery voids the run, as in P3-1's K3.
-* **P2-K4 — the generalisation test.** If no repair improves sensitivity over `FROZEN` on
-  the validation corpus at adequate coverage, the repair family does not generalise.
-  Report as failed in one sentence; do not weaken it to a contributing factor.
+### G1 — Groundedness: 100%, a validity constraint
 
-As in P3-1 §7, a negative outcome here is publishable and the paper must be written so that
-it is. A repair family that does not transfer, measured with an instrument whose
-transportability was audited first, is a result.
+Every label `R` emits for a `(task, component)` must occur as a literal substring of that
+task's own `instruction` or `grading` text, under a normalisation limited to casefolding
+and whitespace collapse, declared with `R` and frozen. Nothing else: no stemming, no
+synonyms, no fuzzy matching.
+
+A single ungrounded label is **contamination, not a coverage shortfall**, so there is no
+percentage here. Violation aborts. This is the mechanism that makes §4's contamination
+non-actionable: knowledge of the target corpus cannot be expressed except through terms the
+task definition already contains.
+
+### G1b — No memorisation: `R` may name no task and no component
+
+`R`'s implementation may not contain any task identifier or component identifier as a
+literal. Checkable mechanically against the 184 task ids and the component ids of both
+corpora, and it is what makes "corpus-independent" a verified property rather than a
+promise: without it, sufficient iteration on the calibration corpus would let `R` memorise
+the 30 hand-written label lists, which is hand-authoring wearing a rule's clothes.
+
+`R`'s free parameters are declared in this spec **before** calibration. Calibration may
+only choose values within that declared set; adding a parameter after seeing calibration
+results is an amendment and is recorded as one.
+
+### G2 — Calibration fidelity: 100%, tolerance 0
+
+With `R`'s labels substituted for the hand-written `LABELS`, `FROZEN` must reproduce
+P3-1's frozen development result **exactly**: the 134-row categorisation, the cause
+taxonomy, and A-10's per-configuration table. Study 2 has 30 label-sensitive components and
+1 inert (`kind = state`, which returns `None` regardless), so the requirement is **30/30**,
+not 80%.
+
+Evaluated once, after freeze. `R` is **not** revised until it passes — G2 is not a loop and
+not a loophole.
+
+**If G2 fails, that is a pre-registered result, not a failure of the experiment.** A
+corpus-independent rule that cannot reconstruct a hand-tuned instrument on the very corpus
+that instrument was written for is direct evidence that the frozen instrument contains
+task-specific authoring which an independent rule does not recover — i.e. that the
+instrument itself is not portable. Reported in one sentence, with the shortfall counted
+(`27/30` is reported as `27/30`). P3-2 stops there and the validation corpus is not
+touched.
+
+### G3 — Validation observability: ≥ 80%, the gate A-15 earned
+
+After `R` is frozen, hashed, and materialised over all 184 tasks, and **only** then, answer
+text from the validation corpus is read for the first time. For each validation
+`(task, component)` with non-null gold, ask whether at least one label `R` emitted for it
+occurs — same frozen normalisation — in the agent's answer text on at least one leg.
+Observability is the fraction of such components.
+
+Below **80%** the sealed comparison is **NOT EVALUABLE**. Not PASS, not FAIL, and the six
+configurations are not run. 79% does not become "K4 failed".
+
+This is the distinction of §3.2 doing work: G1 asks whether the instrument knows what it is
+looking for, G3 asks whether it can recognise how the agent expressed it. The hand-written
+labels score **0%** here (A-15), and that figure is the reference `R` is reported against.
+
+### G4 — Negatives floor: ≥ 20, independent of coverage
+
+The validation corpus must supply at least 20 negative observations — human-coded wrong
+with a stated wrong value — eligible for precision assessment. This is an auditability
+requirement, not a statistical threshold, and it is independent of G3: coverage asks
+whether `R` sees evidence, G4 asks whether there is enough counter-evidence to tell whether
+`R` over-generates.
+
+**G4 is already evaluable and already fails.** It is a property of the corpus, not of `R`:
+A-14's transcription supplies **5** negatives against a floor of 20. Recorded here, before
+`R` exists, with its pre-committed consequence: precision is **not claimed** as adequately
+audited on this corpus, and any precision figure is reported together with its structural
+floor `1 − 5/|match|` — at 30 matches, ≥ 0.833 whatever the instrument does. Sensitivity
+remains evaluable. No negatives may be added after seeing any result.
+
+### G5 — Leakage
+
+No configuration may recover an observation whose gold is absent. Any recovery voids the
+run, as in P3-1's K3.
+
+### P2-K4 — the generalisation test
+
+Only reachable if G1, G1b, G2, G3 and G5 hold. If no repair improves sensitivity over
+`FROZEN` on the validation corpus, the repair family does not generalise: report as failed
+in one sentence and do not weaken it to a contributing factor. Given G4, the verdict is on
+sensitivity alone and says so.
+
+**If any gate before the sealed execution fails, K4 is not run and no K4 verdict exists.**
+As in P3-1 §7, a negative outcome is publishable and the paper must be written so that it
+is.
 
 ## 7. Out of scope
 
@@ -146,10 +236,50 @@ quantity. No modification of Paper 1's or Paper 2's submission directories, the 
 extractor, `matching.py`, the gold lock, or any archive or trajectory. No re-running or
 re-interpreting the development corpus.
 
-## 8. Open before freezing
+## 8. Order of work and hard stops
 
-1. The derivation rule `R` — its exact algorithm, and the coverage and negatives floors of
-   P2-K1 and P2-K2. These are numbers, and they must be fixed before `R` is calibrated, not
-   after its Study 2 coverage is known.
-2. Whether P2-K0's "exactly" admits any tolerance. The default is none.
-3. Whether a blind validation route in §4 can be obtained. If one can, it supersedes §5.
+```
+                          R  (algorithm + declared parameters)
+                          │
+                calibrate on Study 2 only
+                          │
+        ┌─────────────────┼─────────────────┐
+      G1 grounded      G1b no task/         G2 fidelity
+        = 100%         component literals     = 30/30, tolerance 0
+        └─────────────────┼─────────────────┘
+                          │
+                   FREEZE + HASH R
+                          │
+              materialise R over all 184 tasks, hash
+                          │
+        ┌─────────────────┴─────────────────┐
+   G3 observability                    G4 negatives
+      ≥ 80%  (first read of                ≥ 20  — already FAILS at 5
+      validation answer text)               precision not claimed
+        └─────────────────┬─────────────────┘
+                          │
+                 one sealed execution
+                          │
+                        P2-K4
+```
+
+Each number means one thing and they no longer overlap: groundedness is a 100% validity
+constraint, calibration fidelity is exact reconstruction at tolerance 0, and 80% is *only*
+the pre-registered minimum validation observability required for the sealed comparison to
+be evaluable — not a claim that `R` must reach 80% everywhere.
+
+## 9. The claim, worded exactly
+
+> The label vocabulary was generated by a frozen, corpus-independent rule from task-side
+> specifications, calibrated on a separate corpus, and applied uniformly without
+> task-specific manual intervention.
+
+Not claimed, and not to be written: that the validation corpus is blind to the label
+designer. It is not, per §4.
+
+## 10. Open before freezing
+
+1. `R`'s algorithm and its declared parameter set. Everything in §6 is fixed first, and
+   `R` is designed against those gates rather than the gates against `R`.
+2. Whether a blind validation route per §4 can be obtained. If one can, it supersedes §5,
+   and it would also resolve G4, which the current corpus fails.
