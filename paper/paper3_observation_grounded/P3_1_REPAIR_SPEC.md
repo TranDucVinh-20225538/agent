@@ -1772,3 +1772,63 @@ A-14's transcription remains valid and hashed, and is simply not consumed.
 
 No repair rule, configuration, quantity, fixture or kill criterion is altered. §6 is not
 coded and nothing has been run on the sealed corpus.
+
+---
+
+## 24. Amendment A-16 — 2026-09-12, P3-1 is closed
+
+No further execution under this pre-registration. P3-1's remaining question is handed to a
+separately pre-registered experiment, not continued here.
+
+### A-16.1 What P3-1 establishes
+
+* A four-layer decomposition of evaluator failure — observation channel, scope/candidate
+  formation, aggregation, comparison, verdict — with the load-bearing result that a failure
+  at an earlier layer cannot be repaired at a later one. R-CMP is the demonstration: it is
+  bit-identical to FROZEN in §3 and again in §4, because the relevant `M1b` failures are
+  upstream abstentions and comparison-level transformation is causally inaccessible.
+* On the development corpus (A-10), **no category-level repair dominates**. R-AGG is the
+  only repair raising sensitivity, 20/59 → 28/59, and it releases 26 abstentions as +8
+  correct and +18 wrong. R-SCOPE converts 11 of 20 already-correct rows to confident-wrong.
+  R-CHAN raises `M2` from 34 to 59. `ALL` composes destructively. `M1c` = 0 everywhere, a
+  pre-registered mechanism that did not occur.
+* At ordering level (A-12), a **channel**-layer intervention moved the model ordering while
+  aggregation- and comparison-layer interventions did not — with the two cautions that
+  "narrowed" was cancellation rather than convergence, and the inversion was one-sided
+  destruction with `flash` bit-identical to FROZEN.
+* Two traps that share one shape (A-12.4, A-15.5): concordance with a judge, and an
+  apparently valid null, are both obtainable by blinding the instrument. An evaluator's
+  output cannot be read without evidence that the evaluator could see.
+* Integrity machinery that worked: K0 and K3 as faithfulness guards, the parity gates for
+  §3 and §4, and the pre-run coverage audit that stopped §6.
+
+### A-16.2 The claim boundary
+
+> We establish the failure mechanisms and demonstrate their downstream consequences, but
+> deliberately do not claim cross-corpus generalisation, because the frozen instrument was
+> found to have zero label coverage on the intended validation corpus.
+
+K4 is **NOT EVALUABLE** per A-15, not PASS and not FAIL. §7's pre-committed consequence —
+"Paper 3 scopes down to a diagnostic/methods contribution and the prescriptive claim is
+dropped" — applies unchanged; only the *reason* is recorded as non-evaluability rather
+than failure. This is compliance with the pre-registration, not improvisation after an
+unwelcome result: §7 states in advance that this outcome must be publishable, "otherwise
+§4 and §6 are not really pre-registered".
+
+Two independent reasons make the sealed validation weaker than hoped, and the first was
+recorded before the second was found: precision rests on 5 negatives and is floored at
+`1 − 5/|match|` by corpus composition (A-13.3), and label coverage is zero (A-15).
+
+### A-16.3 What is closed
+
+Frozen and not to be re-run or re-interpreted: the four repairs, the six configurations,
+A-10's §3 result, A-12's §4 result, the A-14 transcription (`386941d5…`, valid, simply not
+consumed), and every kill criterion as written. The development corpus is not to be mined
+further. No label, extractor or instrument content was added at any point after A-10.
+
+### A-16.4 What is handed on
+
+The open question — *does the repair family reduce measurement error on a corpus that did
+not produce the taxonomy?* — moves to **P3-2**, registered separately in
+`P3_2_PORTABILITY_SPEC.md`. P3-2 is new work with its own pre-registration and its own
+kill criteria. It is not a continuation of K4 and must never be presented as one.
