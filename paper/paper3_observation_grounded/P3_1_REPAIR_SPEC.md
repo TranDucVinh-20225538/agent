@@ -1211,3 +1211,111 @@ corpus at n=2. Reported as an observation. It is not evidence about the sealed c
 is not a result.
 
 Nothing has been measured. No repair rule, configuration, quantity or fixture changes.
+
+---
+
+## 18. Amendment A-10 — 2026-09-12, the development-corpus run: no repair dominates
+
+`run` completed on the host at `059cb5d`, exit 0. Both inner faithfulness gates passed,
+`K0` passed in its A-9 form, `K3` passed. `out/p3_1_run_development.json` is the record.
+
+### A-10.1 §3 quantities, six configurations, 134 rows over 57 legs
+
+Wilson 95%. `MATCH` destroyed counts previously-correct rows that the configuration turned
+into something else.
+
+| config | sensitivity /59 | abstention /134 | confident-wrong M4/reported | `MATCH` destroyed /20 |
+|---|---|---|---|---|
+| FROZEN | 20 = 0.339 [0.231, 0.466] | 89 = 0.664 | 25/45 = 0.556 [0.412, 0.691] | 0 |
+| R-AGG | **28 = 0.475** [0.353, 0.600] | 63 = 0.470 | 43/71 = 0.606 [0.489, 0.711] | 0 |
+| R-SCOPE | 13 = 0.220 [0.134, 0.341] | 56 = 0.418 | 65/78 = **0.833** [0.735, 0.900] | **14** |
+| R-CMP | 20 = 0.339 [0.231, 0.466] | 89 = 0.664 | 25/45 = 0.556 [0.412, 0.691] | 0 |
+| R-CHAN | 15 = 0.254 [0.161, 0.378] | 104 = 0.776 | 15/30 = 0.500 [0.332, 0.668] | 7 |
+| ALL | 10 = 0.169 [0.095, 0.285] | 79 = 0.590 | 45/55 = 0.818 [0.697, 0.898] | 16 |
+
+**The result: no category-level repair dominates.** This is the outcome §7 pre-committed to
+as reportable as the main result, and it is reached with the repair family frozen since
+`f79042a`.
+
+* **R-AGG** is the only repair that raises sensitivity. It releases 26 abstentions and they
+  decompose exactly: **+8 correct, +18 wrong**. The `M4` increase is concentrated in
+  `ABSENT` (15 → 28) — rows where gold is not in the text at all, so the instrument is
+  committing to invented values where it previously stayed silent. §3 quantity 3 exists to
+  make this visible, and it does.
+* **R-SCOPE** does not merely fail to help: it converts **11 of the 20** already-correct
+  rows into confident-wrong and 3 more into `M1`. Raising observation recall *lowers*
+  measurement correctness. Its confident-wrong rate, 0.833, is the worst of any single
+  configuration.
+* **R-CHAN** raises `M2` from 34 to 59. Markup-span deletion is deleting content-bearing
+  text, most plausibly through the "unterminated opener deletes to end of text" rule. The
+  direction was anticipated — both R-CHAN fixtures S9 and S10 are harm cases — the
+  magnitude was not.
+* **ALL** is worse than every component on sensitivity and near-worst on confident-wrong.
+  The repairs compose destructively.
+
+### A-10.2 R-CMP is inert, for a structural reason
+
+R-CMP is **bit-identical** to FROZEN on every quantity and every taxonomy cell. The reason
+is not chance. R-CMP fires only when the instrument *reports* a value and gold is contained
+in it, but the entity `M1b` failures in this corpus are **abstentions** — `reported` is
+`None`. A comparison-layer repair cannot reach an abstention.
+
+So R-CMP is aimed at a failure mode that the synthetic fixtures S6/S7/S8 can construct and
+this corpus does not contain. That is a finding about where the failures actually sit, and
+it is an argument for the layered decomposition: the entity problem is an aggregation and
+scope problem before it is a comparison problem.
+
+### A-10.3 Two predictions of mine were wrong
+
+Both were recorded before the run, so both are reported.
+
+1. **"Under R-SCOPE every label hit scans the same text, so `found` is always unanimous and
+   `M1` must fall to zero."** False. `M1` totals **19** under R-SCOPE. The reasoning holds
+   only for `scope_money` and `scope_int`, which take `[0]`. `scope_date` does
+   `found.extend(ex._DATE_RE.findall(text))`, so widening the scope collects *every* date in
+   the answer, and `scope_entity` appends from three separate branches. Widening the scope
+   **increases** the number of distinct candidates rather than collapsing them. I reasoned
+   about two of the four extractors and stated the conclusion for all four.
+   The other half of that prediction — that `M2` cannot be recovered because a label hit is
+   still required — **held**, in all six configurations, which is why `K3` passes by
+   construction rather than by luck.
+2. **"`M4` rises by 2 under R-AGG."** `RECALL_MISS` `M4` went 5 → 9. I reasoned only over
+   the 13 `M1a` rows; 2 of the 7 `M1b` rows also resolved to wrong values (`M1b` 7 → 5).
+
+Predictions that held: FROZEN sensitivity 20/59 = 0.339; `M1a` 13 → **3** exactly; `K3` in
+all configurations; and `K3`'s denominator of 34 = 9 + 19 + 6 `VACUOUS_GOLD`, which was
+deduced in A-8 and is now confirmed rather than assumed.
+
+### A-10.4 `M1c` is zero: a pre-registered negative
+
+`M1c` = **0 in all six configurations**. A-2.3 defined it before the run as a candidate
+explanation for part of the `M1b` set. It explains **none** of it. Per the A-2.3 constraint
+that `M1c` be reported "only if the run supports it", it is reported here as a null result
+and is not carried into the paper as a mechanism. 0.7's refusal to tell a single-cause
+story about `RECALL_MISS` therefore stands undisturbed.
+
+### A-10.5 Correction to §7 K1's explanatory arithmetic
+
+§7 K1 contains the parenthetical "plurality recovers only those `M1a` rows in which gold is
+the modal group, known from 0.7 to be 7 of 13, so `M1a` must fall to 6 and not to 0". That
+inherits the strict-majority/modal-group conflation A-8.2 identified. The measured value is
+`M1a` 13 → **3**: 8 rows recovered, 2 became `M4`, and the 3 exact ties remain `M1a`.
+
+**K1's operative criterion is unaffected** — it is stated on the sealed corpus, on whether
+R-AGG recovers any human-credited leg — and is not changed. Only the explanatory arithmetic
+was wrong, and it is corrected here rather than edited in place.
+
+### A-10.6 What this does not establish
+
+`K4` is **not decided**. It is stated on the sealed corpus, and the development corpus is
+the corpus that *produced* the taxonomy, so no outcome here can test generalisation.
+Precision remains not estimable on this corpus, per §3.
+
+What the run does establish is stronger than the original prescriptive ambition: the
+measurement layer cannot be repaired at category level without trading one error class for
+another, and that trade is *quantifiable* — 8 correct answers for 18 wrong ones on the one
+repair that helps at all. The demonstration is possible only because the instrument exposes
+its intermediate state. An LLM judge could not be measured this way at all, which is the
+§1 construct-validity argument arriving as a measured result instead of an assertion.
+
+§4 and §6 remain unrun.
