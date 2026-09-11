@@ -359,9 +359,9 @@ consecutive labels makes the ±120 windows disjoint. `+` below denotes concatena
 | **S3** | R-AGG **=** | `transfer_total` / `money_usd` / `700.00` | `"Transfer total $700.00."` + FILL(250) + `"Transfer total $700.00."` + FILL(250) + `"Transfer total $512.00."` + FILL(250) + `"Transfer total $512.00."` | exact 2–2 tie. Both `FROZEN` and `R-AGG` return `None`. Verifies the tie rule abstains rather than picking `found[0]` |
 | **S4** | R-SCOPE **+** | `rebate_total` / `money_usd` / `318.75` | `"Rebate total is stated below."` + FILL(260) + `"The credited figure is $318.75."` | no money inside the label window → `found=[]` → `FROZEN` `None`, cause `M3`. `R-SCOPE` scans the whole answer → `318.75` → **match** |
 | **S5** | R-SCOPE **−** | `closing_balance` / `money_usd` / `2450.00` | `"Unrelated invoice total $77.10."` + FILL(260) + `"Closing balance: $2,450.00."` | `FROZEN` window contains only `2450.00` → **HIT**. `R-SCOPE` appends the whole answer's *first* money → `77.10` → **turns a correct match into a confident-wrong**. See §5.3 |
-| **S6** | R-CMP **+** | `lodging_site` / `categorical` / `Cedarline Lodge` | `"Lodging site: Cedarline Lodge, amenities Pool, Wifi, Parking."` | candidate is gold plus a trailing list. `FROZEN` exact equality → miss (`M1b`-style). `R-CMP` `norm(gold) ⊆ norm(reported)` → **match** |
-| **S7** | R-CMP **−** | `lodging_site` / `categorical` / `Cedar Lodge` | `"Lodging site: Cedar Lodge Annex."` | a genuinely different property whose name contains gold. `FROZEN` correctly misses. `R-CMP` → **false positive caused by the repair**. Both names are invented and corpus-absent per §5.1 |
-| **S8** | R-CMP **=** | `lodging_site` / `categorical` / `Harbour Point (North Wing)` | `"Lodging site: Harbour Point (North Wing)."` | `extract_entity` splits at `(`, so `reported = "Harbour Point"`, a strict prefix of gold. `norm(gold) ⊄ norm(reported)`. **Neither recovers.** Verifies R-CMP's one-directional asymmetry and that the paren defect stays unrepaired per §2.1 |
+| **S6** | R-CMP **+** | `lodging_site` / `categorical` / `Cedarline Lodge` | `"Lodging site Cedarline Lodge, amenities Pool, Wifi, Parking."` (colon removed, A-2.2) | candidate is gold plus a trailing list. `FROZEN` exact equality → miss (`M1b`-style). `R-CMP` `norm(gold) ⊆ norm(reported)` → **match** |
+| **S7** | R-CMP **−** | `lodging_site` / `categorical` / `Cedar Lodge` | `"Lodging site Cedar Lodge Annex."` (colon removed, A-2.2) | a genuinely different property whose name contains gold. `FROZEN` correctly misses. `R-CMP` → **false positive caused by the repair**. Both names are invented and corpus-absent per §5.1 |
+| **S8** | R-CMP **=** | `lodging_site` / `categorical` / `Harbour Point (North Wing)` | `"Lodging site Harbour Point (North Wing)."` (colon removed, A-2.2) | `extract_entity` splits at `(`, so `reported = "Harbour Point"`, a strict prefix of gold. `norm(gold) ⊄ norm(reported)`. **Neither recovers.** Verifies R-CMP's one-directional asymmetry and that the paren defect stays unrepaired per §2.1 |
 | **S9** | R-CHAN **+** | `wire_total` / `money_usd` / `6100.00` | `"I could not retrieve the figure."` + `"<function=lookup>{\"wire total\": \"$6,100.00\"}</function>"` | the only label hit and the only money are inside scaffolding. `FROZEN` reports `6100.00` → **spurious HIT on a value the agent never reported**. `R-CHAN` deletes the span → `None` → **correctly abstains** |
 | **S10** | R-CHAN **−** | `wire_total` / `money_usd` / `6100.00` | `"<function=lookup>{\"q\": \"wire\"}"` + `" The wire total is $6,100.00."` | unterminated opener, legitimate prose after it. `FROZEN` → **HIT**. `R-CHAN` deletes to end of text → `None` → **loses a recoverable value** |
 
@@ -653,3 +653,107 @@ f00dbcdd33c944bf8429a40ee13d05160cdbac98997a2e9c879ede203b343531  build_final.py
 No repair rule, no configuration, no primary quantity, no fixture, and no kill criterion is
 altered by this amendment. §2 through §5 and §7 stand as frozen at `b6edbba`. K5 is
 resolved as PASS; K4 remains open and is the gate that still matters.
+
+---
+
+## 10. Amendment A-2 — 2026-09-12, implementation and the synthetic gate
+
+`scripts/p3_1_repair.py` implements §2 with gates enforced in the order
+`parity -> synthetic -> run`; `run` refuses unless both prior gates are recorded as
+passed. Configurations compose by patching attributes of the frozen module, and
+**`FROZEN` patches nothing**, which is what makes the parity gate exact.
+
+### A-2.1 Reading the frozen source corrected two descriptions. Neither rule changed.
+
+**SPEC-NOTE 1 — "the ±120-character label window" does not exist.** §2 R-SCOPE and §5.1
+inherited that phrase from the 0.6/0.7 specs. The frozen source has **four different
+scopes**: `extract_money` scans `text[m.end():m.end()+100]` after a `\n\s*Breakdown`
+cutoff; `extract_int` scans `+80`; `extract_entity` uses `text[m.start():m.end()+160]`
+plus a line-delimited branch plus `text[m.end():m.end()+160]`; and only `extract_date`
+calls `_window()`, which is itself **asymmetric** at `m.start()-40` to `m.end()+120`.
+
+The R-SCOPE *rule* is unaffected — it replaces whatever local slice the frozen code took
+with the whole answer — but the description of the baseline was wrong and is corrected
+here. §5.1's `FILL(250)` separator remains valid, for a different reason than stated: the
+largest forward scope is 160, not 120, and 250 still exceeds it.
+
+**SPEC-NOTE 2 — "whole answer" means the entire string, not "after the label".** The
+ambiguity is settled by the spec's own cross-reference, "This is the scope of rule R1",
+and R1 was presence over the entire answer. The consequence is deliberate and was
+predicted in §5.3: the pick becomes the first candidate in the document. S5 confirms it
+empirically — `FROZEN` reports `2450.00` and matches, `R-SCOPE` reports `77.10` and does
+not.
+
+**A structural consequence found only at implementation, pre-registered here as a
+prediction for the run.** Under R-SCOPE every label hit scans the same text and therefore
+yields the same first candidate, so `found` is always unanimous and `_unique_or_none`
+cannot abstain on disagreement: **R-SCOPE alone should drive `M1` to zero.** A label hit
+is still required, so an empty candidate list still returns `None` and **`M2` rows cannot
+be recovered**, which means the §2.1 leakage guard (K3) holds by construction rather than
+by luck.
+
+### A-2.2 K2 fired on S6 and S7, and S8 passed for the wrong reason
+
+First run: 8 of 10 fixtures met their required outcome. S6 and S7 both produced
+`FROZEN reported = None` instead of an over-long entity. Diagnosis, from the verbatim
+`found` lists:
+
+```
+"Lodging site: Cedarline Lodge, amenities Pool, Wifi, Parking."
+  found -> ['Cedarline Lodge, amenities Pool, Wifi, Parking',
+          ': Cedarline Lodge, amenities Pool, Wifi, Parking']   -> None
+"Lodging site Cedarline Lodge, amenities Pool, Wifi, Parking."
+  found -> ['Cedarline Lodge, amenities Pool, Wifi, Parking']    -> reports
+```
+
+Extraction here is the frozen `extract_entity` **untouched**, because R-CMP changes only
+the comparison. The implementation is therefore faithful and the **fixture text was
+wrong**: it assumed `Label: value` yields one candidate. Per K2 the specification is
+amended and the implementation is not: the colon is removed from S6, S7 and **S8**.
+
+S8 is the more instructive failure. It *passed* its required outcome `(no match, no match)`
+— but for the wrong reason, abstaining on self-disagreement rather than exercising R-CMP's
+one-directional asymmetry. A suite that passes for the wrong reason is worse than one that
+fails. After correction S8 reports `Harbour Point` under both configurations and genuinely
+tests the asymmetry against gold `Harbour Point (North Wing)`.
+
+Second run: **10 of 10**. Recorded as passed.
+
+### A-2.3 A new sub-mechanism, pre-registered now: `M1c` self-disagreement
+
+The diagnosis above is a finding, not only a fixture bug. On `Label: value` — the canonical
+way an agent formats a structured answer — the frozen `extract_entity` emits two candidates
+from two branches of the same function, differing only by a leading `": "`, and the
+unanimity rule discards both. The disagreement is **internal to the instrument**: it is not
+two world values, and it is not cross-component contamination.
+
+`M1c` is defined here, before the run: an `M1` row in which the disagreeing values are
+equal under R1 normalisation after stripping leading punctuation, i.e. the instrument
+disagreed with itself about formatting rather than about content. It is reported alongside
+`M1a` and `M1b` at run time.
+
+Two constraints. First, `M1c` is **not** retrofitted onto 0.7: those counts are frozen and
+`M1a` 13 / `M1b` 7 stand as published. Second, `M1c` is a candidate explanation for part of
+the `M1b` set and must be reported as such only if the run supports it; the 0.7 refusal to
+tell a single-cause story about `RECALL_MISS` continues to apply.
+
+### A-2.4 What has NOT been verified
+
+**The parity gate has not been run.** It requires `out/p3_0_recall_audit.jsonl` and the
+Study 2 trajectories, which live on the host; locally it aborts with exit 3 as designed,
+and `run` then refuses with exit 5. The synthetic suite exercises `FROZEN` only on ten
+constructed strings, which is **weak** evidence of wrapper faithfulness. Until FROZEN
+reproduces all 134 recorded `gold`, `reported` and `matched` values, the wrapper is
+unverified and no repair number may be quoted.
+
+The frozen extractor is not in this branch's working tree; it was read from git object
+`3242c30:scripts/study2_hatd_extract.py` and, for the local synthetic run only, staged
+outside the repository at `/tmp/p3_1_local/`. Nothing was checked out into `scripts/` and
+no copy is committed, so the freeze at `3242c30` is untouched.
+
+### A-2.5 What did not change
+
+No repair rule, no configuration, no primary quantity, no kill criterion. §2.2's six
+configurations, §3's quantities, §4's two-sided ordering analysis, §6's sealed protocol and
+§7's K0/K1/K3/K4/K5 stand as frozen at `b6edbba` and amended at `fa4a642`. Only three
+fixture strings in §5.2 are corrected, under the authority K2 grants.
