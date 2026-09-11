@@ -38,7 +38,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "paper" / "paper2_counterfactual_eval" / "protocol"))
 
 import study2_hatd_extract as ex  # noqa: E402  the frozen extractor, imported not copied
-from matching import Kind, match_value  # noqa: E402
+from study2_hatd_apply import match_one  # noqa: E402  the frozen comparison, imported not copied
+from matching import Kind  # noqa: E402
 
 GATES = ROOT / "out" / "p3_1_gates.json"
 RECALL_AUDIT = ROOT / "out" / "p3_0_recall_audit.jsonl"
@@ -247,20 +248,16 @@ def chan_clean(text: str) -> str:
 # R-CMP -- one-directional containment for categorical/entity only.
 # ---------------------------------------------------------------------------
 def match_with_config(spec: dict[str, Any], gold: Any, reported: Any, cfg: set[str]) -> bool:
-    if gold is None or reported is None:
-        return False
-    kind = Kind(spec["kind"])
-    try:
-        if kind is Kind.STATE:
-            kk = {k: Kind(v) for k, v in (spec.get("key_kinds") or {}).items()}
-            if not isinstance(gold, dict) or not isinstance(reported, dict):
-                return False
-            return match_value(kind, gold, reported, key_kinds=kk)
-        if match_value(kind, gold, reported):
-            return True
-    except Exception:
-        return False
-    if "R-CMP" in cfg and kind in (Kind.CATEGORICAL, Kind.ENTITY):
+    """The frozen `match_one` is called first, unchanged. R-CMP only ever *adds* a match.
+
+    Wrapping rather than reimplementing matters here: under FROZEN this function is
+    exactly `match_one`, so the parity gate compares the frozen comparison against its
+    own recorded output rather than against a look-alike of mine.
+    """
+    if match_one(spec, gold, reported):
+        return True
+    if "R-CMP" in cfg and gold is not None and reported is not None \
+            and Kind(spec["kind"]) in (Kind.CATEGORICAL, Kind.ENTITY):
         g, r = norm_r1(gold), norm_r1(reported)
         return bool(g) and g in r
     return False
@@ -308,54 +305,91 @@ def extract_for(task: str, cid: str, kind: str, answer: str, cfg: set[str]) -> A
 # ---------------------------------------------------------------------------
 # Gate 1: parity. FROZEN must reproduce 0.6/0.7 exactly.
 # ---------------------------------------------------------------------------
-def gate_parity() -> bool:
-    if not RECALL_AUDIT.exists():
-        print(f"ABORT: {RECALL_AUDIT} not found. Parity requires the 0.6 record and the "
-              f"Study 2 archive it points at; run this on the host.", file=sys.stderr)
-        return False
-    rows = [json.loads(l) for l in RECALL_AUDIT.read_text().splitlines() if l.strip()]
-    print(f"0.6 rows loaded            : {len(rows)}")
-    if len(rows) != BASELINE_ROWS:
-        print(f"ABORT: expected {BASELINE_ROWS} rows, got {len(rows)}", file=sys.stderr)
-        return False
+def _j(x: Any) -> str:
+    """The comparison idiom 0.7 used for its faithfulness guard, reused unchanged."""
+    return json.dumps(x, sort_keys=True, default=str)
+
+
+def gate_parity(audit: Path, a_legs: Path, p3_legs: Path) -> bool:
+    for p in (audit, a_legs, p3_legs):
+        if not p.exists():
+            print(f"ABORT: {p} not found. Parity requires the 0.6 record and the Study 2 "
+                  f"archive it points at; run this on the host.", file=sys.stderr)
+            return False
+    rows = [json.loads(l) for l in audit.read_text().splitlines() if l.strip()]
+    # Paths are not in the audit file; they are rejoined on (lane, task, leg),
+    # exactly as P3_0_IDENTIFICATION_AUDIT_SPEC section 3 requires.
+    paths: dict[tuple, tuple] = {}
+    for p in (a_legs, p3_legs):
+        for line in p.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                paths[(r["lane"], r["task"], r["leg"])] = (r.get("traj"), r.get("guest"))
+
     cats: dict[str, int] = {}
     for r in rows:
         cats[r["category"]] = cats.get(r["category"], 0) + 1
-    if cats != BASELINE_CATEGORIES:
-        print(f"ABORT: category counts {cats} != baseline {BASELINE_CATEGORIES}", file=sys.stderr)
-        return False
     legs = {(r["lane"], r["task"], r["leg"]) for r in rows}
+    bad: list[str] = []
+    if len(rows) != BASELINE_ROWS:
+        bad.append(f"{len(rows)} rows, expected {BASELINE_ROWS}")
     if len(legs) != BASELINE_LEGS:
-        print(f"ABORT: expected {BASELINE_LEGS} legs, got {len(legs)}", file=sys.stderr)
+        bad.append(f"{len(legs)} legs, expected {BASELINE_LEGS}")
+    if cats != BASELINE_CATEGORIES:
+        bad.append(f"categories {dict(sorted(cats.items()))} != {BASELINE_CATEGORIES}")
+    missing = sorted(k for k in legs if k not in paths)
+    if missing:
+        bad.append(f"no traj/guest path for {len(missing)} leg(s): {missing[:3]}")
+    if bad:
+        print("ABORT: population disagrees with the frozen baseline", file=sys.stderr)
+        for b in bad:
+            print(f"  - {b}", file=sys.stderr)
         return False
-    print(f"category counts            : {cats}  OK")
-    print(f"distinct legs              : {len(legs)}  OK")
+    print(f"population verified       : {len(rows)} rows over {len(legs)} legs, "
+          f"categories {dict(sorted(cats.items()))}")
+
+    # Reachability is checked separately so an unresolvable path reports as one legible
+    # error instead of surfacing as 134 value mismatches. 0.7 proved these paths resolve
+    # on the host; if they stop resolving, that is the finding, not a parity failure.
+    unreachable = []
+    for key in sorted(legs):
+        traj_s, guest_s = paths[key]
+        for label, s in (("traj", traj_s), ("guest", guest_s)):
+            if not s or not Path(s).exists():
+                unreachable.append(f"{key} {label}: {s}")
+    if unreachable:
+        print(f"ABORT: {len(unreachable)} path(s) not reachable from this machine. Parity "
+              f"must run where the Study 2 archive lives.", file=sys.stderr)
+        for u in unreachable[:10]:
+            print(f"  - {u}", file=sys.stderr)
+        return False
+    print(f"archive reachable         : {len(legs)} legs, traj + guest both present")
 
     lock = ex.load_lock()
-    bad: list[str] = []
+    answers: dict[tuple, str] = {}
+    guests: dict[tuple, dict] = {}
     checked = 0
     with Configured(set()):
-        for r in rows:
-            traj = Path(r["traj"])
-            if not traj.exists():
-                print(f"ABORT: trajectory not reachable: {traj}\n"
-                      f"       Parity must run where the Study 2 archive lives.", file=sys.stderr)
-                return False
-            answer = ex.final_answer_from_traj(traj)
-            guest = ex.load_guest(Path(r["guest"]))
-            spec = (lock.get("components") or {}).get(r["task"], {}).get(r["component"]) or {}
-            gold = ex.gold_for_component(guest, r["task"], r["component"], lock)
-            rep = extract_for(r["task"], r["component"], spec.get("kind"), answer, set())
+        for r in sorted(rows, key=lambda x: (x["stratum"], x["lane"], x["task"],
+                                             x["leg"], x["component_id"])):
+            key = (r["lane"], r["task"], r["leg"])
+            if key not in answers:
+                traj_s, guest_s = paths[key]
+                tp = Path(traj_s) if traj_s else None
+                answers[key] = ex.final_answer_from_traj(tp) if tp and tp.exists() else ""
+                gp = Path(guest_s) if guest_s else None
+                guests[key] = ex.load_guest(gp) if gp and gp.exists() else {}
+            task, cid = r["task"], r["component_id"]
+            spec = lock["components"][task][cid]
+            gold = ex.gold_for_component(guests[key], task, cid, lock)
+            rep = extract_for(task, cid, spec["kind"], answers[key], set())
             got = match_with_config(spec, gold, rep, set())
-            if ex._jsonable(gold) != r["gold"]:
-                bad.append(f"gold {r['lane']}/{r['task']}/{r['leg']}/{r['component']}: "
-                           f"{ex._jsonable(gold)!r} != recorded {r['gold']!r}")
-            if ex._jsonable(rep) != r.get("reported"):
-                bad.append(f"reported {r['lane']}/{r['task']}/{r['leg']}/{r['component']}: "
-                           f"{ex._jsonable(rep)!r} != recorded {r.get('reported')!r}")
-            if bool(got) != bool(r.get("matched")):
-                bad.append(f"matched {r['lane']}/{r['task']}/{r['leg']}/{r['component']}: "
-                           f"{got} != recorded {r.get('matched')}")
+            if _j(ex._jsonable(gold)) != _j(r["gold"]):
+                bad.append(f"gold {key}/{cid}: {ex._jsonable(gold)!r} != recorded {r['gold']!r}")
+            if _j(ex._jsonable(rep)) != _j(r["reported"]):
+                bad.append(f"reported {key}/{cid}: {ex._jsonable(rep)!r} != recorded {r['reported']!r}")
+            if bool(got) != bool(r["extractor_match"]):
+                bad.append(f"match {key}/{cid}: {got} != recorded {r['extractor_match']}")
             checked += 1
     print(f"rows replayed under FROZEN : {checked}")
     if bad:
@@ -463,9 +497,12 @@ def _write_gate(name: str, ok: bool) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["parity", "synthetic", "run"])
+    ap.add_argument("--audit", default="out/p3_0_recall_audit.jsonl")
+    ap.add_argument("--a-legs", default="out/study2_hatd_legs.jsonl")
+    ap.add_argument("--p3-legs", default="out/p3_0_extracted.jsonl")
     a = ap.parse_args()
     if a.cmd == "parity":
-        ok = gate_parity()
+        ok = gate_parity(Path(a.audit), Path(a.a_legs), Path(a.p3_legs))
         _write_gate("parity", ok)
         return 0 if ok else 3
     if a.cmd == "synthetic":

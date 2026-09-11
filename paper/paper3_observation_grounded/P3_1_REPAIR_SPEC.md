@@ -757,3 +757,40 @@ No repair rule, no configuration, no primary quantity, no kill criterion. §2.2'
 configurations, §3's quantities, §4's two-sided ordering analysis, §6's sealed protocol and
 §7's K0/K1/K3/K4/K5 stand as frozen at `b6edbba` and amended at `fa4a642`. Only three
 fixture strings in §5.2 are corrected, under the authority K2 grants.
+
+---
+
+## 11. Amendment A-3 — 2026-09-12, parity gate corrected before its first run
+
+The host reported that `scripts/p3_1_repair.py` was absent; the file was pushed, and that
+prompted a check of the parity gate against the actual 0.6 record **before** spending a
+host run. Three defects were found in A-2's parity implementation. All three would have
+produced a spurious ABORT or a false mismatch.
+
+1. **Wrong field names.** `out/p3_0_recall_audit.jsonl` writes `component_id` and
+   `extractor_match`; A-2 read `component` and `matched`.
+2. **The audit file has no path fields at all.** A-2 read `r["traj"]` and `r["guest"]`,
+   which do not exist. Paths must be rejoined on `(lane, task, leg)` from
+   `out/study2_hatd_legs.jsonl` and `out/p3_0_extracted.jsonl`, exactly as
+   `P3_0_IDENTIFICATION_AUDIT_SPEC.md` §3 requires and as 0.7's driver does.
+3. **The comparison was reimplemented instead of wrapped.** A-2 rebuilt `match_one`'s
+   logic with a broader `except Exception`. It now **imports the frozen `match_one`** from
+   `study2_hatd_apply` and calls it unchanged, so under `FROZEN` the gate compares the
+   frozen comparison against its own recorded output rather than against a look-alike.
+   R-CMP can then only ever *add* a match. This is the §2.0 parity principle applied to
+   the gate itself.
+
+Two further changes, neither affecting any rule:
+
+* Value comparison now uses `json.dumps(x, sort_keys=True, default=str)` on both sides,
+  the idiom 0.7's faithfulness guard used, because the audit file was written with
+  `default=str` and Decimals are recorded as strings.
+* Archive reachability is checked as a separate step, so an unresolvable path reports as
+  one legible error rather than surfacing as 134 value mismatches. This matters because
+  the recorded `traj` paths and the recorded `gold_lock` path differ in their root
+  (`/data2/hpcshared/Vinh/` against `/data2/hpcshared/Vinh-/`); 0.7 proved they resolve on
+  the host, and if they ever stop resolving that is a finding about the archive, not a
+  parity failure.
+
+The synthetic gate was re-run after wiring in the frozen `match_one` and still passes
+**10/10**. Parity remains **unrun**; §A-2.4 stands in full.
