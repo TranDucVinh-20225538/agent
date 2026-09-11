@@ -903,6 +903,192 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# Section 4: the ordering analysis. Two-sided, secondary, descriptive.
+#
+# The Paper 2 common support is four tasks, and the frozen module's own numbers show
+# ΔSTS = -0.042 is produced by ONE of them: three tasks have ΔSTS identically 0.000 and
+# retrieval-f009 alone has -0.167. The CI's upper bound is exactly 0.000 for that reason
+# -- not a near-miss but a structural fact, since no task contributes a positive
+# difference. The effective n of the signal is 1. This is stated before the run and is
+# reported whatever the outcome.
+# ---------------------------------------------------------------------------
+PUBLISHED_ORDER = {
+    "mean_STS_gpt": 0.25,
+    "mean_STS_flash": 0.20833333333333331,
+    "argmax_STS": "gpt",
+    "argmax_S0": "flash",
+    "delta_STS": -0.04166666666666666,
+    "per_task": {"counterfactual-f010": (0.0, 0.0), "preference_inference-f014": (0.0, 0.0),
+                 "retrieval-f002": (0.5, 0.5), "retrieval-f009": (0.5, 1 / 3)},
+}
+ORDER_LANES = ("gpt", "flash")  # claude carries none of the four common tasks
+OUT_ORDER = ROOT / "out" / "p3_1_ordering.json"
+
+
+def argmax_of(gpt: float, flash: float) -> str:
+    """The frozen module's tie-handling, reproduced rather than paraphrased."""
+    return "flash" if flash > gpt else ("gpt" if gpt > flash else "tie")
+
+
+def ordering_for_config(cfg: set[str], lock: dict, answers: dict, guests: dict) -> dict:
+    import study2_hatd_apply as ap
+    from matching import sts_leg, binary_track
+    pair = {}
+    with Configured(cfg):
+        for lane in ORDER_LANES:
+            for task in ap.COMMON:
+                comps = ap.components_for(task, lock)
+                m = {}
+                for g in ("G0", "G1"):
+                    key = (lane, task, g)
+                    matches = {}
+                    for cid, spec in lock["components"][task].items():
+                        gold = ex.gold_for_component(guests[key], task, cid, lock)
+                        rep = extract_for(task, cid, spec["kind"], answers[key], cfg)
+                        matches[cid] = match_with_config(spec, gold, rep, cfg)
+                    m[g] = matches
+                s0 = sts_leg(comps, m["G0"])
+                s1 = sts_leg(comps, m["G1"])
+                pair[(lane, task)] = {
+                    "sts0": float(s0), "sts1": float(s1), "sts": float((s0 + s1) / 2),
+                    "Y": int(binary_track(comps, m["G0"], m["G1"])),
+                }
+    return pair
+
+
+def summarise_ordering(pair: dict) -> dict:
+    import study2_hatd_apply as ap
+    g = [pair[("gpt", t)]["sts"] for t in ap.COMMON]
+    f = [pair[("flash", t)]["sts"] for t in ap.COMMON]
+    mg, mf = sum(g) / len(g), sum(f) / len(f)
+    per = [f_i - g_i for g_i, f_i in zip(g, f)]
+    boot = ap.bootstrap_mean(per)
+    return {
+        "mean_STS_gpt": mg, "mean_STS_flash": mf, "delta_STS": mf - mg,
+        "sign": ap.sgn(mf - mg), "argmax_STS": argmax_of(mg, mf),
+        "bootstrap": {k: v for k, v in boot.items() if k != "dist"},
+        "per_task": {t: {"gpt": g[i], "flash": f[i], "delta": per[i],
+                         "Y_gpt": pair[("gpt", t)]["Y"],
+                         "Y_flash": pair[("flash", t)]["Y"]}
+                     for i, t in enumerate(ap.COMMON)},
+        "n_tasks_nonzero_delta": sum(1 for d in per if abs(d) > 1e-12),
+    }
+
+
+def classify_ordering(s: dict, frozen: dict) -> str:
+    """§4's four pre-committed outcomes, reported identically. No outcome is preferred."""
+    if s["argmax_STS"] != frozen["argmax_STS"]:
+        return "INVERTED (argmax moved)"
+    if abs(s["delta_STS"] - frozen["delta_STS"]) < 1e-12:
+        return "UNCHANGED"
+    return ("WIDENED" if abs(s["delta_STS"]) > abs(frozen["delta_STS"]) else "NARROWED")
+
+
+def cmd_ordering(audit: Path, a_legs: Path, p3_legs: Path) -> int:
+    import study2_hatd_apply as ap
+    vp = ROOT / "out" / "study2_valid_pairs.csv"
+    if not vp.exists():
+        print(f"ABORT: {vp} not found; §4 needs the Paper 2 score table.", file=sys.stderr)
+        return 3
+    if Path(ap.OUT).resolve() != (ROOT / "out").resolve():
+        print(f"ABORT: the frozen module reads {ap.OUT} but this tree is {ROOT / 'out'}. "
+              f"§4 must run where the Study 2 archive lives.", file=sys.stderr)
+        return 3
+
+    # §4's population is the four common tasks, not the audit population, so the legs are
+    # resolved from the legs files directly. Any missing leg aborts rather than silently
+    # narrowing the support.
+    paths: dict[tuple, tuple] = {}
+    for p in (a_legs, p3_legs):
+        if not p.exists():
+            print(f"ABORT: {p} not found.", file=sys.stderr)
+            return 3
+        for line in p.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                paths[(r["lane"], r["task"], r["leg"])] = (r.get("traj"), r.get("guest"))
+    need = [(lane, task, g) for lane in ORDER_LANES for task in ap.COMMON
+            for g in ("G0", "G1")]
+    missing = [k for k in need if k not in paths
+               or not all(s and Path(s).exists() for s in paths[k])]
+    if missing:
+        print(f"ABORT: {len(missing)} of {len(need)} common-support legs unresolved: "
+              f"{missing[:4]}", file=sys.stderr)
+        return 3
+    print(f"common support             : {len(ap.COMMON)} tasks x {len(ORDER_LANES)} "
+          f"lanes x 2 legs = {len(need)} legs, all resolved")
+
+    lock = ex.load_lock()
+    answers = {k: ex.final_answer_from_traj(Path(paths[k][0])) for k in need}
+    guests = {k: ex.load_guest(Path(paths[k][1])) for k in need}
+
+    results = {c: summarise_ordering(ordering_for_config(config_set(c), lock, answers,
+                                                         guests)) for c in CONFIGS}
+    fz = results["FROZEN"]
+
+    # §4 faithfulness gate: FROZEN must reproduce the published ordering exactly.
+    bad = []
+    for k in ("mean_STS_gpt", "mean_STS_flash", "delta_STS"):
+        if abs(fz[k] - PUBLISHED_ORDER[k]) > 1e-9:
+            bad.append(f"{k}: {fz[k]!r} != published {PUBLISHED_ORDER[k]!r}")
+    if fz["argmax_STS"] != PUBLISHED_ORDER["argmax_STS"]:
+        bad.append(f"argmax_STS: {fz['argmax_STS']} != {PUBLISHED_ORDER['argmax_STS']}")
+    for t, (pg, pf) in PUBLISHED_ORDER["per_task"].items():
+        got = fz["per_task"][t]
+        if abs(got["gpt"] - pg) > 1e-9 or abs(got["flash"] - pf) > 1e-9:
+            bad.append(f"{t}: ({got['gpt']:.4f},{got['flash']:.4f}) != ({pg:.4f},{pf:.4f})")
+    if bad:
+        print("ABORT: FROZEN does not reproduce the published §4 ordering. Every "
+              "configuration's shift would be measured against an unknown baseline.",
+              file=sys.stderr)
+        for b in bad:
+            print("  !", b, file=sys.stderr)
+        return 11
+    print("FROZEN reproduces the published §4 ordering exactly")
+    print(f"  ΔSTS {fz['delta_STS']:+.4f}, argmax_STS {fz['argmax_STS']}, "
+          f"argmax_S0 {PUBLISHED_ORDER['argmax_S0']} (score, configuration-independent)")
+    print(f"  tasks with a nonzero ΔSTS: {fz['n_tasks_nonzero_delta']} of "
+          f"{len(ap.COMMON)} -- the effective n of this signal")
+
+    print()
+    hdr = (f"{'config':8s} {'STS gpt':>9s} {'STS flash':>10s} {'dSTS':>8s} "
+           f"{'sign':>5s} {'bootstrap 95%':>22s} {'argmax':>7s} {'vs S0':>6s}  outcome")
+    print(hdr)
+    print("-" * len(hdr))
+    for c in CONFIGS:
+        s = results[c]
+        ci = s["bootstrap"].get("ci95")
+        s["outcome"] = classify_ordering(s, fz)
+        s["argmax_moved_vs_frozen"] = s["argmax_STS"] != fz["argmax_STS"]
+        s["selection_disagreement"] = s["argmax_STS"] != PUBLISHED_ORDER["argmax_S0"]
+        print(f"{c:8s} {s['mean_STS_gpt']:>9.4f} {s['mean_STS_flash']:>10.4f} "
+              f"{s['delta_STS']:>+8.4f} {s['sign']:>5d} "
+              f"{f'[{ci[0]:+.4f},{ci[1]:+.4f}]':>22s} {s['argmax_STS']:>7s} "
+              f"{str(s['selection_disagreement']):>6s}  {s['outcome']}")
+
+    print()
+    print("per-task ΔSTS (flash - gpt); Y is reported, not interpreted")
+    for c in CONFIGS:
+        pt = results[c]["per_task"]
+        print(f"  {c:8s} " + "  ".join(
+            f"{t.split('-')[-1]}={pt[t]['delta']:+.3f}" for t in ap.COMMON)
+            + f"   Y all zero: {all(pt[t]['Y_gpt'] == 0 and pt[t]['Y_flash'] == 0 for t in ap.COMMON)}")
+
+    OUT_ORDER.parent.mkdir(parents=True, exist_ok=True)
+    OUT_ORDER.write_text(json.dumps({
+        "corpus": "paper2_common_support", "n_tasks": len(ap.COMMON),
+        "lanes": list(ORDER_LANES), "n_legs": len(need),
+        "published_frozen_reproduced": True,
+        "argmax_S0": PUBLISHED_ORDER["argmax_S0"],
+        "configurations": results,
+    }, indent=1, default=str))
+    print(f"\nwritten: {OUT_ORDER}")
+    print("Secondary and descriptive per §4. Paper 2's published numbers are not "
+          "restated or corrected; errata E-1 stands.")
+    return 0
+
+
 def cmd_diag_k0(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     """Read-only diagnosis of why K0 counted 8 where 0.7 recorded 7. Writes nothing.
 
@@ -1038,7 +1224,7 @@ def gates_ok(paths: tuple) -> tuple[bool, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["parity", "synthetic", "run", "diag-k0"])
+    ap.add_argument("cmd", choices=["parity", "synthetic", "run", "diag-k0", "ordering"])
     ap.add_argument("--audit", default="out/p3_0_recall_audit.jsonl")
     ap.add_argument("--a-legs", default="out/study2_hatd_legs.jsonl")
     ap.add_argument("--p3-legs", default="out/p3_0_extracted.jsonl")
@@ -1059,6 +1245,12 @@ def main() -> int:
         # Diagnostic only: reads the archive, writes nothing, computes no section 3
         # quantity and cannot record a gate.
         return cmd_diag_k0(*paths)
+    if a.cmd == "ordering":
+        ok, why = gates_ok(paths)
+        if not ok:
+            print(f"ABORT: section 4 requires both gates passed. {why}", file=sys.stderr)
+            return 5
+        return cmd_ordering(*paths)
     ok, why = gates_ok(paths)
     if not ok:
         print(f"ABORT: `run` requires both gates passed on the present dependencies. {why}",

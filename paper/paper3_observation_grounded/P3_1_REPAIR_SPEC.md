@@ -1319,3 +1319,84 @@ its intermediate state. An LLM judge could not be measured this way at all, whic
 §1 construct-validity argument arriving as a measured result instead of an assertion.
 
 §4 and §6 remain unrun.
+
+---
+
+## 19. Amendment A-11 — 2026-09-12, §4 ordering implemented; no prediction is attached
+
+A-10 closes the development phase. §4 is implemented here as a separate invocation,
+`ordering`, before §6 is coded.
+
+### A-11.0 A prediction I made and retract
+
+After seeing the A-10 results I remarked that the likely §4 outcome was "widens". That is
+an expectation formed **after** seeing development-corpus results, which is exactly what
+§4's pre-committed symmetric reporting exists to prevent. It is retracted and is not a
+prediction. §4 has four outcomes, they were fixed before freezing, and all four are
+reported identically.
+
+### A-11.1 The signal has an effective n of 1, stated before the run
+
+The frozen module's own §4 artefact shows `ΔSTS = -0.0417` is produced by **one** of the
+four common-support tasks:
+
+| task | STS gpt | STS flash | ΔSTS |
+|---|---|---|---|
+| `counterfactual-f010` | 0.000 | 0.000 | +0.000 |
+| `preference_inference-f014` | 0.000 | 0.000 | +0.000 |
+| `retrieval-f002` | 0.500 | 0.500 | +0.000 |
+| `retrieval-f009` | 0.500 | 0.333 | **-0.167** |
+
+Three tasks contribute identically zero. The bootstrap CI's upper bound is exactly
+`0.000` not as a near-miss but structurally: no task contributes a positive difference, so
+no resample can produce a positive mean. `mean_STS` is 0.25 and 0.208, near the floor, and
+two of four tasks are 0.000 for both lanes. `Y = 0` on all eight pairs.
+
+Any §4 result therefore describes a four-task comparison whose sign rests on one task, and
+is reported as such whatever it shows. This is recorded now so it cannot be introduced
+afterwards as a caveat on an inconvenient outcome.
+
+### A-11.2 What `ordering` computes
+
+Per configuration, over the four common tasks and lanes `gpt` and `flash` — `claude`
+carries none of these tasks, which is why the frozen comparison is flash-versus-gpt:
+per-leg STS via the frozen `sts_leg`, pair STS as the mean of the two legs, `Y` via the
+frozen `binary_track`, then the lane means, `ΔSTS = flash − gpt`, its sign, the frozen
+paired bootstrap at 5000 resamples with `SEED = 20260904`, and `argmax_STS`.
+
+`COMMON`, `components_for`, `bootstrap_mean`, `sgn`, `sts_leg` and `binary_track` are all
+imported from the frozen modules. The tie rule is the frozen module's own.
+
+`argmax_S0 = flash` comes from the Paper 2 score table and is **configuration-independent**:
+no repair touches the judge's scores. So "selection disagreement" is reported against a
+fixed reference, and "argmax moved" is reported against FROZEN's own `argmax_STS = gpt`.
+
+### A-11.3 §4 faithfulness gate
+
+FROZEN must reproduce the published ordering exactly — `mean_STS_gpt` 0.25,
+`mean_STS_flash` 0.20833…, `ΔSTS` −0.04166…, `argmax_STS` `gpt`, and every per-task pair
+in the table above. Mismatch exits **11** and writes nothing, because each configuration's
+shift would otherwise be measured against an unknown baseline. This is the same
+construction as §3's two inner gates.
+
+### A-11.4 Population resolution
+
+§4's population is the four common tasks, **not** the audit population: 4 tasks × 2 lanes ×
+2 legs = 16 legs, resolved from the two legs files directly. Any unresolved leg aborts
+rather than silently narrowing the support. `study2_valid_pairs.csv` must be present and the
+frozen module's hardcoded `OUT` must resolve to this tree, or the run aborts with exit 3 —
+the A-4 lesson applied before it can bite.
+
+### A-11.5 The four outcomes
+
+Fixed before freezing, reported identically, verified reachable and symmetric in the
+implementation: **UNCHANGED** if `ΔSTS` is identical; **WIDENED** or **NARROWED** if the
+magnitude moves with the argmax held; **INVERTED** if the argmax moves. §4's three written
+interpretations stand as recorded — inversion is reported as secondary and not as the
+headline, widening means the artefact was masking disagreement rather than creating it, and
+unchanged means the artefact does not propagate to selection at this n.
+
+Paper 2's published numbers are not restated or corrected. Errata E-1 stands. `Y` is
+computed and reported, not interpreted.
+
+No repair rule, configuration, quantity, fixture or criterion changes. §6 remains uncoded.
