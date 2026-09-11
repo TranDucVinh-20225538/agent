@@ -298,6 +298,114 @@ Note what this subgroup does **not** license. It is not a sealed control: the ce
 found by reading output, not designated in advance, and there is no external label on
 either leg. It sharpens the descriptive contrast; it cannot validate a metric.
 
+## 5c. Amendment, 2026-09-12 — pre-registered scope extension for 0.2
+
+Written **after** 0.1 completed and **before** the extractor touches any Study 2 leg.
+This is a **scope extension**: a new population under the *same* frozen instrument. It is
+not an instrument change, and no code, lock, or inference setting is modified.
+
+### What 0.1 established
+
+The clean run (171 legs, three frozen lanes, `--expect-legs 57`) reproduced Paper 2
+exactly: 29 excluded-`VALID_DONE` legs (GPT 14, Flash 13, Claude 2), 5 high-`S`
+non-`DONE` cells (GPT 2, Flash 2, Claude 1), consistency check clean. Of the 29, **16** are
+on keyed tasks and measurable, **13** are vacuous. Causes: 23 orphan, 6 `G2`.
+
+### Gate 0's ceiling is structural
+
+A cell with both `G0` and `G1` at `VALID_DONE` is in `A` **by definition**, and 0.1 found no
+exception. So the 16 measurable legs are each the single terminating leg of a non-paired
+cell, and Gate 0 as originally written can produce **leg-level** positives only. The
+pair-level `Y = 0` question is not underpowered on this archive; it is closed, because the
+extractor already ran on all 18 pairs in `A`.
+
+### The implementation clarification that makes the extension possible
+
+`out/study2_hatd_extractor_lock.md` reads "Last well-formed `traj.jsonl` row, field
+`response`. **If that row's action is `DONE`**, that response is the candidate answer."
+The frozen implementation does not do that. `final_answer_from_traj()` at `3242c30` takes
+the last non-empty row's `response`, strips `<think>`, and never inspects the action;
+unparseable content then fail-closes to `None`, which `matching.py` treats as a mismatch.
+
+The frozen extractor is therefore already capable of reading a non-`DONE` leg, with no
+change of any kind. This is recorded as an **implementation clarification of the existing
+lock, not a modification of it**. Anyone reading only the lock prose would conclude the
+opposite.
+
+### Extraction population for 0.2
+
+| stratum | legs | note |
+|---|---:|---|
+| original Gate 0: excluded `VALID_DONE`, keyed | 16 | 11 orphan + 5 `G2` |
+| added: non-`DONE` partner legs of the 4 matched dissociation cells | 4 | new |
+| **total distinct legs** | **20** | |
+
+The four `DONE` legs of the dissociation cells are **already inside the 16** — they are
+keyed orphans — so the population is 20 distinct legs, not 24. Counting the 8 dissociation
+legs as additional would double-count them.
+
+The four matched dissociation cells, each `S = 100` on both legs, both on keyed tasks:
+
+| lane | task | `DONE` leg | non-`DONE` leg |
+|---|---|---|---|
+| flash | `aggregation-f037` | G1 | G0 |
+| flash | `counterfactual-f005` | G0 | G1 |
+| gpt | `preference_inference-f010` | G1 | G0 |
+| gpt | `retrieval-f010` | G0 | G1 |
+
+**Within a cell, gold is not held fixed.** `G0` gold is that leg's `probe_before` and an
+injected `G1`'s gold is its `probe_after`; the world differing is the intervention itself.
+What is held fixed is the task, the component set, the agent, the rubric, and the
+instrument. A non-`DONE` leg counts as matching only against **its own** post-intervention
+gold, never the partner's.
+
+A fifth stratum of `n = 1` is pre-registered now, reported separately and **never pooled**:
+`claude` / `retrieval-f002` `G0`, non-`DONE`, `S = 100`, on a keyed task, whose partner leg
+also failed to terminate. It is included at this point precisely so that it is not added
+later after the matched cells' results are known, which would be the post-hoc move this
+spec exists to prevent. It cannot influence the matched-cell analysis because it is not
+pooled with it.
+
+### The new quantity, and what it is not
+
+The quantity produced by the added stratum is
+
+> **pair-level component match under terminal-independent extraction.**
+
+It must be reported under that name. It is **not** `Y = 1` within `A`. The definition of
+`Y` on `A` is unchanged and remains `0` on all 18 pairs. These four cells are outside `A`,
+so no result here revises any Paper 2 quantity; what it can show is whether the pair-level
+null is a consequence of the completion gate rather than of state tracking.
+
+### Outcome criteria, fixed before extraction
+
+- *leg-level match*: every positive-weight component of that leg matches that leg's own gold.
+- *cell-level terminal-independent match*: both legs of one cell each match their own gold.
+
+Patterns, not thresholds:
+
+- **Terminal-independent pair evidence exists** — at least one of the four cells has both
+  legs matching. Observable component evidence then does not require terminal `DONE`.
+- **Completion-dependent** — the `DONE` legs match and all four non-`DONE` legs fail. This
+  is a real qualification of the P3 thesis and must be reported as such, not explained away.
+- **Uninformative** — the `DONE` legs also fail, in which case the extractor says nothing
+  about these cells either way and the `S = 100` scores are the only evidence present.
+
+### Reporting rule for 0.3
+
+For all **11** keyed orphan legs, report the partner leg's score descriptively, whether high
+or low. Partner score may **not** be used to select, order, or exclude cases. The four
+matched cells were identified by terminal status, never by score, and the gradient among the
+rest (for example `gpt` / `contradiction-f006` at `S = 64`, `flash` / `aggregation-f020` at
+`S = 83`) is part of the description.
+
+### Stop point
+
+After 0.2 runs once on exactly these 20 legs, stop. Gate 1 / item timing is **not** run yet:
+four of its five cells are the dissociation cells, so what the frozen extractor says about
+their legs must be known before item timing is used to explain a mechanism. No other cell,
+leg, or lane is added.
+
 ## 6. Order of work
 
 ```
