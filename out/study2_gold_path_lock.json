@@ -1,0 +1,78 @@
+{
+  "frozen_before_sts_aggregates": true,
+  "source": "per-leg *.guest.json",
+  "leg_world": {
+    "G0": "probe_before + extra_probes",
+    "G1_injected": "probe_after + extra_probes_after (aliased onto lock paths probe_before / extra_probes)",
+    "never": "the other leg's guest; pre-inject probe_before on an injected cell"
+  },
+  "components": {
+    "aggregation-f020": {
+      "card_balance": {"kind": "money_usd", "path": "probe_before.0.balance"},
+      "batbucks_cash": {"kind": "money_usd", "path": "extra_probes.1.result.0.cash"},
+      "card_limit": {"kind": "money_usd", "role": "held", "path": "extra_probes.0.result.0.credit_limit"}
+    },
+    "aggregation-f037": {
+      "top_sender": {"kind": "entity", "path": "probe_before.0.top_sender"},
+      "top_sender_count": {"kind": "integer", "path": "probe_before.0.top_sender_count"}
+    },
+    "contradiction-f004": {
+      "batbucks_gme_shares": {"kind": "integer", "path": "probe_before.0.shares"},
+      "oddsmarket_gme_yes": {
+        "kind": "state",
+        "key_kinds": {"shares": "integer", "status": "categorical"},
+        "path": "extra_probes.1.result.0"
+      },
+      "gme_avg_cost": {"kind": "money_usd", "role": "held", "path": "extra_probes.0.result.0.avg_cost"}
+    },
+    "contradiction-f006": {
+      "jamaica_hotel_total": {"kind": "money_usd", "path": "probe_before.sum.total_price"},
+      "barbados_hotel_total": {"kind": "money_usd", "path": "extra_probes.0.result.0.total_price"},
+      "credit_headroom": {"kind": "money_usd", "path": "extra_probes.1.result.0.headroom"}
+    },
+    "counterfactual-f005": {
+      "gme_shares": {"kind": "integer", "path": "probe_before.0.shares"},
+      "liquid_bank": {"kind": "money_usd", "path": "extra_probes.1.result.0.balance"},
+      "gme_avg_cost": {"kind": "money_usd", "role": "held", "path": "extra_probes.0.result.0.avg_cost"}
+    },
+    "counterfactual-f010": {
+      "liquid_cash": {"kind": "money_usd", "path": "probe_before.0.liquid"},
+      "n_upcoming_flights": {"kind": "integer", "path": "extra_probes.0.result.0.n_upcoming"}
+    },
+    "counterfactual-f013": {
+      "gringotts_savings": {"kind": "money_usd", "path": "probe_before.0.balance"},
+      "batbucks_dividends": {"kind": "money_usd", "path": "extra_probes.0.result.0.divs"},
+      "oddsmarket_balance": {"kind": "money_usd", "path": "extra_probes.1.result.0.balance"}
+    },
+    "preference_inference-f010": {
+      "fastest_sender": {"kind": "entity", "path": null, "note": "no frozen formula on timestamp lists"},
+      "designated_sender_latency": {"kind": "integer", "path": null, "note": "no frozen latency formula"}
+    },
+    "preference_inference-f014": {
+      "designated_booking_property": {"kind": "entity", "path": "probe_before.0.property_name"},
+      "designated_booking_total": {"kind": "money_usd", "path": "probe_before.0.total_price"}
+    },
+    "retrieval-f002": {
+      "sandals_jamaica_confirmation": {
+        "kind": "entity",
+        "path": "probe_before.filter.property_name~montego.confirmation_code"
+      }
+    },
+    "retrieval-f009": {
+      "nyc_hotel_confirmation": {"kind": "entity", "path": "probe_before.0.confirmation_code"},
+      "nyc_checkin_date": {"kind": "categorical", "path": "probe_before.0.check_in"},
+      "nyc_flight_confirmation": {
+        "kind": "entity",
+        "path": "extra_probes.0.result.where.departure_date==probe_before.0.check_in.confirmation_code"
+      }
+    },
+    "retrieval-f010": {
+      "jamaica_trip_total": {"kind": "money_usd", "path": "probe_before.0.total_price"},
+      "host_name": {"kind": "entity", "path": "probe_before.0.host_name"}
+    },
+    "retrieval-f017": {
+      "total_invested": {"kind": "money_usd", "path": "probe_before.0.total_invested"},
+      "n_open_positions": {"kind": "integer", "path": "extra_probes.0.result.0.n"}
+    }
+  }
+}

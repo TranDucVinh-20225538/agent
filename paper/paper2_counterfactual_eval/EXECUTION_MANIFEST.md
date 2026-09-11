@@ -36,9 +36,9 @@ Two OpenRouter-capable budget lanes. **No raw keys in repo/logs** — env vars o
 | # | Model | Lane / host | Status |
 | --- | --- | --- | --- |
 | 1 | Qwen 3.5-9B | SMALL (exhausted), Study 1 runner | **COMPLETE but OUT of Layer B** — §0.4 replay PASS (0 hits / 0 parse changes); excluded for instrument + transport mismatch and \(\lvert\mathcal{A}\rvert=0\); coverage only (§0.10) |
-| 2 | Qwen 3.8-Flash | SMALL exhausted; `008` funded | **NO VALID LEGS YET** — pre-patch invalidated (§0.3), post-patch `58369` died on key exhaustion (§0.7). §0.7 exclusion **withdrawn**; runnable as a fresh lane from leg 1 after Claude (§0.8) |
-| 3 | GPT-5.5 | `008`, node30, `results/paper2_exec/study2-gpt` | **COMPLETE + FROZEN** — 57/57, 32 `DONE` / 25 `TERMINAL_FAIL`, 2026-09-09T06:37 ICT; `GPT_FROZEN.txt`, `out/study2_gpt_freeze.json`, archive `chmod a-w`; substituted substrate §0.2 |
-| 4 | Claude Opus 4.6 | `008…9dd` **via generic XML bridge, not Anthropic native** | **RUNNING** — fresh 57 legs from leg 1, PID `920150`; substrate disclosure §0.8 |
+| 2 | Qwen 3.8-Flash | `Vinh-` HPC post-patch | **COMPLETE + FROZEN** — 57/57, 29 `DONE` / 28 `TERMINAL_FAIL`, \(\lvert\mathcal{A}\rvert=8\); canonical `.../hpc-flash-small-gate0a-postpatch` (`dr-xr-xr-x`); no merge to `Vinh/` (not writable); §0.15 |
+| 3 | GPT-5.5 | `Vinh` HPC (also was node30) | **COMPLETE + FROZEN** — 57/57, 32 `DONE` / 25 `TERMINAL_FAIL`, \(\lvert\mathcal{A}\rvert=9\); substituted substrate §0.2 |
+| 4 | Claude Opus 4.6 | `Vinh` HPC, generic XML bridge | **COMPLETE + FROZEN** — 57/57, 4 `DONE` / 53 `TERMINAL_FAIL`, \(\lvert\mathcal{A}\rvert=1\); report only; §0.14 |
 
 Original order (9B → Flash → Claude → GPT) is superseded for **scheduling only** by §0.5. \(\mathcal{M}\), \(\mathcal{T}\), \(D\), and per-cell policy are unchanged.
 
@@ -316,7 +316,86 @@ With 9B out (§0.10), the ranked roster is then **GPT + Flash = 2 agents**, whic
 
 **What is forbidden here.** Lowering \(n_{\min}\), counting G2 into pairs, admitting non-`DONE` legs as \(Y = 0\), re-ranking on \(\overline{S}\) alone, or stopping the Claude lane early to reallocate budget. `PAPER2_SPEC.md` §6.1 bars optional stopping, and 1/57 is a far stronger reported number than 1/35. The lane runs to 57.
 
-**Still live.** Flash has not started its fresh lane. If Flash lands \(\ge n_{\min}\) and Claude unexpectedly reaches 3, the roster is 3 and Layer B is evaluated normally under §6.1(c)–(f), with §0.9's warning about Claude being scored only on its wins handled by the §6.1(f) common-support analysis. Both branches are now written down; neither may be selected after the count.
+**Still live (at writing of §0.13).** Flash had not started its fresh lane. Both branches were written down; neither may be selected after the count. **Superseded by §0.14:** Claude closed at \(\lvert\mathcal{A}\rvert=1\).
+
+### 0.14 Dated freeze — Claude lane COMPLETE (2026-09-10)
+
+**Host-reported terminal state.** 57/57 legs. **4 `DONE` / 53 `TERMINAL_FAIL`.** Archive write-locked (`chmod a-w`); CHECKPOINT overwrite blocked. Marker `results/paper2_exec/study2-claude/CLAUDE_FROZEN.txt`; checksum `out/study2_claude_freeze.json` (`62774f95…`); locked: Claude archive, log, pid, `paper2-study2-claude-*`. Flash not touched (`study2-flash` still `755`). GPT remains frozen from earlier.
+
+**Valid-pair count (authoritative).** The four `DONE` legs are `counterfactual-f013` G0, `counterfactual-f013` G1, `counterfactual-f005` G0, `contradiction-f014` G1. Only **one** task has both G0 and G1 `DONE` → \(\lvert\mathcal{A}_{\text{Claude}}\rvert = 1\). Below \(n_{\min}=3\): Claude is **reported, not ranked**.
+
+**Roster consequence (now factual, not projected).** With 9B out (§0.10) and Claude out of ranking, the only agents that can enter Layer B are **GPT + Flash**. If Flash reaches \(n_{\min}\), ranked roster = 2 → `PAPER2_SPEC.md` §6.1(c) fires (**Layer B not evaluated**); §6.1(g) signed-difference may be reported as **exploratory** only. If Flash also fails \(n_{\min}\), ranked roster ≤ 1 → same §6.1(c) reading, and (g) is void (needs two ranked agents).
+
+**Forbidden.** Resume / rewrite / re-judge any Claude cell. No lowering \(n_{\min}\), no admitting non-`DONE` as \(Y=0\), no counting G2 into pairs, no optional stopping of Flash.
+
+**Next.** Flash continues its fresh lane. Offline work that needs Claude archive (judge-frame audit, near-miss rescue counts for §0.11, completion-conditional §6.1(e)) waits until Flash also freezes, or may start read-only on the locked Claude tree now — never mutating it.
+
+### 0.15 Dated freeze — Flash lane COMPLETE; Study 2 execution closed (2026-09-11)
+
+**Host-reported.** Flash 57/57 frozen at canonical path  
+`/data2/hpcshared/Vinh-/agent/results/paper2_exec/hpc-flash-small-gate0a-postpatch` (`dr-xr-xr-x`). GPT/Claude untouched under `Vinh/`. No re-judge, no merge of pre-patch Flash corpora. Copy into `Vinh/` skipped (tree not writable). Host analysis commit `be1c4c6` (docs/tables only, no PNG, not pushed).
+
+**Final \(\lvert\mathcal{A}\rvert\)** (G0∧G1 `VALID_DONE`, G2 ignored, \(n_{\min}=3\)):
+
+| Lane | Cells | DONE/FAIL | \(\lvert\mathcal{A}\rvert\) | Rank |
+| --- | --- | --- | --- | --- |
+| GPT | 57 | 32/25 | **9** | exploratory (with Flash) |
+| Flash | 57 | 29/28 | **8** | exploratory (with GPT) |
+| Claude | 57 | 4/53 | **1** | report only |
+
+**Roster.** Exactly two agents at \(n_{\min}\) → `PAPER2_SPEC.md` §6.1(c): **Layer B not evaluated**. §6.1(g) applies.
+
+**§6.1(g) partial (host).** Common support \(\lvert\mathcal{A}^\cap\rvert=4\) tasks. Mean base-leg \(S\) difference Flash−GPT = **+46.5** (bootstrap CI 21–72). **\(\Delta\mathrm{STS}\) / \(Y\) not computed** — no locked \(\hat D\) extractor yet (`DESIGN.md` §3.1). Rubric \(S\) is on disk; matching code exists under `protocol/matching.py` but extraction from final-answer text is still coder-protocol, not sealed.
+
+**Next (blocking for a complete §6.1(g)).** Lock extractor → code \(\hat D\) on all valid-pair legs for GPT+Flash (+ Claude coverage) against guest gold → run `protocol/matching.py` → fill \(\Delta\mathrm{STS}\), sign disagreement frequency, LOPO. Do not invent STS from \(\Delta S\) or judge text.
+
+### 0.16 Dated analysis — \(\hat D\) locked; §6.1(g) filled; exploratory sign disagreement (2026-09-11)
+
+**Extractor / STS commits (host).** \(\hat D\) extractor locked at `3242c30`. STS/\(Y\) tables at `71a405d`. Archives not mutated; no re-judge; extractor **not** retuned after seeing STS.
+
+**Layer A (degenerate).** \(Y=0\) on every pair of every \(\mathcal{A}\), so \(S^0\) cannot separate \(Y=1\) from \(Y=0\) — there is no \(Y=1\). Mean \(S^0\) on \(\mathcal{A}\): GPT **69.333** (n=9), Flash **95.750** (n=8), Claude **100** (n=1, coverage only). Mean pair-STS on \(\mathcal{A}\): GPT **0.130**, Flash **0.229**, Claude **0**. High \(S\) on \(\mathcal{A}\) is not evidence of state tracking.
+
+**§6.1(g) on \(\mathcal{A}^\cap\), exploratory only.** \(\mathcal{A}^\cap = \{\)`counterfactual-f010`, `preference_inference-f014`, `retrieval-f002`, `retrieval-f009`\(\}\), \(|\mathcal{A}^\cap|=4\).
+
+| | GPT | Flash |
+| --- | --- | --- |
+| mean \(S^0\) | 49.5 | **96.0** → \(\arg\max\) **Flash** |
+| mean pair-STS | **0.250** | 0.208 → \(\arg\max\) **GPT** |
+| \(Y\) (binary track) | 0/4 | 0/4 |
+
+\(\operatorname{sign}(\Delta S^0)\neq\operatorname{sign}(\Delta\mathrm{STS})\) on **4/4** tasks (\(\Delta=\) Flash−GPT). Paired bootstrap, seed `20260904`, \(B=5000\): \(\Delta S^0 = \mathbf{+46.5}\) (95% CI 21.0–72.0); \(\Delta\mathrm{STS} = \mathbf{-0.042}\) (95% CI −0.125–0.0). **LOPO fragile:** leaving out `retrieval-f009` makes \(\arg\max\) STS a **tie**; the other three leave-outs keep Flash on \(S^0\) and GPT on STS. Per §6.1(b)/(g) this is exploratory; Layer B remains **not evaluated** (§6.1(c)).
+
+**Mandatory caveats (do not drop in write-up).**
+
+1. \(Y=0\) on **every** valid pair in \(\mathcal{A}\) (GPT 9, Flash 8, Claude 1). STS is near-floor; much of the mass is `reported=None` (fail-closed extract) or G1 inject surface (e.g. `SM-88431` vs `SM-88431-CF`).
+2. **Full-\(\mathcal{A}\) vs common-support flip (§6.1(f)).** On full \(\mathcal{A}\), Flash is higher on **both** \(S^0\) and STS (0.229 vs 0.130). On \(\mathcal{A}^\cap\), GPT is higher on STS. That is a **support flip** and is itself a reported result: selection is sensitive to which tasks each agent finished. It is not licence to pick the prettier denominator.
+3. \(\Delta\mathrm{STS}\) CI reaches 0.0 and the magnitude is small against the \(S\) gap; the common-4 \(\arg\max\) disagreement ranks **small residuals**, not agents that tracked. Claim language: *signed-difference exploratory disagreement on common support*, never “Layer B confirms decision consequence” and never “GPT is more reliable than Flash”.
+
+**Artifacts (imported to local, §0.17):** `out/study2_layerA.md`, `out/study2_completion_conditional.md`, `out/study2_selection_g.md`, `out/study2_selection_g_sts.*`, `out/study2_sts_pairs.*`, `out/study2_valid_pairs.*`, `out/study2_hatd_extractor_lock.*`, `out/study2_gold_path_lock.*`, `out/study2_hatd_legs.jsonl`, `out/study2_paper_results.md`.
+
+**Paper 2 status.** Execution closed. Selection claim stays under-powered / exploratory. Layer A + completion-conditional (§6.1(e)) + instrument §§0.2–0.15 + this §0.16 package are the confirmatory-adjacent deliverables. The \(Y=0\) / near-floor STS pattern is primary fuel for Paper 3's measurement-interface claim, not a reason to reopen extractor knobs.
+
+### 0.17 Dated import — host history landed locally; §0.4/§0.10 debt CLOSED; two manifests reconciled (2026-09-12)
+
+**How it landed.** GitHub push from the run host is impossible (deploy key is read-only), so the host produced `generic-executor-phase1-8197110.bundle` (66 KB) plus a 24 KB tarball of `out/`. `git bundle verify` PASS; prerequisite `e8f6289` was already present locally; fetched to `refs/remotes/hpc/generic-executor-phase1`, tip `8197110`. Five commits: `0773242` → `be1c4c6` → `3242c30` → `71a405d` → `8197110`. Tables copied into `out/` (host's `out/paper_results.md` renamed `out/study2_paper_results.md` to avoid collision with the Paper 1 file of that name).
+
+**§0.4 / §0.10 debt is closed by evidence, not assertion.** §0.10 recorded `0773242` as *absent on host*, leaving the Flash half of the parser-equivalence gate **inconclusive**. The commit is now in hand: `0773242053e66fe2391f960d9a0baa1e6198db92`, committed **2026-09-08T12:28:15+07:00**, author *Dao Quang Toan*, message *"Wire near-miss parser on paper2_exec PYTHONPATH for Gate 0A Flash."* Read directly, it does two things:
+
+1. `scripts/paper2_exec_run.sh` (+5 lines): exports `PYTHONPATH="${A}:…"` so `qwen_cua`'s try-import of `generic_executor.near_miss_xml` resolves after the script `cd`s into MyPCBench. The inline comment states it changes no prompt, no `DONE`, no `max_steps`, no task order — consistent with §0.3's account of the patch as an **instrument bind**.
+2. `generic_executor/near_miss_xml.py` (+34/−1): adds `classify_parse_event` plus the labels `CANONICAL_PARSE` / `NEAR_MISS_CANONICALIZED` / `MALFORMED_REJECTED` / `EMPTY_ACTION`. This is an **audit-only taxonomy** — it labels a stored `response` offline and, per its own docstring, "does not change `VALID_DONE` / last-action" and "never maps a missing action to `DONE`". It cannot alter which actions executed.
+
+So §0.3's characterisation stands, with one precision the earlier wording lacked: the patch was wiring **plus an audit classifier that cannot affect actions or termination**, not wiring alone. The §0.11 dual analysis draws its rescue labels from exactly this taxonomy (`out/study2_gate011_nearmiss_dual.md`: Flash \(\lvert\mathcal{A}\rvert\) 8 as-executed vs 7 with rescues treated as rejected; GPT/Claude parser-not-applied).
+
+**Two manifests, and this one is canonical for the amendment chain.** `git merge-base` of local `HEAD` and the host branch is `7cb434f`; `e8f6289` is **not** an ancestor of local `HEAD`. The host's `EXECUTION_MANIFEST.md` is therefore not an older copy of this file but a **parallel document** (220 lines vs ~490 here) with disjoint content in both directions:
+
+- **Only here:** the whole §0.1–§0.16 amendment chain, including the pre-registrations that must be timestamp-checkable (`21c5618` for §6.1(g)).
+- **Only on host:** three dated operational notes of 2026-09-06 (GPT hard-block, Claude OpenRouter SMALL compatibility smoke, Gate −1.5 measurement remediation) and the §0.15/§0.16 summary tables.
+
+This file stays the record of record. Host-only content is folded in **additively** below; the file is never resolved by a git merge of the two branches, because a careless resolution would silently drop one side's chain.
+
+**Imported from host, because it is materially about measurement — Gate −1.5 remediation (2026-09-06).** Not a change to \(\mathcal{M}\)/\(\mathcal{T}\)/\(D\). False-`DONE` root cause: `cell_has_done` matched `"done": true`, which is **also** set by `FAIL` and `PREDICT_CRASH` rows in `traj`. Canonical rule adopted: \(\texttt{VALID\_DONE} \iff \texttt{canonical\_last\_action} = \texttt{DONE}\), via tracked `scripts/paper2_traj_terminal.py`. Offline reclassification (`scripts/canonical_audit_paper2.py` → `CHECKPOINT.canonical.jsonl`) moved **Flash from 27 to 23 `DONE`** with 4 mismatches; the original `CHECKPOINT.jsonl` is retained as historical. Later checkpoints call the canonical helper; harness pin in `out/paper2_harness_pin.json`. **Study 1 analysis must use `CHECKPOINT.canonical.jsonl`**, not raw pre-remediation `DONE` counts. This is the earliest instance in the project of the hazard §0.12 later audited on the judge side, and it belongs in any write-up of the instrument.
+
+**Imported but SUPERSEDED — host's GPT hard-block resume condition (2026-09-06).** That note lists a resume path through "frozen `ResponseStateAdapter` … this manifest amended with adapter freeze hash". §0.2 (2026-09-08) **withdrew** the adapter: none was ever built, and the GPT lane ran the substituted generic XML scaffold. The host row is retained here only as history and must not be cited as the GPT lane's provenance. Likewise its Claude row ("57 legs remain unstarted … official lane still planned as native") is superseded by §0.8.
 
 ---
 
@@ -424,5 +503,9 @@ Stop the full experiment if and only if continuing would invalidate comparabilit
 | 0.11 | 2026-09-09 | Near-miss enumeration is Flash-derived, so Claude's `EMPTY_XML_ABORT` dialect is unrescued → per-model instrument advantage; mandatory dual analysis with rescues treated as rejected |
 | 0.12 | 2026-09-09 | Judge frame path audited: ordering clean (join on `screenshot_file`, not `step_num`); frame-count asymmetry real but shifts \(S\) in 0/94 cells; \(\mathrm{corr}(\text{steps},S)=-0.275\) so no max-reduce inflation; \(S\) re-derived exactly on 94/94 → all re-reductions are free |
 | 0.13 | 2026-09-10 | Roster arithmetic corrected for 9B's exclusion, recorded at 35/57: Claude's 2 `DONE` are one pair; likely below \(n_{\min}\) → ranked roster GPT + Flash = 2 → §6.1(c) fires, **Layer B not evaluated**; 87–91-step legs are §0.6 metering, not a breach; both branches fixed in advance |
+| 0.14 | 2026-09-10 | Claude **FROZEN** 57/57: 4 `DONE` / 53 `TERMINAL_FAIL`, \(\lvert\mathcal{A}\rvert=1\) (only `f013` G0+G1); reported not ranked; Flash continues untouched; Layer B path = GPT+Flash under §6.1(c)/(g) |
+| 0.15 | 2026-09-11 | Flash **FROZEN** 57/57: \(\lvert\mathcal{A}\rvert=8\); GPT 9 / Claude 1; Layer B not confirmatory; §6.1(g) partial (\(\Delta S\) only, common support 4); **STS blocked on unlocked \(\hat D\) extractor** |
+| 0.16 | 2026-09-11 | Extractor `3242c30`, STS `71a405d`; common-4 sign disagreement (Flash \(\arg\max S\), GPT \(\arg\max\) STS); \(Y=0\) all \(\mathcal{A}\); full-\(\mathcal{A}\) STS order flips vs \(\mathcal{A}^\cap\); LOPO fragile; Layer B still not confirmatory |
+| 0.17 | 2026-09-12 | Host history imported by bundle (`8197110`, 5 commits) since push is blocked by a read-only deploy key; **`0773242` found and read → §0.4/§0.10 inconclusive half CLOSED** (PYTHONPATH bind + audit-only parse taxonomy, cannot change actions or `VALID_DONE`); host manifest identified as a **parallel document**, this file declared canonical, host-only Gate −1.5 remediation imported, host adapter/native rows marked superseded by §0.2/§0.8 |
 | `PAPER2_SPEC.md` §6.1 | 2026-09-08 | Power, rank stability, no optional stopping, completion-conditional reporting |
 | `PAPER2_SPEC.md` §6.1(g) | 2026-09-10 | Two-ranked-agent branch fixed in advance: §6.1(c) unchanged (Layer B not evaluated), but a signed-difference comparison on common support with paired bootstrap may be reported as **exploratory**; void if ≥3 agents reach \(n_{\min}\); written before the Flash lane and before any STS exists |
