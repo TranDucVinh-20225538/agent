@@ -204,6 +204,100 @@ unreadable. If every cell lands on pattern 3, Gate 1 passes on dissociation and 
 timing-inflation hypothesis is reported as **not supported** — which is a finding to state,
 not a gap to hide.
 
+## 5b. Amendment, 2026-09-12 — the 0.1 corpus must be named, not discovered
+
+The first 0.1 run is **void** and its output must not be used. It was pointed at
+`/data2/hpcshared/Vinh/agent/results/paper2_exec` and the script discovered lanes by
+listing that directory, which holds far more than the frozen Study 2 corpora. It
+enumerated **262 legs across 8 directories**, mixing in:
+
+| directory | legs | status |
+|---|---:|---|
+| `study2-gpt` | 57 | frozen, in scope |
+| `study2-claude` | 57 | frozen, in scope |
+| `study2-flash` | 27 | **stale**, not the freeze |
+| `qwen38-flash` | 57 | 23 `DONE`, so not the freeze either (freeze has 29) |
+| `qwen35-9b` | 57 | lane excluded before execution, §0.10 |
+| `study2-flash.INVALIDATED_pre_repair_20260906T181448Z` | 2 | invalidated |
+| `gate0a-flash-instrument` | 1 | instrument diagnostic |
+| `gpt-5.5-invalid-openrouter-transport` | 4 | rejected transport |
+
+The frozen Flash corpus is not under that root at all. Per `out/study2_flash_freeze.json`
+it is `/data2/hpcshared/Vinh-/agent/results/paper2_exec/hpc-flash-small-gate0a-postpatch`
+(57 legs, `DONE` 29, `|A| = 8`), under `Vinh-` rather than `Vinh`.
+
+Two fixes, both in `scripts/p3_0_enumerate_legs.py`:
+
+1. `--lane NAME=PATH`, repeatable, which names each corpus explicitly and allows lanes
+   under different roots. Bare `ROOT` discovery still works but now prints a warning that
+   discovery cannot distinguish a frozen corpus from a stale, invalidated, pre-patch, or
+   out-of-scope one.
+2. `--expect-legs N`, which validates every requested lane **before** anything is written
+   or reported and exits 3 otherwise. A lane that yields zero legs is also an error. The
+   original run should have stopped at `flash = 27`; instead every downstream count
+   silently inherited it.
+
+The canonical 0.1 invocation is therefore:
+
+```
+python3 scripts/p3_0_enumerate_legs.py \
+  --lane gpt=/data2/hpcshared/Vinh/agent/results/paper2_exec/study2-gpt \
+  --lane claude=/data2/hpcshared/Vinh/agent/results/paper2_exec/study2-claude \
+  --lane flash=/data2/hpcshared/Vinh-/agent/results/paper2_exec/hpc-flash-small-gate0a-postpatch \
+  --expect-legs 57 \
+  --terminal scripts/paper2_traj_terminal.py \
+  --lock out/study2_gold_path_lock.json \
+  --jsonl out/p3_0_legs.jsonl
+```
+
+`qwen35-9b` and the pre-patch Flash corpus stay **out of scope**. 9B was excluded before
+execution and the Flash freeze policy forbids merging pre-patch material; bringing either
+into P3-0 would be a scope change requiring its own pre-registration, not a judgement call
+made while reading output.
+
+### What the void run nevertheless established
+
+The two lanes that *were* the frozen corpora reproduce Paper 2 exactly, which validates the
+script against independently computed numbers: GPT gives 14 excluded-`VALID_DONE` legs and
+Claude 2, matching §6.1(e)'s 14 and 2; GPT gives 18 legs in `A` and Claude 2, matching
+`2 x 9` and `2 x 1`; GPT gives 2 high-`S` non-`DONE` cells and Claude 1, matching 2 and 1.
+The consistency check also came back clean: no cell has both legs `VALID_DONE` while
+sitting outside `A`, so the pairing rule and the terminal channel agree.
+
+### A second bug, found because the printed numbers did not add up
+
+The cross-tab showed 7 keyed `G2` legs while the summary line showed
+`G2_by_design: 4`. Cause: `gate0_measurable` was computed as
+`valid_done and not cell_in_A and task_keyed`, but `cell_in_A` is a **cell**-level flag, so
+a `G2` leg belonging to a cell that *did* form a valid pair was disqualified. A `G2` leg is
+outside `A` by design no matter what its cell did. Corrected to disqualify on `cell_in_A`
+only for `G0` and `G1`. On the void run this understated the measurable stratum as 16 when
+the correct figure is 19, i.e. exactly the keyed excluded-`DONE` legs; the same undercount
+would have occurred on the clean run.
+
+### Matched dissociation cells — the most informative unit found so far
+
+Cross-referencing the two output tables shows a structure the spec did not anticipate. For
+GPT, two cells have **one leg `DONE` at `S = 100` and the partner leg non-`DONE` at
+`S = 100`**, on keyed tasks:
+
+| lane | task | `DONE` leg | non-`DONE` leg |
+|---|---|---|---|
+| gpt | `preference_inference-f010` | G1, `S = 100` | G0, `S = 100` |
+| gpt | `retrieval-f010` | G0, `S = 100` | G1, `S = 100` |
+
+Within one cell the task, the gold, and the agent are held fixed, and the only thing that
+differs is whether the episode closed. The `DONE` leg is Gate 0 measurable and the
+non-`DONE` leg is Gate 1 analysable, so a single cell feeds both gates with the task and
+gold confounds removed. This is a stronger unit than either gate's population taken
+separately, and 0.3 and 0.4 must report these cells as a named subgroup. The same shape
+appears for `retrieval-f017` in the pre-patch Flash corpus, which suggests it is not a
+one-off, though that corpus stays out of scope.
+
+Note what this subgroup does **not** license. It is not a sealed control: the cells were
+found by reading output, not designated in advance, and there is no external label on
+either leg. It sharpens the descriptive contrast; it cannot validate a metric.
+
 ## 6. Order of work
 
 ```

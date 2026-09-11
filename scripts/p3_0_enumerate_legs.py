@@ -78,11 +78,24 @@ def cell_score(leg_dir):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("root")
+    ap.add_argument("root", nargs="?",
+                    help="parent of the lane trees; discovers every subdirectory as a "
+                         "lane, which is only safe if that parent holds nothing but the "
+                         "frozen corpora. Prefer --lane.")
+    ap.add_argument("--lane", action="append", default=[], metavar="NAME=PATH",
+                    help="name one lane explicitly, repeatable. Lanes may live under "
+                         "different roots. Using this disables directory discovery.")
+    ap.add_argument("--expect-legs", type=int, default=None,
+                    help="refuse to report unless every lane holds exactly this many "
+                         "legs. Set it: a short lane means a stale or partial corpus.")
     ap.add_argument("--terminal", default="scripts/paper2_traj_terminal.py")
     ap.add_argument("--lock", default="out/study2_gold_path_lock.json")
     ap.add_argument("--jsonl", default="out/p3_0_legs.jsonl")
     a = ap.parse_args()
+
+    if not a.root and not a.lane:
+        print("give either ROOT or one or more --lane NAME=PATH", file=sys.stderr)
+        return 2
 
     if not os.path.exists(a.terminal):
         print(f"canonical terminal script not found: {a.terminal}\n"
@@ -93,12 +106,29 @@ def main() -> int:
     keyed = keyed_tasks(a.lock)
     print(f"keyed tasks in gold lock: {len(keyed)}")
 
+    if a.lane:
+        lanes = []
+        for spec in a.lane:
+            if "=" not in spec:
+                print(f"--lane needs NAME=PATH, got {spec!r}", file=sys.stderr)
+                return 2
+            name, _, path = spec.partition("=")
+            if not os.path.isdir(path):
+                print(f"lane {name}: not a directory: {path}", file=sys.stderr)
+                return 2
+            lanes.append((name, path))
+    else:
+        lanes = [(d.replace("study2-", ""), os.path.join(a.root, d))
+                 for d in sorted(os.listdir(a.root))
+                 if os.path.isdir(os.path.join(a.root, d))]
+        print(f"WARNING: discovered {len(lanes)} lanes under {a.root} by directory "
+              f"listing: {[n for n, _ in lanes]}\n"
+              "         Discovery cannot tell a frozen corpus from a stale, "
+              "invalidated, pre-patch, or\n"
+              "         out-of-scope one. Use --lane NAME=PATH to state the corpus.\n")
+
     rows = []
-    for lane_dir in sorted(os.listdir(a.root)):
-        lane_path = os.path.join(a.root, lane_dir)
-        if not os.path.isdir(lane_path):
-            continue
-        lane = lane_dir.replace("study2-", "")
+    for lane, lane_path in lanes:
         for task in sorted(os.listdir(lane_path)):
             task_path = os.path.join(lane_path, task)
             if not os.path.isdir(task_path):
@@ -129,9 +159,37 @@ def main() -> int:
                     "exclusion_cause": cause,
                     "score": cell_score(os.path.join(task_path, leg)),
                     # The only stratum Gate 0 can measure with zero lock change.
-                    "gate0_measurable": (vd and not in_A and task in keyed),
+                    # A G2 leg is outside A by design even when its own cell formed a
+                    # valid pair, so `in_A` may only disqualify G0 and G1.
+                    "gate0_measurable": (
+                        vd and task in keyed
+                        and not (leg in ("G0", "G1") and in_A)
+                    ),
                     "dir": os.path.join(task_path, leg),
                 })
+
+    by_lane = collections.Counter(r["lane"] for r in rows)
+
+    # Validate the corpus before anything is written or reported. A stale, partial,
+    # invalidated, or simply wrong directory shows up here, and every count below
+    # would otherwise inherit the error silently.
+    if not rows:
+        sys.stdout.flush()
+        print(f"ABORT: no legs found. Expected {'/'.join(LEGS)} directories under "
+              f"<lane>/<task>/. Check the lane paths.", file=sys.stderr)
+        return 3
+    if a.expect_legs is not None:
+        # Iterate the requested lanes, not the observed ones, so a lane that yielded
+        # nothing at all is an error rather than a silently absent row.
+        wrong = {ln: by_lane.get(ln, 0) for ln, _ in lanes
+                 if by_lane.get(ln, 0) != a.expect_legs}
+        if wrong:
+            sys.stdout.flush()
+            print(f"ABORT: --expect-legs {a.expect_legs} but these lanes differ: {wrong}",
+                  file=sys.stderr)
+            print(f"       Nothing written to {a.jsonl}, nothing reported. "
+                  "Point --lane at the frozen corpora.", file=sys.stderr)
+            return 3
 
     with open(a.jsonl, "w") as fh:
         for r in rows:
@@ -139,7 +197,6 @@ def main() -> int:
 
     print(f"legs enumerated: {len(rows)}  -> {a.jsonl}\n")
 
-    by_lane = collections.Counter(r["lane"] for r in rows)
     done = collections.Counter(r["lane"] for r in rows if r["valid_done"])
     inA = collections.Counter(r["lane"] for r in rows if r["cell_in_A"] and r["leg"] in ("G0", "G1"))
     print(f"{'lane':8s} {'legs':>5s} {'VALID_DONE':>11s} {'legs in A':>10s}")
