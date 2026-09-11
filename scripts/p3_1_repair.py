@@ -803,6 +803,91 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     return 0
 
 
+def cmd_diag_k0(audit: Path, a_legs: Path, p3_legs: Path) -> int:
+    """Read-only diagnosis of why K0 counted 8 where 0.7 recorded 7. Writes nothing.
+
+    P3_0_CONCLUSION records the 7 as rows in which gold was a **strict majority** of the
+    accumulated candidates, with tallies 10/12, 4/5 and 3/4. §7 K0 restated that as "the
+    modal group". Strict majority is a *proper* subset of unique mode, so plurality must
+    recover at least 7, and 8 is consistent with a faithful implementation.
+
+    This prints the per-call tallies so the difference is visible per row instead of
+    inferred, and separates the two candidate explanations for the eighth row: gold modal
+    without being a majority, versus a pick that matches gold only through the frozen
+    money tolerance.
+    """
+    pop = load_population(audit, a_legs, p3_legs)
+    if pop is None:
+        return 3
+    rows, answers, guests, lock = pop
+
+    n_maj = n_mode = n_rec = n_tol = 0
+    print()
+    print("13 M1a rows: per-call candidate tallies under FROZEN, then the R-AGG outcome")
+    print("=" * 100)
+    for r in rows:
+        key = (r["lane"], r["task"], r["leg"], r["component_id"])
+        spec = lock["components"][r["task"]][r["component_id"]]
+        gold = ex.gold_for_component(guests[(r["lane"], r["task"], r["leg"])],
+                                     r["task"], r["component_id"], lock)
+        answer = answers[(r["lane"], r["task"], r["leg"])]
+        AGG_CALLS.clear()
+        with Configured(set(), instrument=True):
+            rep0 = extract_for(r["task"], r["component_id"], spec["kind"], answer, set())
+            m0 = match_with_config(spec, gold, rep0, set())
+        calls = list(AGG_CALLS)
+        cause, dis = idaud.classify(spec, r["task"], r["component_id"], gold, rep0, m0,
+                                    answer, calls)
+        if cause != "M1" or not idaud.gold_among(
+                spec, gold, [v for c in dis for v in c["filtered"]]):
+            continue
+
+        gk = _group_key(gold)
+        maj = mode = False
+        print(f"\n{r['lane']}/{r['task']}/{r['leg']}/{r['component_id']}  "
+              f"kind={spec['kind']}  gold={ex._jsonable(gold)!r}")
+        for i, c in enumerate(dis):
+            tally: dict[Any, int] = {}
+            for v in c["filtered"]:
+                tally[_group_key(v)] = tally.get(_group_key(v), 0) + 1
+            n = sum(tally.values())
+            gc = tally.get(gk, 0)
+            top = max(tally.values())
+            is_maj = gc * 2 > n
+            is_mode = gc == top and sum(1 for t in tally.values() if t == top) == 1
+            maj = maj or is_maj
+            mode = mode or is_mode
+            print(f"  call {i}: n={n:>3d} gold_group={gc:>3d} top={top:>3d} "
+                  f"groups={len(tally)}  strict_majority={is_maj}  unique_mode={is_mode}")
+            if len(tally) <= 6:
+                print(f"           tally={ {str(k)[:18]: v for k, v in tally.items()} }")
+        AGG_CALLS.clear()
+        with Configured({"R-AGG"}, instrument=True):
+            rep1 = extract_for(r["task"], r["component_id"], spec["kind"], answer,
+                               {"R-AGG"})
+            m1 = match_with_config(spec, gold, rep1, {"R-AGG"})
+        exact = _group_key(rep1) == gk if rep1 is not None else False
+        tol = bool(m1) and not exact
+        n_maj += maj
+        n_mode += mode
+        n_rec += bool(m1)
+        n_tol += tol
+        print(f"  R-AGG -> {ex._jsonable(rep1)!r} matched={bool(m1)} "
+              f"exact_gold_group={exact} matched_via_tolerance_only={tol}")
+
+    print()
+    print("=" * 100)
+    print(f"gold a strict majority in at least one call : {n_maj}   <- 0.7 records 7")
+    print(f"gold the unique mode in at least one call   : {n_mode}")
+    print(f"R-AGG recovers                              : {n_rec}   <- K0 observed 8")
+    print(f"  of which matched only via money tolerance : {n_tol}")
+    print()
+    print("Strict majority implies unique mode, never the converse, so recovered >= 7 is")
+    print("required of a faithful implementation. Nothing is written; no quantity of "
+          "section 3 is computed.")
+    return 0
+
+
 def ilen(d: dict) -> int:
     return sum(len(v) for v in d.values())
 
@@ -864,7 +949,7 @@ def gates_ok(paths: tuple) -> tuple[bool, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["parity", "synthetic", "run"])
+    ap.add_argument("cmd", choices=["parity", "synthetic", "run", "diag-k0"])
     ap.add_argument("--audit", default="out/p3_0_recall_audit.jsonl")
     ap.add_argument("--a-legs", default="out/study2_hatd_legs.jsonl")
     ap.add_argument("--p3-legs", default="out/p3_0_extracted.jsonl")
@@ -881,6 +966,10 @@ def main() -> int:
         if ok:
             _write_gate("synthetic", True, gate_deps(None))
         return 0 if ok else 4
+    if a.cmd == "diag-k0":
+        # Diagnostic only: reads the archive, writes nothing, computes no section 3
+        # quantity and cannot record a gate.
+        return cmd_diag_k0(*paths)
     ok, why = gates_ok(paths)
     if not ok:
         print(f"ABORT: `run` requires both gates passed on the present dependencies. {why}",

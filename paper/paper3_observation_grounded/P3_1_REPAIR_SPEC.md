@@ -1040,3 +1040,79 @@ Exit codes, so an abort is never ambiguous: 3 population, 5 gates, 6 module prov
 
 No repair rule, configuration, quantity, fixture or criterion changes. Nothing has been
 measured.
+
+---
+
+## 16. Amendment A-8 — 2026-09-12, K0 fired; the guard was mis-stated, and it is not yet repaired
+
+`run` aborted on the host with exit 9: R-AGG recovered **8** of 13 `M1a` rows where `K0`
+expected 7. Per §7 K0 nothing else was read, and nothing was written.
+
+### A-8.1 The two faithfulness gates passed first, which is what makes this diagnosable
+
+Both inner gates of A-6.1 passed before `K0` was evaluated:
+
+* FROZEN reproduced 0.6's reported and matched values on all 134 rows **with
+  instrumentation active**, so the `_unique_or_none` wrapper is pass-through.
+* the cause taxonomy reproduced 0.7 exactly — `RECALL_MISS` `M1` 20 / `M1a` 13 / `M1b` 7 /
+  `M2` 9 / `M3` 5 / `M4` 5, and `ABSENT` `M1` 25 / `M2` 19 / `M3` 2 / `M4` 15.
+
+`K0` therefore cannot be failing in the classification layer. `ABSENT` `M1` is entirely
+`M1b` (25 of 25), as it must be: gold absent from the text cannot be among the candidates.
+
+### A-8.2 The provenance of the 7, traced rather than assumed
+
+`P3_0_CONCLUSION.md` is explicit:
+
+> In **7 of the 13** `M1a` rows the gold value was a **strict majority** of the accumulated
+> candidates and was still discarded, including 10 of 12 for
+> `flash/retrieval-f009/G1/nyc_flight_confirmation`, 4 of 5 for
+> `flash/aggregation-f020/G1/batbucks_cash`, and 3 of 4 on three further rows.
+
+Every quoted tally is a strict majority. The phrase "strict majority" occurs nowhere in the
+P3-0 scripts, so the figure was established by that written analysis, and it counts strict
+majorities.
+
+§7 K0 restated it as "the `M1a` rows in which gold is **the modal group**" — and §2 R-AGG
+freezes the repair to **plurality**, the unique modal group, with abstention on an exact
+tie. Strict majority is a **proper subset** of unique mode: a group holding more than half
+is necessarily the unique mode, but a unique mode need not hold more than half, as in
+tallies of 2/1/1. A faithful plurality implementation must therefore recover **at least**
+7, and 8 violates nothing.
+
+The defect is in the guard I wrote, not in the repair: I applied a number established for
+one predicate to a different predicate. §1.1 of this document says "strict majority" and
+§7 K0 says "modal group", both attached to 7; that inconsistency was present at freeze and
+is recorded here rather than quietly corrected.
+
+### A-8.3 What is deliberately NOT being done
+
+`K0`'s expected value is **not** being changed from 7 to 8. That would fit the criterion to
+the observed result, which this document forbids. Two candidate explanations for the eighth
+row remain untested, and they have different consequences:
+
+1. gold is the unique mode in some call without being a majority — the guard is simply
+   mis-stated and R-AGG is faithful;
+2. the plurality pick is not in gold's group but matches gold through the frozen
+   `match_money_usd` ±1 tolerance — §2 R-AGG anticipated exactly this hazard when it
+   refused to use the tolerance for grouping, and it would mean "recovered" is a weaker
+   notion than intended.
+
+### A-8.4 A read-only diagnostic, with its prediction recorded first
+
+`diag-k0` prints, for each of the 13 `M1a` rows, the per-call candidate tally, the size of
+gold's group, whether gold is a strict majority and whether it is the unique mode, then
+R-AGG's pick with whether it lies in gold's group exactly or matched only via tolerance.
+It writes nothing, computes no §3 quantity and cannot record a gate.
+
+**Prediction, recorded before the diagnostic is run:** strict-majority rows = 7,
+R-AGG-recovered = 8, matched-via-tolerance-only = 0. If that holds, explanation 1 is
+correct and `K0` is restated against the predicate 0.7 actually established, in a further
+amendment, before `run` is retried. If it does not hold, `K0` stands as a genuine failure
+and R-AGG is not faithful.
+
+Per-call detail matters and is printed per call rather than pooled: `extract_entity` can
+invoke the decision rule more than once, `M1a` is defined on the pooled candidate list, but
+R-AGG decides per call. That gap is itself a candidate explanation and must be visible.
+
+Nothing has been measured. No repair rule, configuration, quantity or fixture changes.
