@@ -1400,3 +1400,103 @@ Paper 2's published numbers are not restated or corrected. Errata E-1 stands. `Y
 computed and reported, not interpreted.
 
 No repair rule, configuration, quantity, fixture or criterion changes. §6 remains uncoded.
+
+---
+
+## 20. Amendment A-12 — 2026-09-12, §4 ordering result
+
+Run at `6ee4b9f`, `sha256(p3_1_repair.py) = 90dc1396…`, exit 0, 16 legs resolved. The §4
+faithfulness gate passed: FROZEN reproduced the published ordering exactly, so every
+configuration's shift is measured against a known baseline. `out/p3_1_ordering.json`.
+
+### A-12.1 The outcome, recorded as it came
+
+§4 has **no single outcome**. The four pre-committed labels split by configuration:
+
+| config | STS gpt | STS flash | ΔSTS | bootstrap 95% | argmax | agrees with `S0` | outcome |
+|---|---|---|---|---|---|---|---|
+| FROZEN | 0.2500 | 0.2083 | −0.0417 | [−0.125, +0.000] | gpt | no | *(baseline)* |
+| R-AGG | 0.3333 | 0.3125 | −0.0208 | [−0.250, +0.188] | gpt | no | **NARROWED** |
+| R-SCOPE | 0.2083 | 0.1875 | −0.0208 | [−0.250, +0.188] | gpt | no | **NARROWED** |
+| R-CMP | 0.2500 | 0.2083 | −0.0417 | [−0.125, +0.000] | gpt | no | **UNCHANGED** |
+| R-CHAN | 0.0417 | 0.2083 | +0.1667 | [+0.000, +0.375] | flash | yes | **INVERTED** |
+| ALL | 0.0417 | 0.2708 | +0.2292 | [+0.063, +0.417] | flash | yes | **INVERTED** |
+
+All lane means and deltas were recomputed independently from the per-task values and
+agree. FROZEN's own row is definitional, not a finding. Nothing is rescued and no outcome
+is preferred; the three readings below are constraints on how these rows may be read, not
+adjustments to them.
+
+### A-12.2 "Narrowed" here is cancellation, not convergence
+
+Under R-AGG the mean gap shrinks (−0.0417 → −0.0208) while per-task disagreement
+**grows**: the number of tasks with a nonzero ΔSTS goes 1 → 2, and the total absolute
+per-task disagreement goes 0.167 → 0.583, a factor of 3.5. The two tasks move in opposite
+directions (`counterfactual-f010` +0.250, `retrieval-f009` −0.333) and partly cancel in the
+mean. The CI widens from [−0.125, 0.000] to [−0.250, +0.188] and now straddles zero.
+
+Reporting "the gap narrowed" without this would be misleading. The repair did not bring
+the lanes into agreement; it made them disagree more, in both directions at once.
+
+R-SCOPE has a per-task delta vector **identical** to R-AGG's at different levels. At four
+tasks this is not a pattern and is not read as one.
+
+### A-12.3 "Inverted" here is one-sided destruction
+
+Under R-CHAN, `flash` is **bit-identical to FROZEN** — every per-task value unchanged,
+mean 0.2083 — while `gpt` collapses from 0.2500 to 0.0417. The argmax moved because the
+channel intervention removed `gpt`'s evidence, not because `flash` measured better. This
+is the same mechanism A-10 recorded, where R-CHAN destroyed 7 `MATCH` rows and drove `M2`
+from 34 to 59, here landing asymmetrically on one lane.
+
+ALL is that destruction plus the `flash` gain from the other repairs: `gpt` at R-CHAN's
+0.0417, `flash` lifted to 0.2708.
+
+*Why* the deletion falls on one lane is not investigated. That would be digging the
+development corpus, and the honest place to test it is §6.
+
+### A-12.4 The trap: agreeing with the judge is not validity
+
+R-CHAN and ALL are the only configurations whose `argmax_STS` **agrees** with the judge's
+`argmax_S0 = flash`; the other four disagree. A naive reading is that the channel repair
+"resolved" the selection disagreement of §4. It did not. It produced agreement by blinding
+the instrument on one lane, and A-10 already shows that configuration has the lowest
+sensitivity but one and the largest `M2`.
+
+This is recorded as a trap rather than a result: **concordance with the judge cannot be
+used as evidence that a measurement configuration is better**, because the cheapest route
+to concordance is to stop measuring. No repair was or will be selected on this basis.
+
+### A-12.5 The confidence intervals touching zero are structural
+
+A-11.1 predicted FROZEN's upper bound of exactly 0.000 from the fact that no task
+contributes a positive delta. The mirror case now also appears: R-CHAN's deltas are all
+≥ 0, so its **lower** bound is exactly 0.000. Same artefact, opposite sign. Neither bound
+is evidence about significance; it is a consequence of all nonzero per-task deltas sharing
+a sign at n = 4. The two configurations whose deltas straddle zero (R-AGG, R-SCOPE) are
+also the two with CIs that straddle zero.
+
+### A-12.6 `Y` and R-CMP
+
+`Y = 0` on all eight pairs in **all six** configurations. Even R-AGG, which raised §3
+sensitivity from 20/59 to 28/59, never produces a pair where every component matches on
+both legs. Reported, not interpreted, per §4.
+
+R-CMP is again bit-identical to FROZEN on both lanes — the second independent appearance
+of A-10's structural finding, and it is described the same way: comparison-level
+transformation is causally inaccessible because the relevant failures are upstream
+abstentions. Not "failed to improve".
+
+### A-12.7 What this does and does not support
+
+It strengthens the four-layer argument with an ordering-level observation: an intervention
+at the **channel** layer moved the model ordering, while interventions at the aggregation
+and comparison layers did not. Layer position determines whether a measurement choice can
+reorder models.
+
+It supports no generalization. Four tasks, two lanes, one task carrying the frozen signal,
+`Y` degenerate throughout, on the Paper 2 corpus. §4 is secondary and descriptive and is
+reported as such. Paper 2's published numbers are not restated or corrected; errata E-1
+stands.
+
+No repair rule, configuration, quantity, fixture or criterion changed. §6 remains uncoded.
