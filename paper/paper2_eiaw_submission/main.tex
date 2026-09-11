@@ -1,0 +1,259 @@
+% Paper 2 — NeurIPS 2026 workshop submission (double-blind).
+% Evaluation of Interactive Agents @ NeurIPS 2026
+% Prose transferred from a frozen analysis package; no new experiments.
+% Sources: out/study2_paper_results.md, out/study2_selection_g.md,
+%          paper/paper2_counterfactual_eval/EXECUTION_MANIFEST.md §§0.1--0.17,
+%          paper/paper2_counterfactual_eval/PAPER2_SPEC.md §6.1(a)--(g).
+% Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\documentclass{article}
+
+\usepackage[dblblindworkshop]{neurips_2026}
+\workshoptitle{Evaluation of Interactive Agents}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\graphicspath{{figs/}}
+\newcommand{\task}[1]{\texttt{#1}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Acap}{\mathcal{A}^{\cap}}
+\newcommand{\STS}{\mathrm{STS}}
+
+\title{When Coverage Decides the Ranking:\\
+A Pre-Registered Audit of Completion-Conditioned\\
+Computer-Use Agent Evaluation}
+
+% Displayed as Anonymous Author(s) under dblblindworkshop.
+\author{Anonymous Authors}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Computer-use agents are compared by a completion-conditioned score: an episode must terminate, and a rubric judge then assigns a number.
+We ask whether that number and a state-tracking measure select the same agent, on a universe and analysis plan frozen before any outcome existed.
+Three agents each ran $57$ pre-registered legs under one instrument.
+Coverage was the first result rather than a nuisance: valid counterfactual pairs, which require both legs to reach a canonical \texttt{DONE}, numbered $9$ for GPT-5.5, $8$ for Qwen3.8-Flash, and $1$ for Claude Opus~4.6, so only two agents met the pre-registered threshold $n_{\min}=3$ and the confirmatory selection test was, by its own pre-registered rule, not evaluated.
+Binary state tracking was $0$ on \emph{every} valid pair of every agent, leaving score-versus-tracking calibration degenerate rather than weak.
+In the remaining exploratory comparison the two measurement layers did not agree: on a four-task common support the score favoured Flash by $+46.5$ points (95\% CI $[21.0,\,72.0]$), while graded tracking favoured GPT-5.5 by $-0.042$ (95\% CI $[-0.125,\,0.000]$) --- an aggregate reversal that is strict on one of four tasks, tied on the other three, and erased by removing that one task.
+We therefore report measurement instability under this instrument, not an agent ranking: the observed ordering depends on which layer and which support is used.
+\end{abstract}
+
+\section{Introduction}
+
+Leaderboards for computer-use agents (CUAs) report a completion score: the episode ended and a rubric assigned a number~\citep{jang2026mypcbench,xie2024osworld}.
+Selecting an agent from such a leaderboard presumes that the score orders agents the way the property one cares about would order them.
+Prior work in this line showed that, for individual episodes, task completion, counterfactual state tracking, and score sensitivity can come apart~\citep{shao2026protocolvalidity,turk2026counterfactualclinical}.
+That leaves the decision-relevant question open: when the measurement layer changes, does the \emph{choice} of agent change?
+
+This paper answers that question on a sealed universe with an analysis plan fixed in advance, and reports what actually happened, which is not a clean disagreement and not a clean agreement.
+Two findings dominate and both are about the instrument rather than the agents.
+
+First, \textbf{coverage decided who could be compared at all}.
+The unit of a counterfactual comparison is a \emph{pair} of episodes, base and intervened, and a pair enters the analysis only if both legs terminate canonically.
+Termination rates differed so sharply across agents that one frontier agent contributed a single usable pair out of a possible $19$, which under the pre-registered threshold removed it from ranking and reduced the roster below the minimum required for the confirmatory test.
+
+Second, \textbf{the two layers produced different aggregate preferences but at the edge of one layer's resolution}.
+Among the two agents with enough support, the conventional score strongly preferred one agent while graded tracking preferred the other; that reversal, however, is carried entirely by one task out of four and the tracking measure is tied on the rest.
+
+\paragraph{Contributions.}
+(1)~A pre-registered, coverage-first audit in which the valid-pair count is reported as a finding rather than a denominator.
+(2)~An instrument whose termination channel is \emph{fail-closed} and \emph{independent of the judge}, so that ``scored well without closing the episode'' is an observation rather than a bookkeeping artefact.
+(3)~An exploratory two-layer comparison reported with its own fragility: the strict/tied decomposition, the single task that carries the reversal, the resolution limit of the tracking measure, and the flip between per-agent and common support.
+The claim is methodological and scoped to this instrument; we do not offer a ranking and we do not estimate a population rate.
+
+\section{Setup}
+\label{sec:setup}
+
+\paragraph{Frozen universe and plan.}
+Tasks, agents, interventions, seed, step budget, and the analysis rules were written and committed before execution.
+The inclusion threshold ($n_{\min}=3$ valid pairs to be ranked), the rule that fewer than three ranked agents means the confirmatory selection test is \emph{not evaluated}, the prohibition on optional stopping, and the form in which a two-agent comparison may appear were all fixed in advance of any outcome.
+We note this because every headline number below is a null or a partial result, and the value of such results depends entirely on the plan predating them.
+
+\paragraph{Pairs and interventions.}
+For task $t$, $E_t^{0}$ is the seeded guest state and $E_t^{1}=I_t(E_t^{0})$ applies a locked patch to a pre-registered determining set $D_t$.
+Instruction, interface, screenshot size, and judge are held fixed; guest probes confirm that gold moved.
+Each task contributes legs $G0$ (base) and $G1$ (intervened); a third variant is executed but excluded from pairing by pre-registration.
+A pair is \emph{valid} iff both $G0$ and $G1$ terminate canonically, and $\A_i$ denotes agent $i$'s valid pairs.
+Execution failures are never recoded as tracking failures.
+
+\paragraph{Two measurement layers.}
+The conventional layer is the base-leg rubric $S^{0}\in\{0,\dots,100\}$, i.e.\ the number a leaderboard would report on the unmodified world; base and intervened scores are deliberately not averaged.
+The tracking layer is a graded state-tracking score $\STS$, computed by extracting reported values $\hat D$ from the final answer and matching them against guest gold under per-component typed rules, with no judge in the loop.
+Binary track $Y=1$ requires every positive-weight component to match on \emph{both} legs.
+The extraction code was frozen at a recorded commit \emph{before} any aggregate $\STS$ was computed, and was not revised afterwards.
+
+\paragraph{Termination is a separate channel, and it fails closed.}
+Completion is read only from the last recorded trajectory action.
+The classifier does not consult the judge's output when deciding termination, so episode closure and task score are derived from disjoint inputs; and it is fail-closed, meaning a missing, malformed, or unreadable trajectory can only be \emph{excluded} from $\A$, never converted into an apparent completion.
+Both properties matter for how the numbers may be read: the reported $|\A_i|$ are \textbf{lower bounds}, and a high rubric score on a non-terminating episode cannot be an artefact of one channel leaking into the other.
+An earlier defect in this project, in which a truthy \texttt{done} field was also set by crash and failure rows, was remediated before the first leg reported here, so no number below was reclassified after the fact.
+
+\paragraph{Substrate disclosure.}
+All three lanes ran the same generic XML tool protocol over one chat-completions endpoint.
+This is \emph{not} the vendors' native computer-use instruments: the GPT-5.5 and Claude lanes were executed on the shared protocol after native tool-ownership validation failed or was unavailable on the run host.
+Comparability is therefore within this roster and instrument only, and is not comparability against natively instrumented results for the same model names.
+
+\section{Coverage is the first result}
+\label{sec:coverage}
+
+Each agent ran the full pre-registered schedule of $57$ legs; no lane was stopped early or extended.
+Table~\ref{tab:coverage} gives the outcome.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Coverage under the frozen instrument. A valid pair requires both $G0$ and $G1$ to terminate canonically. $|\A|$ values are lower bounds because the terminal classifier is fail-closed. Claude's mean $S^{0}$ is computed on a single pair.}
+\label{tab:coverage}
+\begin{tabular}{lrrrrr}
+\toprule
+Agent & \texttt{DONE}\,/\,57 & rate & $|\A|$ & mean $S^{0}$ on $\A$ & mean $\STS$ on $\A$ \\
+\midrule
+GPT-5.5          & 32 & 0.561 & 9 & 69.3 & 0.130 \\
+Qwen3.8-Flash    & 29 & 0.509 & 8 & 95.8 & 0.229 \\
+Claude Opus 4.6  &  4 & 0.070 & 1 & 100\ \ ($n{=}1$) & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Claude terminated on four legs, and those four fall on three distinct tasks, so exactly one task has both legs terminating: $|\A|=1$ out of $19$ possible pairs.
+Under the pre-registered threshold $n_{\min}=3$ it is reported but not ranked.
+With one further agent excluded before execution for instrument and transport mismatch, the ranked roster is two agents, which is fewer than three, and therefore \textbf{the confirmatory selection test is not evaluated} --- a stated outcome of the plan rather than a failed experiment.
+
+Two readings must be resisted here.
+Claude's mean $S^{0}$ on $\A$ is the highest in the table, but it is a single pair on the one task the agent solved and closed; it is a coverage artefact, exactly the selection pressure the plan anticipated, and not evidence that the agent scores best.
+Conversely the non-terminating legs are not tracking failures: they are absent observations, and recoding them as $Y=0$ is forbidden by the plan.
+
+\section{Layer A: calibration is degenerate, not weak}
+\label{sec:layera}
+
+The intended calibration analysis asks how well $S^{0}$ predicts $P(Y=1)$ on valid pairs.
+It cannot be estimated, for a stronger reason than small $n$: \textbf{$Y=0$ on all $18$ valid pairs across all three agents}.
+No pair matched every positive-weight component of $D$ on both legs.
+There is no positive class, so $S^{0}$ cannot separate $Y=1$ from $Y=0$, and any statement of the form ``score is (mis)calibrated to tracking'' is unavailable on this sample.
+
+The graded measure is correspondingly near its floor: mean $\STS$ on $\A$ is $0.130$, $0.229$, and $0$ (Table~\ref{tab:coverage}).
+This is the context in which the next section's differences must be read.
+A gap between $\STS=0.250$ and $\STS=0.208$ is a gap between two small residuals, not between a reliable agent and an unreliable one.
+
+\section{Exploratory two-layer comparison}
+\label{sec:selection}
+
+Because only two agents were rankable, the comparison below is reported in the single form the plan permits: signed differences on the common support, with a paired bootstrap, labelled \textbf{exploratory}, and not presented as the confirmatory test.
+The common support is $\Acap=\{$\task{counterfactual-f010}, \task{preference\_inference-f014}, \task{retrieval-f002}, \task{retrieval-f009}$\}$, $|\Acap|=4$.
+
+Aggregate means on $\Acap$ point in opposite directions: $S^{0}$ is $49.5$ for GPT-5.5 versus $96.0$ for Flash, so $\arg\max S^{0}$ is Flash; $\STS$ is $0.250$ versus $0.208$, so $\arg\max\STS$ is GPT-5.5.
+A paired bootstrap over tasks (seed $20260904$, $B=5000$) gives $\Delta S^{0}=+46.5$ with 95\% CI $[21.0,\,72.0]$ and $\Delta\STS=-0.042$ with 95\% CI $[-0.125,\,0.000]$, differences taken as Flash minus GPT-5.5.
+
+\paragraph{The reversal is strict on one task and tied on three.}
+Table~\ref{tab:pertask} gives the per-task values, and they are less dramatic than the aggregate suggests.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Per-task values on the common support, $\Delta$ as Flash minus GPT-5.5. $\STS$ strictly prefers GPT-5.5 on one task and is exactly tied on three.}
+\label{tab:pertask}
+\begin{tabular}{lrrrrrr}
+\toprule
+Task & $S^{0}$ GPT & $S^{0}$ Flash & $\STS$ GPT & $\STS$ Flash & $\Delta S^{0}$ & $\Delta\STS$ \\
+\midrule
+\task{counterfactual-f010}        & 83 & 100 & 0.000 & 0.000 & $+17$ & $0.000$ \\
+\task{preference\_inference-f014} &  0 &  84 & 0.000 & 0.000 & $+84$ & $0.000$ \\
+\task{retrieval-f002}             & 75 & 100 & 0.500 & 0.500 & $+25$ & $0.000$ \\
+\task{retrieval-f009}             & 40 & 100 & 0.500 & 0.333 & $+60$ & $-0.167$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On three of four tasks $\Delta\STS$ is exactly zero: the tracking layer is \emph{indifferent} between the two agents, not opposed to the score.
+Only \task{retrieval-f009} is a strict reversal.
+The aggregate $\Delta\STS$ is therefore driven entirely by that one task, and removing it makes the $\STS$ comparison a tie.
+A leave-one-pair-out check reports exactly this and nothing more: it is a sensitivity analysis confirming the same single-task concentration, not a second, independent piece of evidence.
+
+\paragraph{The tracking layer is coarse at this scale.}
+Across these pairs $\STS$ takes only the values $\{0.000,\,0.333,\,0.500\}$, because each task contributes a handful of typed components.
+The honest reading is that the reversal sits at the resolution limit of the measure: with this few components per task, $\STS$ has little room to express a small disagreement, and a reader is entitled to ask whether the layer is disagreeing or merely failing to discriminate.
+We raise the objection rather than wait for it, and we do not claim to settle it on four tasks.
+
+\paragraph{The common support is not a neutral slice.}
+Restricting to $\Acap$ moves GPT-5.5's mean $S^{0}$ from $69.3$ on its own nine pairs down to $49.5$, while Flash's is essentially unchanged ($95.8\to96.0$).
+The shared tasks are thus adversarial to GPT-5.5 on the score layer.
+The direction flips for tracking: on each agent's own $\A$, Flash is higher on \emph{both} layers ($\STS$ $0.229$ versus $0.130$), whereas on $\Acap$ GPT-5.5 is higher on $\STS$.
+Both denominators are reported and neither was chosen after inspecting which looked better; the discrepancy between them is itself the result, namely that the selection question is sensitive to which tasks each agent happened to finish.
+
+\section{Completion-conditioned observability}
+\label{sec:completion}
+
+Conditioning on termination changes which trajectories the downstream measurement can see at all, and the direction of that effect is worth stating precisely because the intuitive guess is wrong.
+On average, excluded cells score \emph{lower} than included ones: mean $S$ off $\A$ is $46.4$, $44.9$, and $26.1$ for GPT-5.5, Flash, and Claude, against $69.3$, $95.8$, and $100$ on $\A$.
+The completion filter is therefore conservative for the calibration question rather than flattering.
+
+What survives that averaging is a small set of sharp cases: $2$, $2$, and $1$ excluded cells scored $\ge 90$ with no canonical termination.
+Because the terminal channel is independent of the judge (Section~\ref{sec:setup}), these are genuine observations of substantial rubric-visible progress without episode closure, not scoring accidents.
+They are descriptive: none enters $\arg\max$, and none is converted into a pair.
+Their significance is that a completion-conditioned protocol cannot express them, so an agent whose failure mode is non-closure is measured mostly by its absence.
+
+\paragraph{Instrument asymmetry.}
+One further caveat bounds the coverage numbers.
+A parser canonicalisation that rescues near-miss tool syntax was enumerated from one agent's dialect, so it is more forgiving of that agent.
+Re-deriving terminal outcomes with those rescues treated as rejections moves Flash from $|\A|=8$ to $7$; the other lanes are unaffected because the canonicalisation does not fire on their output.
+The pre-registered dual analysis is reported for this reason rather than assumed away.
+
+\section{Discussion}
+
+The result of this audit is a measurement problem, not a ranking.
+Under this frozen instrument, on the four-task common support, with two rankable agents, and with binary tracking identically zero throughout, CUA reliability is not adequately characterised by a single completion-conditioned score: the ordering that measurement produces depends on which layer is used and on which tasks each agent finished.
+We state the scope inside the claim deliberately.
+We have shown instability of this instrument on this universe; we have not shown that CUA benchmarks in general are invalid, and the data here could not support that.
+
+Both quantities compared here are proxies.
+$S^{0}$ is a rubric judge's number and $\STS$ is a typed match against guest gold through an extractor; neither is independently established ground truth, so a disagreement between them licenses no inference about which is correct.
+This is why we decline both directions of the tempting conclusion: the evidence does not say one agent tracks state better, only that the proxies do not order the pair invariantly under the observed support.
+
+The constructive implication is for the design of the next measurement rather than for any leaderboard.
+Three properties of this instrument turned out to carry the analysis: termination read from a fail-closed channel, scoring read from a channel that never consults it, and an extraction step frozen before aggregates were computed.
+Those made the null results interpretable.
+What they could not supply is a validated target: with $Y=0$ everywhere, the tracking layer produced an ordering but no positive instance against which to check that the ordering means what its name says.
+A reliability measure for agents that frequently do not close episodes therefore needs two things this study did not have: a target defined without reference to episode completion, and positive and negative controls that can separate genuine reliability signal from artefacts of support and protocol observability.
+
+\paragraph{Broader impacts.}
+Making coverage and layer dependence visible discourages reading a single completion score as a certificate of state tracking.
+The same paired design could be turned on proprietary graders; we intend it as a diagnostic of measurement, not as an exploit.
+
+\section{Related work}
+
+OSWorld~\citep{xie2024osworld}, WebArena~\citep{zhou2024webarena}, and VisualWebArena~\citep{koh2024visualwebarena} score agents with completion rubrics; MyPCBench~\citep{jang2026mypcbench} provides the seeded personal desktop that our interventions reuse.
+OSWorld and WebArena are Apache-2.0, VisualWebArena is MIT, and MyPCBench is MIT with an OSWorld-derived harness under Apache-2.0; we omit URLs to preserve anonymity.
+None pairs $E^{0}$ with $E^{1}=I(E^{0})$ to separate state tracking from the score, and none reports valid-pair coverage as a quantity that can decide whether a comparison exists.
+\citet{shao2026protocolvalidity} audit whether the intended capability remains necessary for a score; we ask instead whether two measurement layers select the same agent.
+\citet{turk2026counterfactualclinical} show that coverage-style scores can hide update failures under controlled mutations; the completion-conditioning we report is the same hazard displaced into the eligibility rule rather than the rubric.
+\citet{bellibatlu2026judgesense} measure judge instability under paraphrase; our instability is with respect to the measurement layer and the analysis support, with the judge held fixed.
+The paired design follows interventionist language~\citep{pearl2009causality}; we identify no model internals.
+
+\section{Limitations}
+
+Three agents, one environment, one instrument, $57$ legs each, and $18$ valid pairs in total.
+Only two agents were rankable and the confirmatory selection test was not evaluated, so the two-layer comparison is exploratory throughout.
+Binary tracking is zero everywhere, which makes the calibration analysis degenerate and leaves $\STS$ unvalidated against any positive instance.
+The common support has four tasks; the aggregate $\STS$ reversal rests on one of them and disappears without it; and $\STS$ takes only three distinct values on these pairs.
+Reported $|\A|$ are lower bounds by construction, and the near-miss asymmetry moves one lane's count by one pair.
+The lanes ran a shared generic tool protocol rather than vendor-native computer-use instruments, so these are results for the named models \emph{on this substrate}.
+Per-step guest state was not retained, so no analysis here can condition on in-episode environment state.
+
+\section{Conclusion}
+
+On a universe and analysis plan frozen in advance, the agent that a completion-conditioned score selects is not the agent a graded state-tracking measure selects, but the disagreement is exploratory, concentrated in a single task, and measured at the resolution limit of the tracking layer --- and it sits on top of a coverage asymmetry severe enough that one frontier agent yielded a single usable pair and the confirmatory test could not be run at all.
+The finding we are willing to defend is the instability itself: under this instrument, which agent looks better depends on the measurement layer and the analysis support.
+Validating a reliability target that does not require episode completion, against explicit controls, is the prerequisite for turning that instability into a measurement.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\newpage
+\input{checklist.tex}
+
+\end{document}
