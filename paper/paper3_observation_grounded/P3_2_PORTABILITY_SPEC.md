@@ -283,3 +283,66 @@ designer. It is not, per §4.
    `R` is designed against those gates rather than the gates against `R`.
 2. Whether a blind validation route per §4 can be obtained. If one can, it supersedes §5,
    and it would also resolve G4, which the current corpus fails.
+
+---
+
+## 11. Pre-design audit — G1 ↔ G2 compatibility (2026-09-12)
+
+Run before `R` was designed, on the reasoning that two invariants which contradict each
+other must be caught before any algorithm exists — the A-15 lesson applied to the
+protocol itself rather than to an instrument. `scripts/p3_2_k0_g1_compat_audit.py`,
+read-only over task definitions and the frozen label table, no answer text, exits 5.
+
+### 11.1 First, a tension that does not exist
+
+G2 as frozen compares *results* — the 134-row categorisation, the cause taxonomy, A-10's
+table — not label strings. Frozen regex spelling such as `avg(erage)? cost` is therefore
+already an implementation detail, and a literal label is not required to equal it. No
+amendment is needed on that point.
+
+### 11.2 What the audit does test, and what it found
+
+Using the frozen label patterns themselves as matchers against each task's own
+`instruction`/`grading`, so the audit invents no regex-stripping rule of its own:
+
+| | |
+|---|---|
+| label-sensitive calibration components | 30 |
+| with ≥1 **groundable** frozen label | **26** |
+| with none | **4** |
+
+```
+aggregation-f037/top_sender            labels `top (inbox )?sender`, `most (emails|messages)`
+aggregation-f037/top_sender_count      labels `top_sender_count`, `message count`, `email count`
+contradiction-f004/batbucks_gme_shares only `batbucks.*gme` matched, via a `.*` wildcard
+counterfactual-f005/gme_avg_cost       label `avg(erage)? cost`
+```
+
+A pattern containing `.*` is excluded from feasibility because its match is whatever lies
+between two anchors — here roughly 900 characters of rubric text — and cannot license a
+literal label. That is a structural exclusion, not a length threshold chosen to suit the
+outcome. Note the same component id `gme_avg_cost` is groundable under
+`contradiction-f004` (`'average cost'` occurs) and not under `counterfactual-f005`: the
+obstruction is a property of the task text, not of the component name.
+
+### 11.3 The limit of this audit, stated rather than glossed
+
+The audit proves the **frozen labels** are not groundable for those four, so G2 cannot be
+met by reproducing them. It does **not** prove that no other task-side-grounded phrase
+selects the same extraction windows and so reproduces the behaviour G2 actually tests.
+Settling that requires reading calibration answer text, which this audit deliberately does
+not do.
+
+So the finding is a determinate obstruction to one route to G2, and a risk flag on the
+other. It is **not** yet a proof that G1 and G2 contradict each other, and must not be
+written as one.
+
+### 11.4 Open
+
+Whether to run a second-stage audit on the calibration corpus — for each of the four,
+does any task-side-grounded span select the same extraction window as the frozen label? —
+which would convert the risk flag into a determinate answer before `R` is designed. It
+reads Study 2 answer text, which is the calibration corpus and is permitted; it reads no
+validation answer text.
+
+`R` remains undesigned, and no parameter set has been declared.
