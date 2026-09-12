@@ -709,8 +709,9 @@ selftest  →  pre-replay gates  →  materialise R on Study 2  →  escape
 
 Pre-replay, all required, else abort (this is not a G2 verdict):
 
-* `scripts/p3_2_r.py` has no uncommitted edits; its blob is printed and is the
-  version the verdict is about
+* on-disk `scripts/p3_2_r.py` hashes to the locked blob `92e7951…` (declared
+  at `e638525`). Git index/worktree status is irrelevant: the host fetches
+  files without committing them. A different blob aborts; it is not G2.
 * frozen extractor / apply / 0.7 classifier blobs match `p3_1_repair.FROZEN_BLOBS`
 * live calibration components are exactly the 30 (`kind ≠ state`)
 * population is the frozen 134 rows / 57 legs

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import ast
 import json
-import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -29,6 +28,9 @@ TASKS = ROOT / "external" / "MyPCBench-main" / "tasks" / "final" / "all_tasks_wi
 LOCK = ROOT / "out" / "study2_gold_path_lock.json"
 R_PATH = ROOT / "scripts" / "p3_2_r.py"
 SELF_PATH = Path(__file__).resolve()
+# Locked at e638525. Index/worktree status is not a version: the host checks
+# files out of FETCH_HEAD without committing them. Content is.
+R_BLOB = "92e7951376f9eba850913a807c770552f9e6f39f"
 
 # Published FROZEN row of A-10 (P3-1). Counts, not intervals.
 A10_FROZEN = {"sensitivity": (20, 59), "abstention": (89, 134), "confident_wrong": (25, 45)}
@@ -76,15 +78,10 @@ def inject(table: dict) -> None:
     ex.LABELS.update(table)
 
 
-def r_is_dirty() -> str | None:
-    out = subprocess.run(
-        ["git", "status", "--porcelain", "--", str(R_PATH.relative_to(ROOT))],
-        cwd=ROOT, capture_output=True, text=True, check=False,
-    )
-    if out.returncode != 0:
-        return f"git status failed: {out.stderr.strip()}"
-    if out.stdout.strip():
-        return f"uncommitted edits in {R_PATH.name}: {out.stdout.strip()!r}"
+def r_version_ok() -> str | None:
+    got = r_blob()
+    if got != R_BLOB:
+        return f"R blob {got} != locked {R_BLOB}"
     return None
 
 
@@ -122,6 +119,8 @@ def selftest() -> int:
         bad.append(f"R fixture drifted: {got}")
     if g1b_hits():
         bad.append(f"G1b literals in R: {g1b_hits()}")
+    if r_blob() != R_BLOB:
+        bad.append(f"pinned R_BLOB is stale: file {r_blob()} pin {R_BLOB}")
 
     # Injection is a total replace: leftover frozen keys are a gate fail.
     saved = dict(ex.LABELS)
@@ -160,9 +159,9 @@ def selftest() -> int:
 
 def pre_replay(lock: dict, tasks: dict, table: dict) -> list[str]:
     bad = []
-    dirty = r_is_dirty()
-    if dirty:
-        bad.append(dirty)
+    ver = r_version_ok()
+    if ver:
+        bad.append(ver)
     try:
         p31.check_provenance()
     except SystemExit:
@@ -209,7 +208,7 @@ def cmd_run(audit: Path, a_legs: Path, p3_legs: Path) -> int:
     live = set(live_components(lock))
     row_comps = {(r["task"], r["component_id"]) for r in rows
                  if (r["task"], r["component_id"]) in live}
-    print(f"pre-replay PASS          : R clean, 30 components, "
+    print(f"pre-replay PASS          : R blob locked, 30 components, "
           f"{len(table)} injected, G1b hold")
     print(f"                         : {len(row_comps)} of 30 appear in the 134")
 
