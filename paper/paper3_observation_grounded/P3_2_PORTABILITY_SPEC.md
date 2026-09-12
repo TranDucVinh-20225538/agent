@@ -1,7 +1,7 @@
 # P3-2 — Instrument portability and cross-corpus validation
 
-**Status: pre-registration. Gates frozen. `R` declared at §13, not yet hashed.
-Pre-design audits in §12 are closed.**
+**Status: G2 FAIL at 9/30. `R` is not revised. Validation corpus not touched.
+Pre-design audits in §12 are closed. Sealed run not reached.**
 
 New work with its own pre-registration and its own kill criteria. **Not** a continuation of
 P3-1's K4, and it must never be presented as one. P3-1 is closed at A-16; its four repairs,
@@ -203,7 +203,7 @@ that instrument was written for is direct evidence that the frozen instrument co
 task-specific authoring which an independent rule does not recover — i.e. that the
 instrument itself is not portable. Reported in one sentence, with the shortfall counted
 (`27/30` is reported as `27/30`). P3-2 stops there and the validation corpus is not
-touched.
+touched. Evaluated: **9/30** (§13.8).
 
 ### G3 — Validation observability: ≥ 80%, the gate A-15 earned
 
@@ -306,11 +306,11 @@ experiment measures.
 
 | property | status |
 |---|---|
-| groundedness | 100%, hard gate |
-| calibration fidelity | exact, tolerance 0 |
-| validation observability | ≥ 80% |
+| groundedness | 100%, hard gate — held |
+| calibration fidelity | **FAIL — 9/30** (§13.8) |
+| validation observability | not reached |
 | precision negatives | **FAIL** — 5 < 20 |
-| sensitivity | evaluable |
+| sensitivity | not reached |
 
 ## 10. The claim, worded exactly
 
@@ -685,13 +685,11 @@ it also emits the empty list for `liquid_bank`, whose tokens do not occur in tha
 task's definition — G1 working, not a hole to fill. Neither empty-or-wrong
 component is a reason to add a parameter.
 
-### 13.6 Freeze artefact, when the time comes
+### 13.6 Freeze artefact
 
-After G1, G1b and G2 have been evaluated once: the hash of `scripts/p3_2_r.py` and
-the materialised table of `R` over every `(task, component_id)` in the Study 2 lock
-(`kind ≠ state`) and in the sealed transcription's component index (ids only; no
-gold, no answer text). Components are not invented for the other tasks in the
-184-file; `R` is well-defined on them the moment a `component_id` is supplied.
+G2 failed, so this artefact is not produced and is not a route around the stop.
+`R`'s source remains the locked blob `92e7951…`. It is not re-hashed for
+application, because there is no application.
 
 `scripts/p3_2_r.py` is the implementation. `scripts/p3_2_r_check.py` is G1, G1b,
 and the synthetic fixtures. Neither reads answer text.
@@ -728,3 +726,33 @@ components: a component is reconstructed iff every one of its rows has the same
 G2 FAIL is a verdict, not a prompt. The runner prints `G2 FAIL — N components
 not reconstructed` and exits. It does not suggest a parameter, an exception, or
 a second run. Nothing is written.
+
+### 13.8 G2 result — 9/30, stop
+
+Run at `802e553`, `R` blob `92e7951…`, pre-replay PASS, exit 5. Nothing written.
+`R` is not revised.
+
+```
+reconstructed 9/30
+MATCH 20 → 13    RECALL_MISS 39 → 46    ABSENT 61    VACUOUS 14
+A-10 FROZEN      sens 13/59   abstain 104/134   conf-wrong 17/30
+                 (published  20/59          89/134            25/45)
+```
+
+**9/30 is reported as 9/30.** That is the sentence §6 reserved. A locked,
+corpus-independent rule does not reconstruct the hand-written label table on
+the corpus that table was written for. The frozen instrument contains
+task-specific authoring that the rule does not recover. The instrument, as
+frozen, is not portable.
+
+Two of the nine are `aggregation-f037`'s pair, which extracted nothing under
+both instruments. The other seven are not interpreted here. Two of the
+twenty-one were named before the run (`credit_headroom` 5/5, `liquid_bank`
+3/5). They are 2 of 21, not the shortfall.
+
+The 134-row shift is seven `MATCH` rows becoming `RECALL_MISS`. `ABSENT` did
+not move. `R` lost detections the frozen table had; it did not invent matches
+where gold is absent. That is a description of the table, not a repair.
+
+P3-2 stops. G3 is not run. The validation corpus is not opened. No parameter
+is added. The claim in §10 is not available: transfer was never evaluated.
