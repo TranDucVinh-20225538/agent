@@ -1,6 +1,7 @@
 # P3-2 — Instrument portability and cross-corpus validation
 
-**Status: pre-registration, unfrozen draft. Nothing has been implemented or run.**
+**Status: pre-registration. Gates frozen. `R` declared at §13, not yet hashed.
+Pre-design audits in §12 are closed.**
 
 New work with its own pre-registration and its own kill criteria. **Not** a continuation of
 P3-1's K4, and it must never be presented as one. P3-1 is closed at A-16; its four repairs,
@@ -322,11 +323,8 @@ designer. It is not, per §4.
 
 ## 11. Open before freezing
 
-1. `R`'s algorithm and its declared parameter set. Everything in §6 is fixed first, and
-   `R` is designed against those gates rather than the gates against `R`. The pre-design
-   audits in §12 are closed and do not add a parameter; they say what a grounded rule
-   will not recover (`credit_headroom`'s ungrounded synonym) and that G2 may fail as
-   already pre-registered.
+1. ~~`R`'s algorithm and its declared parameter set.~~ Closed by §13. Values are locked,
+   not searched. The pre-design audits added no parameter.
 2. Whether a blind validation route per §4 can be obtained. If one can, it supersedes §5,
    and it would also resolve G4, which the current corpus fails.
 
@@ -603,5 +601,97 @@ as a shortfall (`29/30` is reported as `29/30`), and the validation corpus is
 not touched.
 
 The bound is not enlarged. Size 3 after seeing size 2 fail would be the
-amendment §12.9 forbade. Pre-design audits stop here. `R` is still undesigned,
-and no parameter set has been declared.
+amendment §12.9 forbade. Pre-design audits stop here. `R` is declared in §13.
+
+---
+
+## 13. `R` — algorithm and locked parameters
+
+Declared after the gates and after the pre-design audits, and **not** fitted to them.
+No parameter exists to recover an ungrounded synonym. There is no search space: every
+value below is locked. "Calibration" in §8 therefore means *apply once on Study 2 and
+evaluate G1 / G1b / G2*, not *choose the setting that reconstructs the frozen labels*.
+
+`R` is a function of task-side text and a component identifier, nothing else:
+
+```
+R(instruction, grading, component_id) → list[str]
+```
+
+It does not take answer text. It does not take `task_id`. It does not take `kind`. It
+contains no task identifier and no component identifier as a literal (G1b).
+
+### 13.1 Normalisation (P6), locked
+
+```
+norm(s) = " ".join(s.casefold().split())
+```
+
+Casefold and whitespace collapse only. No stemming, no hyphenation, no Unicode
+compatibility folding beyond `casefold`. `grading` that is not a string is
+`json.dumps(..., ensure_ascii=False)` before concatenation, the same join the
+pre-design audits used:
+
+```
+task_text = (instruction or "") + " " + (grading if str else json.dumps(grading))
+```
+
+A label is grounded iff `norm(label)` is a contiguous substring of `norm(task_text)`.
+
+### 13.2 Generation (P1, P2, P5, P7), locked
+
+1. Split `component_id` on `_`. No camelCase split, no digit split, no other delimiter.
+2. Discard every token of length less than 2. A one-character token is not a term
+   (the `n_` prefix of a schema name is a flag, not a word). This is declared here,
+   not fitted.
+3. Form every contiguous subsequence of the remaining tokens, joined by a single
+   space, shortest-first then left-to-right. That is the entire candidate set.
+   There is no maximum below the full identifier.
+4. Keep a candidate iff it is grounded under §13.1. Deduplicate by `casefold`,
+   first kept.
+
+That is the rule. Examples of the *generation* step, before the groundedness
+filter, using invented identifiers so this paragraph is not a G1b violation:
+
+```
+alpha_beta          →  alpha, beta, alpha beta
+n_open_items        →  open, items, open items
+```
+
+### 13.3 What is locked off
+
+| parameter | value | why it is off |
+|---|---|---|
+| P3 punctuation variants | **off** | hyphen / slash / optional-`e` forms are how the frozen table spells `avg(erage)? cost` and `check-?in`; adding them now would be an amendment dressed as a default |
+| P4 task-side n-gram harvest | **off** | that is the generator that produced `'and I'` and `'about'`; a generic rule does not harvest the task text |
+| synonym / abbreviation lists | **off** | this is what would emit the ungrounded load-bearing phrases §12.10 named |
+| stopword lists | **off** | component-id generation does not produce them; a list fitted after §12 would be post-hoc |
+| answer text | **never an input** | |
+
+If a later amendment turns any of these on, it is recorded as one and `R` is
+re-hashed. It is not slipped into a version bump.
+
+### 13.4 How labels are applied
+
+`R` emits **literals**, not regex. Substitution into the frozen extractor escapes
+each label (`re.escape`) before `extract_*` sees it. An empty list is a legal
+output and means the instrument extracts `None` on that component.
+
+### 13.5 What this rule will not recover
+
+It will not emit a phrase that is absent from the task text. Combined with §12.10,
+it will not recover the frozen `credit_headroom` vector. On the calibration corpus
+it also emits the empty list for `liquid_bank`, whose tokens do not occur in that
+task's definition — G1 working, not a hole to fill. Neither empty-or-wrong
+component is a reason to add a parameter.
+
+### 13.6 Freeze artefact, when the time comes
+
+After G1, G1b and G2 have been evaluated once: the hash of `scripts/p3_2_r.py` and
+the materialised table of `R` over every `(task, component_id)` in the Study 2 lock
+(`kind ≠ state`) and in the sealed transcription's component index (ids only; no
+gold, no answer text). Components are not invented for the other tasks in the
+184-file; `R` is well-defined on them the moment a `component_id` is supplied.
+
+`scripts/p3_2_r.py` is the implementation. `scripts/p3_2_r_check.py` is G1, G1b,
+and the synthetic fixtures. Neither reads answer text.
