@@ -1,7 +1,7 @@
 # P4-C — Metric completion specification (design freeze)
 
-**Status: PHASE 2 SEALED. No agents. $0 API. P4-B immutable. Phase 3 BLOCKED.**  
-Spec authored 2026-09-12. Phase 1 recorded 2026-09-12. Phase 2 sealed 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
+**Status: PHASE 3 FLASH PILOT PASS. P4-B immutable. Phase 4 BLOCKED.**  
+Spec authored 2026-09-12. Phase 1–2 recorded 2026-09-12. Phase 3 Flash C01–C03 run 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
 
 This file opens a **new workstream**. It does not amend `P4_PREREG.md` §2,
 does not edit `p4_instrument.py`, does not change P4-B E1–E4, gold, worlds,
@@ -509,3 +509,32 @@ clusters_sha256: bd30104becac546169ce62f921e6079a3df758a9a0fccf95106f9aa59060352
 worlds_sha256: b39c1e082a21c18f4a2b105e94586b3d0584b57af6c3a6904e50fa903ef75c4b
 gold_spec_sha256: dfe9e6a308bc5b21e59c8ca27f2182b7e7773441ba185012371dc2fc1fd8c2d8
 ```
+
+---
+
+## 19. Phase 3 gate (Flash observability; C01–C03)
+
+PASS iff ≥2 of 3 Flash legs produce a last-text the frozen instrument
+scores (HIT/MISS/ABSTAIN all count), spend ≤ $30, corpus/instrument
+unchanged. Not confirmatory `N_C`. G1–G6 not estimated. Phase 4 remains
+BLOCKED until separately authorized.
+
+```yaml
+phase: 3
+workstream: P4-C
+status: PASS
+next: PHASE_4_CONFIRMATORY
+next_status: BLOCKED
+model: qwen/qwen3.8-flash
+pilot_ids: [C01, C02, C03]
+n_scorable: 3
+api_spend_usd: 0.00113
+G1_G6: not_estimated
+instrument_modified: false
+p4b_modified: false
+corpus_modified: false
+```
+
+Observability (not a gate, not a reason to edit V1–V6 or C04–C30):
+C01 HIT; C02 ABSTAIN `no_anchor`; C03 MISS (entity remainder after
+anchor). Adjudicator A: SUCCESS on all three traces. `DONE`/`SUCCESS` ≠ HIT.
