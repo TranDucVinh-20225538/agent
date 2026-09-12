@@ -74,6 +74,11 @@ SELECT-only. Snapshot never patched. If a database’s schema is unknown,
 dump schema (no `SELECT *`) then freeze SQL, then run; do not edit SQL
 after seeing values.
 
+HPC boot of 2026-09-12 14:26+07 **TECHNICAL_ABORT** (`qemu-img` not
+on PATH). The written 0/16 is void. Not a Wave B score. `apply_gate`
+must not run on it. Wrapper now sources `qemu_datadir_wrap.sh` (same
+extracted QEMU Study 2 already used).
+
 On HPC, tree `/data2/hpcshared/Vinh-/agent` (no agent keys):
 
 ```bash

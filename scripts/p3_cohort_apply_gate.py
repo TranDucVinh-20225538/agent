@@ -17,6 +17,12 @@ B_PATH = OUT / "wave_b.json"
 def main() -> int:
     a = json.loads(A_PATH.read_text())
     b = json.loads(B_PATH.read_text())
+    if b.get("status") == "TECHNICAL_ABORT" or b.get("n_survive") is None:
+        print("REFUSE: Wave B is TECHNICAL_ABORT / not scored. Do not apply the gate.")
+        return 2
+    if b.get("n_scored") != 16:
+        print(f"REFUSE: Wave B n_scored={b.get('n_scored')} != 16")
+        return 2
     n_a = int(a["n_survive"])
     n_b = int(b["n_survive"])
     n = n_a + n_b

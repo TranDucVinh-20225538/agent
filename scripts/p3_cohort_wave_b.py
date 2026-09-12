@@ -88,12 +88,32 @@ def boot_env():
     return env
 
 
+def write_abort(reason: str) -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "protocol": "P3_COHORT_PROBE_PROTOCOL.md",
+        "wave": "B",
+        "status": "TECHNICAL_ABORT",
+        "n_scored": 0,
+        "n_survive": None,
+        "reason": reason,
+    }
+    (OUT / "wave_b.json").write_text(json.dumps(doc, indent=2) + "\n")
+    (OUT / "wave_b.md").write_text(
+        "# Wave B TECHNICAL_ABORT — not scored\n\n"
+        f"{reason}\n\n"
+        "Do not run apply_gate on this file. 0/16 is not a probe result.\n"
+    )
+    print(f"TECHNICAL_ABORT: {reason}", flush=True)
+
+
 def write_report(rows: list[dict]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     n_yes = sum(1 for r in rows if r["survive"])
     doc = {
         "protocol": "P3_COHORT_PROBE_PROTOCOL.md",
         "wave": "B",
+        "status": "SCORED",
         "n_scored": len(rows),
         "n_survive": n_yes,
         "n_fail": len(rows) - n_yes,
@@ -184,30 +204,8 @@ def main() -> int:
     except Exception as exc:
         print(f"TECHNICAL FAILURE during boot/wave B: {exc!r}", flush=True)
         traceback.print_exc()
-        have = {r["id"] for r in rows}
-        for cluster in clusters:
-            if cluster["id"] in have:
-                continue
-            rows.append(
-                {
-                    "id": cluster["id"],
-                    "wave": "B",
-                    "survive": False,
-                    "components": [
-                        {
-                            "id": d["id"],
-                            "kind": d["kind"],
-                            "locked": False,
-                            "reason": "boot_or_session_failure",
-                        }
-                        for d in cluster["determining"]
-                    ],
-                    "error": repr(exc),
-                    "models": ["flash", "gpt"],
-                }
-            )
-        write_report(rows)
-        return 1
+        write_abort(repr(exc))
+        return 2
     finally:
         if env is not None:
             try:
