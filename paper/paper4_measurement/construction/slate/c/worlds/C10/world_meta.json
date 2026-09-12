@@ -1,0 +1,29 @@
+{
+  "anchors": [
+    "beck peat crate"
+  ],
+  "component_id": "beck_qty_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/beck_counts.csv",
+    "Notes/board_total.txt",
+    "Notes/grit_roster.txt"
+  ],
+  "id": "C10",
+  "instruction": "Sum the beck peat crate counts that the grit roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/beck_counts.csv",
+    "left_where": [
+      {
+        "col": "site",
+        "eq": "beck"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/grit_roster.txt"
+  },
+  "slot": "C2-intended"
+}

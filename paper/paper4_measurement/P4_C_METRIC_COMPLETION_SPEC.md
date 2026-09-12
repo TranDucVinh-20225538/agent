@@ -1,7 +1,7 @@
 # P4-C — Metric completion specification (design freeze)
 
-**Status: SPEC ONLY. No agents. $0 API. P4-B immutable.**  
-Authored 2026-09-12.
+**Status: PHASE 1 CONSTRUCTION PASS. No agents. $0 API. P4-B immutable. Phase 2 BLOCKED.**  
+Spec authored 2026-09-12. Phase 1 recorded 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
 
 This file opens a **new workstream**. It does not amend `P4_PREREG.md` §2,
 does not edit `p4_instrument.py`, does not change P4-B E1–E4, gold, worlds,
@@ -450,6 +450,29 @@ N_C: 30
 c1_floor: 10
 c2_floor: 10
 coverage_gate: 0.50
+instrument_modified: false
+p4b_modified: false
+agents_run: 0
+api_spend_usd: 0
+```
+
+---
+
+## 17. Phase 1 gate (construction; $0)
+
+PASS iff CQ01–CQ06 hit C1–C6 against frozen `p4_instrument.score`, and
+C01–C30 lock gold from `L` with T1–T8, quotas, and disjoint C dialect.
+No agents. No instrument edit. No P4-B edit.
+
+```yaml
+phase: 1
+workstream: P4-C
+status: PASS
+next: PHASE_2_QUALIFICATION
+next_status: BLOCKED
+N_C: 30
+construction_n_pass: 30
+cq_pass: 6
 instrument_modified: false
 p4b_modified: false
 agents_run: 0

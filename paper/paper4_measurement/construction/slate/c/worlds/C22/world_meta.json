@@ -1,0 +1,29 @@
+{
+  "anchors": [
+    "rush tarn notes"
+  ],
+  "component_id": "rush_tarn_count",
+  "family": "Tally",
+  "files": [
+    "Finance/grit_mail.csv",
+    "Mail/tarn_notes.eml",
+    "Notes/board_count.txt"
+  ],
+  "id": "C22",
+  "instruction": "Count the rush tarn notes in the mail that also appear on the grit sheet.",
+  "kind": "integer",
+  "locator": {
+    "field": "sku",
+    "key": "sku",
+    "left": "Mail/tarn_notes.eml",
+    "left_where": [
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "count_join",
+    "right": "Finance/grit_mail.csv"
+  },
+  "slot": "C2-intended"
+}

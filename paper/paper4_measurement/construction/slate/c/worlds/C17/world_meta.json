@@ -1,0 +1,33 @@
+{
+  "anchors": [
+    "glen yard sealed"
+  ],
+  "component_id": "glen_sealed_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/peat_sheet.csv",
+    "Notes/board_seal.txt",
+    "Notes/sealed_index.txt"
+  ],
+  "id": "C17",
+  "instruction": "Report the crate cost for the glen yard sealed crate on the peat sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/peat_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "glen"
+      },
+      {
+        "col": "seal",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Notes/sealed_index.txt"
+  },
+  "slot": "C2-intended"
+}

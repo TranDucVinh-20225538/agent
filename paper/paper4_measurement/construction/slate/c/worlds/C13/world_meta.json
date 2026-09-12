@@ -1,0 +1,34 @@
+{
+  "anchors": [
+    "live glen grit"
+  ],
+  "component_id": "live_glen_clerk",
+  "family": "Reconcile",
+  "files": [
+    "Finance/clerk_live.csv",
+    "Mail/clerk_copy.eml"
+  ],
+  "id": "C13",
+  "instruction": "Name the live glen grit clerk from the roster sheet, not the mail copy.",
+  "kind": "entity",
+  "locator": {
+    "field": "clerk",
+    "key": "post",
+    "left": "Finance/clerk_live.csv",
+    "left_where": [
+      {
+        "col": "post",
+        "eq": "glen-grit"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/clerk_copy.eml",
+    "right_where": [
+      {
+        "col": "post",
+        "eq": "glen-grit"
+      }
+    ]
+  },
+  "slot": "C2-intended"
+}

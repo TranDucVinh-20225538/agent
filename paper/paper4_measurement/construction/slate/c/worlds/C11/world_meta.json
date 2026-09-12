@@ -1,0 +1,34 @@
+{
+  "anchors": [
+    "live ridge crate"
+  ],
+  "component_id": "live_ridge_crate",
+  "family": "Reconcile",
+  "files": [
+    "Finance/ridge_live.csv",
+    "Mail/ridge_quote.eml"
+  ],
+  "id": "C11",
+  "instruction": "Report the live ridge crate total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/ridge_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "ridge-crate"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/ridge_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "ridge-crate"
+      }
+    ]
+  },
+  "slot": "C1-intended"
+}

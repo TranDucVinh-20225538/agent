@@ -1,0 +1,34 @@
+{
+  "anchors": [
+    "live bracken bin"
+  ],
+  "component_id": "live_bracken_bin",
+  "family": "Reconcile",
+  "files": [
+    "Finance/bracken_live.csv",
+    "Mail/bracken_quote.eml"
+  ],
+  "id": "C15",
+  "instruction": "Report the live bracken bin total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/bracken_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "bracken-bin"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/bracken_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "bracken-bin"
+      }
+    ]
+  },
+  "slot": "ordinary"
+}

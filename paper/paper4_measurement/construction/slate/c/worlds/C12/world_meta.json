@@ -1,0 +1,34 @@
+{
+  "anchors": [
+    "live scree peat"
+  ],
+  "component_id": "live_scree_peat",
+  "family": "Reconcile",
+  "files": [
+    "Finance/scree_live.csv",
+    "Mail/scree_mail.eml"
+  ],
+  "id": "C12",
+  "instruction": "Report the live scree peat total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/scree_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "scree-peat"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/scree_mail.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "scree-peat"
+      }
+    ]
+  },
+  "slot": "C2-intended"
+}

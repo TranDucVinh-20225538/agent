@@ -1,0 +1,32 @@
+{
+  "anchors": [
+    "fell yard rush"
+  ],
+  "component_id": "fell_rush_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/grit_sheet.csv",
+    "Mail/rush_flag.eml"
+  ],
+  "id": "C16",
+  "instruction": "Report the crate cost for the fell yard rush crate on the grit sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/grit_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "fell"
+      },
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/rush_flag.eml"
+  },
+  "slot": "C1-intended"
+}
