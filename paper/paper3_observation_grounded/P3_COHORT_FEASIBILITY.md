@@ -125,28 +125,18 @@ This list is the feasibility object. It is not a result.
 
 ---
 
-Probe protocol: `P3_COHORT_PROBE_PROTOCOL.md`. Wave A scored (pre-inject
-only). Wave B declared, not yet guest-run.
+Probe protocol: `P3_COHORT_PROBE_PROTOCOL.md`. Both waves scored.
 
-## Verdict (on paper, today)
+## Verdict (locked)
 
 | Status | n |
 |---|---|
-| Ready to run (gold locked, labels locked, two models assigned) | **0** |
-| Wave A gold-locked (pre-inject only) | **9 / 12** |
-| Wave A failed (D not rewritten) | **3** (`aggregation-f004`, `contradiction-f014`, `retrieval-f005`) |
-| Wave B declared, guest not run | **16** |
-| Need from Wave B to pass the gate | **≥ 11** |
-| Study 2 C7 support | **4** — cannot pass; not used |
+| Wave A gold-locked | **9 / 12** |
+| Wave B gold-locked | **7 / 16** |
+| **n** | **16** |
+| Threshold | 20 |
+| Gate | **FAIL** |
 
-**9 < 20.** Gate is **open**. Not YES. Not NO. Do not write A yet.
-
-The three Wave A failures stay failed. D is not rewritten. Study 2’s
-other eight are not makeup. Labels are not written until both waves are
-scored and n ≥ 20.
-
-**What this does not authorise:** trajectories, a P3-3 spec, enlarging `R`,
-G3, or treating 9 as “close enough.”
-
-Next: one dummy-guest SELECT-only boot of Wave B
-(`scripts/p3_cohort_wave_b.py`). Then apply the stop rule. Nothing else.
+**16 < 20.** Comparative branch closed for this archive/cohort. C7 is
+existence only. Write path A. Do not lower 20. Do not rewrite D. Do not
+fold in Study 2’s other eight. Do not start trajectories.

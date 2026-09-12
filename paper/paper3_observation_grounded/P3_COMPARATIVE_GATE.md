@@ -87,11 +87,12 @@ keeps construct identity. It is not a back door around G3.
 
 ---
 
-Probe: `P3_COHORT_PROBE_PROTOCOL.md`. Wave A = 9/12 gold-locked (pre-inject
-only). Wave B = 16 declared, not run. Gate open. Need ≥ 11 Wave B survivors.
+Probe: `P3_COHORT_PROBE_PROTOCOL.md`. Wave A = 9/12. Wave B = 7/16.
+**n = 16 < 20. Gate FAIL.** Comparative branch closed. C7 existence only.
+Write path A.
 
 ## Camera-ready
 
-What is missing is comparative evidence at scale. Nothing else. If the archive
-cannot provide it, do not force it. If the venue target requires it, design **one**
-new run around this gate.
+The 20-cluster cohort was designed and probe-locked. It did not reach
+n ≥ 20. Do not force a comparative claim from 16. Write the diagnostic
+paper. C7 stays existence.

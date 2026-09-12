@@ -108,6 +108,16 @@ After both waves are scored:
 
 Do not lower 20. Do not top up the slate after seeing which probes passed.
 
+## Result (locked)
+
+Scored on node002 at FETCH_HEAD `332b3247b069ac33ec267271e6b22f139452f593`.
+Wave A **9/12**. Wave B **7/16**, `status=SCORED`, `n_scored=16`.
+**n = 16 < 20. Gate: FAIL.**
+
+`apply_gate` exit 5. SQL not edited. Slate not replaced. Prior TECHNICAL_ABORT
+files are not this score. Comparative branch for this archive/cohort is
+**closed**. C7 stays existence. Write path A.
+
 ## What this file does not authorise
 
 Trajectories. A P3-3 experiment spec. Enlarging `R`. G3. Sealed. Looking
