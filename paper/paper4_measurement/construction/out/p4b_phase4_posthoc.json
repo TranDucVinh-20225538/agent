@@ -1,0 +1,40 @@
+{
+  "kind": "posthoc_not_estimand",
+  "api_spend_usd": 0,
+  "n_episodes": 40,
+  "N_B": 20,
+  "locked_gates_unchanged": {
+    "E1": "PASS",
+    "E2": "PASS",
+    "E3": "NOT_EVALUABLE",
+    "E4": "NOT_EVALUABLE",
+    "P4B_constructive_transfer": "NULL_E3_NOT_EVALUABLE"
+  },
+  "hero_execution_vs_measurement": [
+    {"execution": "DONE", "p4": "HIT", "n": 5},
+    {"execution": "DONE", "p4": "MISS", "n": 5},
+    {"execution": "DONE", "p4": "ABSTAIN", "n": 30}
+  ],
+  "abstain": {
+    "n": 30,
+    "causes": {"no_anchor": 30, "absent": 0, "ambiguous": 0, "channel_indeterminate": 0},
+    "by_lane": {"flash": 14, "gpt": 16},
+    "by_family": {"Locate": 2, "Compute": 8, "Reconcile": 5, "Filter": 7, "Tally": 8},
+    "by_kind": {"money_usd": 11, "integer": 12, "entity": 4, "categorical": 3},
+    "clusters_both_models_abstain": 12
+  },
+  "by_lane": {
+    "flash": {"HIT": 2, "MISS": 4, "ABSTAIN": 14},
+    "gpt": {"HIT": 3, "MISS": 1, "ABSTAIN": 16}
+  },
+  "by_family": {
+    "Locate": {"HIT": 3, "MISS": 3, "ABSTAIN": 2},
+    "Compute": {"HIT": 0, "MISS": 0, "ABSTAIN": 8},
+    "Reconcile": {"HIT": 2, "MISS": 1, "ABSTAIN": 5},
+    "Filter": {"HIT": 0, "MISS": 1, "ABSTAIN": 7},
+    "Tally": {"HIT": 0, "MISS": 0, "ABSTAIN": 8}
+  },
+  "hit_ids": ["B01:flash", "B01:gpt", "B02:flash", "B09:gpt", "B10:gpt"],
+  "miss_ids": ["B03:flash", "B04:flash", "B04:gpt", "B12:flash", "B15:flash"],
+  "defensible_claim": "P4 demonstrated zero false-positive HITs and invariance under controlled irrelevant-span perturbations, while revealing substantial observation-channel abstention under natural agent behavior. However, natural success/failure correspondence could not be fully evaluated because the prespecified eligibility floors were not met."
+}
