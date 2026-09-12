@@ -323,7 +323,10 @@ designer. It is not, per §4.
 ## 11. Open before freezing
 
 1. `R`'s algorithm and its declared parameter set. Everything in §6 is fixed first, and
-   `R` is designed against those gates rather than the gates against `R`.
+   `R` is designed against those gates rather than the gates against `R`. The pre-design
+   audits in §12 are closed and do not add a parameter; they say what a grounded rule
+   will not recover (`credit_headroom`'s ungrounded synonym) and that G2 may fail as
+   already pre-registered.
 2. Whether a blind validation route per §4 can be obtained. If one can, it supersedes §5,
    and it would also resolve G4, which the current corpus fails.
 
@@ -526,7 +529,7 @@ are 24, not 30. Among the 22 singleton-reachable, several one-survivor rows have
 mixed quality already named in §12.5 (`'could'`, `'am'`, `'or'`, `'and I'`). Those are
 not adopted as labels.
 
-### 12.9 Set-valued reachability on the two — method, pending execution
+### 12.9 Set-valued reachability on the two — method
 
 What remains is whether **some other** grounded set reproduces the frozen vector. That is
 the question §12.8 left in the same position stage 1 left stage 2.
@@ -550,4 +553,55 @@ G2 at 30/30 remains attainable in principle by a rule that emits more than one l
 Either way the resolution, if one is needed, is an amendment recorded as one — not a
 quietly weakened gate, and not a larger bound chosen after seeing the pair result.
 
-`R` is still undesigned, and no parameter set has been declared.
+The result is §12.10.
+
+### 12.10 Set-valued result — one genuine miss, one coincidental hit
+
+Run at `56abb8a`, read-only, no artefact written, exit 5.
+
+```
+contradiction-f006/credit_headroom                 UNREACHABLE at size ≤ 2
+preference_inference-f014/designated_booking_total REACHABLE at size 2 (7 pairs)
+```
+
+**`credit_headroom` is the place G2's difficulty actually lives.** The decomposition is
+the finding, not the pair count. On every one of the five legs, the grounded label
+extracts nothing and the ungrounded synonym extracts exactly the frozen value:
+
+```
+           frozen   headroom   available credit
+flash/G0    1649      None          1649
+flash/G1    1649      None          1649
+flash/G2    2449      None          2449
+gpt/G1      1649      None          1649
+gpt/G2      2449      None          2449
+```
+
+The agents use a phrase the task definition does not contain. The term the task
+definition does contain never appears next to the number. 597,871 grounded pairs
+were tested; none substitute. This is A-15's shape, on the calibration corpus
+itself: groundedness 1, observability 0, and the frozen instrument papered over
+the gap with a synonym G1 would forbid `R` to emit.
+
+**`designated_booking_total` is reachable only by coincidence.** `total` extracts
+nothing on all 7 legs. `price` is the value source on flash/G1 (`4.2`) and an
+over-extraction on flash/G0 (`26` against frozen `None`). The frozen `None` on
+flash/G0 is `total` acting as a disagreement injector — `_unique_or_none` over
+several totals plus `26`. The seven surviving pairs share `'about'` and pair it
+with instruction debris (`'Am'`, `'or a'`, `'resort'`). That is the `'and I'`
+pattern from §12.5, and it is not a path a generic rule would take. They are
+not adopted.
+
+G2's threshold is **not** restated; it remains 30/30. A-10 defines abstention as
+`reported is None` and confident-wrong as `reported is not None and not matched`.
+The grounded-only subset reports `None` on all five `credit_headroom` legs;
+frozen reports a number on all five. That is a different A-10 cell by
+construction, not a reason to move the gate. G2 failure is already a
+pre-registered result (§6): a corpus-independent rule that cannot reconstruct
+a hand-tuned synonym is evidence that the instrument is not portable, reported
+as a shortfall (`29/30` is reported as `29/30`), and the validation corpus is
+not touched.
+
+The bound is not enlarged. Size 3 after seeing size 2 fail would be the
+amendment §12.9 forbade. Pre-design audits stop here. `R` is still undesigned,
+and no parameter set has been declared.
