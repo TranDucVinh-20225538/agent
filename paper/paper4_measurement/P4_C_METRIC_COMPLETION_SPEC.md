@@ -1,7 +1,7 @@
 # P4-C — Metric completion specification (design freeze)
 
-**Status: PHASE 3 FLASH PILOT PASS. P4-B immutable. Phase 4 BLOCKED.**  
-Spec authored 2026-09-12. Phase 1–2 recorded 2026-09-12. Phase 3 Flash C01–C03 run 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
+**Status: PHASE 4 COMPLETE. P4-C-Metric v1 FAIL. P4-B immutable. Stop.**  
+Spec authored 2026-09-12. Phases 1–3 recorded 2026-09-12. Phase 4 confirmatory run 2026-09-12. `N_C`, floors, and G1–G6 are unchanged. Do not patch V1–V6, gold, or floors.
 
 This file opens a **new workstream**. It does not amend `P4_PREREG.md` §2,
 does not edit `p4_instrument.py`, does not change P4-B E1–E4, gold, worlds,
@@ -538,3 +538,48 @@ corpus_modified: false
 Observability (not a gate, not a reason to edit V1–V6 or C04–C30):
 C01 HIT; C02 ABSTAIN `no_anchor`; C03 MISS (entity remainder after
 anchor). Adjudicator A: SUCCESS on all three traces. `DONE`/`SUCCESS` ≠ HIT.
+
+---
+
+## 20. Phase 4 gate (confirmatory; Flash primary)
+
+60 legs completed. Phase-3 τ not pooled. Unit = 30 clusters.
+
+Primary public report (Flash): `Cov = 0.1667`, `CC = 0.6000`,
+`DH = 0.1000 (Cov = 0.1667, CC = 0.6000)`. Abs = 0.8333.
+
+| Gate | Result |
+|---|---|
+| G1 false HIT | **PASS** (0) |
+| G2 C1 | **NOT_EVALUABLE** (eligible 3 < floor 10) → fails P4-C |
+| G3 C2 | **NOT_EVALUABLE** (eligible 0 < floor 10) → fails P4-C |
+| G4 invariance | **PASS** |
+| G5 coverage | **FAIL** (Flash Cov 0.1667 < 0.50) |
+| G6 honesty | **PASS** |
+| P4-C-Metric v1 | **FAIL** |
+
+Do not lower floors. Do not edit V1–V6 or the sealed corpus. Do not open
+P4-D in this file. Phase 5 Claude not run.
+
+```yaml
+phase: 4
+workstream: P4-C
+status: FAIL
+next: STOP
+n_completed: 60
+N_C: 30
+Cov: 0.1667
+CC: 0.6000
+api_spend_usd_phase4: 0.395962
+api_spend_usd_cumulative: 0.397092
+G1: PASS
+G2: NOT_EVALUABLE
+G3: NOT_EVALUABLE
+G4: PASS
+G5: FAIL
+G6: PASS
+instrument_modified: false
+p4b_modified: false
+corpus_modified: false
+pilot_pooled: false
+```
