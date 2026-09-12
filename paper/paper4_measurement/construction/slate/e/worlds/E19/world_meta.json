@@ -1,0 +1,32 @@
+{
+  "component_id": "vielle_live_clerk",
+  "condition": "plus",
+  "family": "Reconcile",
+  "family_id": "F07",
+  "files": [
+    "Finance/vielle_live.csv",
+    "Mail/gemshorn_roster.eml"
+  ],
+  "id": "E19",
+  "instruction": "Name the live vielle gemshorn clerk on the vielle live sheet.",
+  "kind": "entity",
+  "locator": {
+    "field": "clerk",
+    "key": "seat",
+    "left": "Finance/vielle_live.csv",
+    "left_where": [
+      {
+        "col": "seat",
+        "eq": "vielle-desk"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/gemshorn_roster.eml",
+    "right_where": [
+      {
+        "col": "seat",
+        "eq": "vielle-desk"
+      }
+    ]
+  }
+}

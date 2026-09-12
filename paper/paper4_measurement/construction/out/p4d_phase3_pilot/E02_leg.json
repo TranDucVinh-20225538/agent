@@ -1,0 +1,45 @@
+{
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "E02",
+  "n_steps": 4,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "51.30",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.0008513069400000001,
+  "tau": "**$51.30**\n\nDetails:\n- `Finance/cromorne_racket.csv` lists the line item `bombard-shawm` with an amount of **51.30**.\n- Cross-check: `Mail/shawm_note.eml` confirms `bombard-shawm` is listed (`listed: yes`).\n- Note: a similar row, `bombard-near` (48.70), is a different SKU and was not used.\n\nCLAIM: 51.30",
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nMail/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "cromorne_racket.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Mail",
+      "result": "shawm_note.eml",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/cromorne_racket.csv",
+      "result": "sku,amount\nbombard-shawm,51.30\nbombard-near,48.70\ntabor-x,9.20\nnakers-x,4.15\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Mail/shawm_note.eml",
+      "result": "sku: bombard-shawm\nlisted: yes\n",
+      "tool": "read_file"
+    }
+  ]
+}

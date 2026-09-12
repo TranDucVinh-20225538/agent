@@ -1,0 +1,55 @@
+{
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "E03",
+  "n_steps": 4,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "34.10",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.0013984066800000001,
+  "tau": "Decoding the instrument\u2011code names against the workspace files:\n\n- **cromorne racket sheet** \u2192 `Finance/cromorne_racket.csv`\n- **shawm bombard** \u2192 SKU `bombard-shawm` (confirmed \"listed: yes\" in `Mail/shawm_note.eml` and `Notes/posted_index.txt`, i.e. it is the posted line)\n- **fee** \u2192 the `amount` column\n\nOn the cromorne_racket sheet, the `bombard-shawm` row shows an amount of **34.10**.\n\nCLAIM: 34.10",
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nMail/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "cromorne_racket.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Mail",
+      "result": "shawm_note.eml",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "posted_index.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/cromorne_racket.csv",
+      "result": "sku,amount\nbombard-shawm,34.10\nbombard-tabor,39.70\nshawm-spare,7.25\nfar-row,4.80\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Mail/shawm_note.eml",
+      "result": "sku: bombard-shawm\nlisted: yes\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/posted_index.txt",
+      "result": "sku: bombard-shawm\nlisted: yes\n---\nsku: bombard-tabor\nlisted: yes\n",
+      "tool": "read_file"
+    }
+  ]
+}

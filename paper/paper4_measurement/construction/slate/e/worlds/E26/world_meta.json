@@ -1,0 +1,27 @@
+{
+  "component_id": "bombard_mail_count",
+  "condition": "minus",
+  "family": "Tally",
+  "family_id": "F09",
+  "files": [
+    "Finance/gittern_sheet.csv",
+    "Mail/cromorne_notes.eml",
+    "Notes/posted_n.txt"
+  ],
+  "id": "E26",
+  "instruction": "Count the bombard cromorne notes in the mail that also appear on the gittern sheet.",
+  "kind": "integer",
+  "locator": {
+    "field": "sku",
+    "key": "sku",
+    "left": "Mail/cromorne_notes.eml",
+    "left_where": [
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "count_join",
+    "right": "Finance/gittern_sheet.csv"
+  }
+}

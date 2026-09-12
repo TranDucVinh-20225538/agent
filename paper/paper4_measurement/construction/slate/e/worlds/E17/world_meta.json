@@ -1,0 +1,32 @@
+{
+  "component_id": "citole_live_due",
+  "condition": "minus",
+  "family": "Reconcile",
+  "family_id": "F06",
+  "files": [
+    "Finance/citole_live.csv",
+    "Mail/sackbut_quote.eml"
+  ],
+  "id": "E17",
+  "instruction": "Report the live citole sackbut due on the citole live sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/citole_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "citole-bin"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/sackbut_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "citole-bin"
+      }
+    ]
+  }
+}

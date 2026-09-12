@@ -1,0 +1,26 @@
+{
+  "component_id": "racket_qty_sum",
+  "condition": "plus",
+  "family": "Compute",
+  "family_id": "F05",
+  "files": [
+    "Finance/racket_counts.csv",
+    "Notes/crumhorn_roster.txt"
+  ],
+  "id": "E13",
+  "instruction": "Sum the racket bombard crate counts that the crumhorn roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/racket_counts.csv",
+    "left_where": [
+      {
+        "col": "site",
+        "eq": "racket"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/crumhorn_roster.txt"
+  }
+}

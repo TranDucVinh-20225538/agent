@@ -1,0 +1,26 @@
+{
+  "component_id": "shawm_bombard_fee",
+  "condition": "plus",
+  "family": "Locate",
+  "family_id": "F01",
+  "files": [
+    "Finance/cromorne_racket.csv",
+    "Mail/shawm_note.eml"
+  ],
+  "id": "E01",
+  "instruction": "Report the shawm bombard fee posted on the cromorne racket sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/cromorne_racket.csv",
+    "left_where": [
+      {
+        "col": "sku",
+        "eq": "bombard-shawm"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/shawm_note.eml"
+  }
+}

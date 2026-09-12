@@ -1,0 +1,60 @@
+{
+  "channel": "last_assistant_text_claim_line",
+  "execution_status": "DONE",
+  "gt": {
+    "cause": "compute_tally_sources_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "E12",
+  "lane": "gpt",
+  "model": "openai/gpt-5.5",
+  "n_steps": 4,
+  "p4_measurement": {
+    "cause": "match",
+    "committed": "32.60",
+    "status": "HIT"
+  },
+  "phase3_pilot": false,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "32.60",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.18226809611999994,
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "nakers_crates.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "all_nakers.txt\nvielle_list.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/nakers_crates.csv",
+      "result": "sku,yard,amount\nn-a,nakers,14.70\nn-b,nakers,17.90\nn-c,nakers,31.45\nn-d,rebec,6.25\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/vielle_list.txt",
+      "result": "sku: n-a\nlisted: yes\n---\nsku: n-b\nlisted: yes\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/all_nakers.txt",
+      "result": "sku: n-a\nlisted: yes\n---\nsku: n-b\nlisted: yes\n---\nsku: n-c\nlisted: yes\n",
+      "tool": "read_file"
+    }
+  ],
+  "trajectory_used_for_p4": false
+}

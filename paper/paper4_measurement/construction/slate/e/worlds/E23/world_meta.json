@@ -1,0 +1,30 @@
+{
+  "component_id": "shawm_reed_status",
+  "condition": "minus",
+  "family": "Filter",
+  "family_id": "F08",
+  "files": [
+    "Finance/shawm_sheet.csv",
+    "Notes/sealed_index.txt"
+  ],
+  "id": "E23",
+  "instruction": "Give the reed status for the shawm dulcian sealed slip.",
+  "kind": "categorical",
+  "locator": {
+    "field": "reed_status",
+    "key": "sku",
+    "left": "Finance/shawm_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "shawm"
+      },
+      {
+        "col": "seal",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Notes/sealed_index.txt"
+  }
+}

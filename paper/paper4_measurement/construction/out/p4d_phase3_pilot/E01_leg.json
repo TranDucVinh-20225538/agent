@@ -1,0 +1,45 @@
+{
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "E01",
+  "n_steps": 4,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "44.80",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.00043913430000000004,
+  "tau": "**Shawm bombard fee (cromorne racket sheet)**\n\n| SKU | Amount |\n|---|---|\n| bombard-shawm | 44.80 |\n\n- Source: `Finance/cromorne_racket.csv` \u2014 line `bombard-shawm,44.80`\n- Cross-check: `Mail/shawm_note.eml` confirms `sku: bombard-shawm` is **listed: yes**, so the posted figure stands as-is (no adjustment needed).\n\nCLAIM: 44.80",
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nMail/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "cromorne_racket.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Mail",
+      "result": "shawm_note.eml",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/cromorne_racket.csv",
+      "result": "sku,amount\nbombard-shawm,44.80\ntabor-far,8.15\nnakers-far,3.40\nrebec-far,120.00\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Mail/shawm_note.eml",
+      "result": "sku: bombard-shawm\nlisted: yes\n",
+      "tool": "read_file"
+    }
+  ]
+}
