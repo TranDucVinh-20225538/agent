@@ -1,0 +1,27 @@
+{
+  "anchors": [
+    "apron chute fee"
+  ],
+  "component_id": "apron_chute_fee",
+  "family": "Locate",
+  "files": [
+    "Finance/gantry_quay.csv",
+    "Mail/apron_note.eml"
+  ],
+  "id": "B01",
+  "instruction": "Report the apron chute fee posted on the gantry quay sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/gantry_quay.csv",
+    "left_where": [
+      {
+        "col": "sku",
+        "eq": "chute-apron"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/apron_note.eml"
+  }
+}

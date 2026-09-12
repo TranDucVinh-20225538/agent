@@ -1,0 +1,33 @@
+{
+  "anchors": [
+    "live winch cask"
+  ],
+  "component_id": "live_winch_cask",
+  "family": "Reconcile",
+  "files": [
+    "Finance/winch_live.csv",
+    "Mail/winch_quote.eml"
+  ],
+  "id": "B09",
+  "instruction": "Report the live winch cask total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/winch_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "winch-cask"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/winch_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "winch-cask"
+      }
+    ]
+  }
+}

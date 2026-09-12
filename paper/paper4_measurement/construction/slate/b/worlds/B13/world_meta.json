@@ -1,0 +1,31 @@
+{
+  "anchors": [
+    "gantry yard rush"
+  ],
+  "component_id": "gantry_rush_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/mill_hatch_sheet.csv",
+    "Mail/rush_flag.eml"
+  ],
+  "id": "B13",
+  "instruction": "Report the crate cost for the gantry yard rush crate on the mill hatch sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/mill_hatch_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "gantry"
+      },
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/rush_flag.eml"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "anchors": [
+    "live hopper bilge"
+  ],
+  "component_id": "live_hopper_bilge",
+  "family": "Reconcile",
+  "files": [
+    "Finance/hopper_live.csv",
+    "Mail/hopper_quote.eml"
+  ],
+  "id": "B10",
+  "instruction": "Report the live hopper bilge total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/hopper_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "hopper-bilge"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/hopper_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "hopper-bilge"
+      }
+    ]
+  }
+}

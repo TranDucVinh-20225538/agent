@@ -1,0 +1,27 @@
+{
+  "anchors": [
+    "quay mill shifts"
+  ],
+  "component_id": "quay_mill_shift_count",
+  "family": "Tally",
+  "files": [
+    "Calendar/quay_shifts.ics",
+    "Notes/loft_names.txt"
+  ],
+  "id": "B17",
+  "instruction": "Count the quay mill shifts on the calendar that also appear on the loft roster.",
+  "kind": "integer",
+  "locator": {
+    "field": "summary",
+    "key": "summary",
+    "left": "Calendar/quay_shifts.ics",
+    "left_where": [
+      {
+        "col": "location",
+        "eq": "quay"
+      }
+    ],
+    "op": "count_join",
+    "right": "Notes/loft_names.txt"
+  }
+}

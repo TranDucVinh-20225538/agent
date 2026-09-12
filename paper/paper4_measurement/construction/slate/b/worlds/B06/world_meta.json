@@ -1,0 +1,28 @@
+{
+  "anchors": [
+    "winch dory crate"
+  ],
+  "component_id": "winch_dory_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/dory_crates.csv",
+    "Notes/gantry_quay_list.txt",
+    "Receipts/dory_spare.html"
+  ],
+  "id": "B06",
+  "instruction": "Sum the winch dory crate costs that the gantry quay note lists.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/dory_crates.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "winch"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/gantry_quay_list.txt"
+  }
+}

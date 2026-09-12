@@ -1,0 +1,762 @@
+{
+  "B01": {
+    "family": "Locate",
+    "kind": "money_usd",
+    "component_id": "apron_chute_fee",
+    "instruction": "Report the apron chute fee posted on the gantry quay sheet.",
+    "anchors": ["apron chute fee"],
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/gantry_quay.csv",
+      "right": "Mail/apron_note.eml",
+      "left_where": [{"col": "sku", "eq": "chute-apron"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/gantry_quay.csv",
+        "format": "csv",
+        "columns": ["sku", "amount"],
+        "rows": [
+          {"sku": "chute-apron", "amount": "88.40"},
+          {"sku": "mill-hatch", "amount": "21.15"},
+          {"sku": "quay-loft", "amount": "34.60"},
+          {"sku": "gantry-cask", "amount": "9.05"}
+        ]
+      },
+      {
+        "path": "Mail/apron_note.eml",
+        "format": "kv",
+        "rows": [
+          {"sku": "chute-apron", "amount": "16.80", "subject": "prior quote"}
+        ]
+      }
+    ]
+  },
+  "B02": {
+    "family": "Locate",
+    "kind": "money_usd",
+    "component_id": "mill_hatch_surcharge",
+    "instruction": "Report the mill hatch surcharge on the loft cask sheet.",
+    "anchors": ["mill hatch surcharge"],
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/loft_cask.csv",
+      "right": "Mail/hatch_note.eml",
+      "left_where": [{"col": "sku", "eq": "mill-hatch"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/loft_cask.csv",
+        "format": "csv",
+        "columns": ["sku", "amount"],
+        "rows": [
+          {"sku": "mill-hatch", "amount": "64.25"},
+          {"sku": "winch-dory", "amount": "8.50"},
+          {"sku": "spar-ketch", "amount": "19.75"},
+          {"sku": "hopper-bilge", "amount": "3.30"}
+        ]
+      },
+      {
+        "path": "Mail/hatch_note.eml",
+        "format": "kv",
+        "rows": [
+          {"sku": "mill-hatch", "amount": "11.00", "subject": "old surcharge"}
+        ]
+      }
+    ]
+  },
+  "B03": {
+    "family": "Locate",
+    "kind": "entity",
+    "component_id": "dory_skipper",
+    "instruction": "Name the dory skipper listed on the marsh hopper card.",
+    "anchors": ["dory skipper"],
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/marsh_hopper.txt",
+      "right": "Finance/dory_roster.csv",
+      "left_where": [],
+      "key": "skipper",
+      "field": "skipper"
+    },
+    "files": [
+      {
+        "path": "Notes/marsh_hopper.txt",
+        "format": "kv",
+        "rows": [
+          {"skipper": "Wren Cobb", "post": "dory"}
+        ]
+      },
+      {
+        "path": "Finance/dory_roster.csv",
+        "format": "csv",
+        "columns": ["skipper", "post"],
+        "rows": [
+          {"skipper": "Wren Cobb", "post": "dory"},
+          {"skipper": "Pia Holt", "post": "mill"},
+          {"skipper": "Ned Quill", "post": "loft"},
+          {"skipper": "Asa Brink", "post": "quay"}
+        ]
+      }
+    ]
+  },
+  "B04": {
+    "family": "Locate",
+    "kind": "categorical",
+    "component_id": "north_dock_wire",
+    "instruction": "Give the wire status for the north quay dock slip.",
+    "anchors": ["wire status"],
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/north_slip.txt",
+      "right": "Calendar/dock_watch.ics",
+      "left_where": [{"col": "location", "eq": "north-dock"}],
+      "key": "location",
+      "field": "wire_status"
+    },
+    "files": [
+      {
+        "path": "Notes/north_slip.txt",
+        "format": "kv",
+        "rows": [
+          {"location": "north-dock", "wire_status": "hush"}
+        ]
+      },
+      {
+        "path": "Calendar/dock_watch.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "watch", "location": "north-dock", "hours": "8"},
+          {"summary": "spare", "location": "south-dock", "hours": "15"},
+          {"summary": "open", "location": "east-dock", "hours": "11"},
+          {"summary": "sealed", "location": "west-dock", "hours": "2"}
+        ]
+      }
+    ]
+  },
+  "B05": {
+    "family": "Compute",
+    "kind": "money_usd",
+    "component_id": "loft_crate_sum",
+    "instruction": "Sum the loft yard crate costs that the mill hatch note lists.",
+    "anchors": ["loft yard crate"],
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/crate_yard.csv",
+      "right": "Notes/mill_hatch_list.txt",
+      "left_where": [{"col": "yard", "eq": "loft"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/crate_yard.csv",
+        "format": "csv",
+        "columns": ["sku", "yard", "amount"],
+        "rows": [
+          {"sku": "crate-a", "yard": "loft", "amount": "40.10"},
+          {"sku": "crate-b", "yard": "loft", "amount": "25.20"},
+          {"sku": "crate-c", "yard": "gantry", "amount": "7.40"},
+          {"sku": "crate-d", "yard": "quay", "amount": "12.00"}
+        ]
+      },
+      {
+        "path": "Notes/mill_hatch_list.txt",
+        "format": "kv",
+        "rows": [
+          {"sku": "crate-a", "listed": "yes"},
+          {"sku": "crate-b", "listed": "yes"}
+        ]
+      },
+      {
+        "path": "Receipts/spare_costs.html",
+        "format": "html",
+        "columns": ["sku", "amount"],
+        "rows": [
+          {"sku": "crate-e", "amount": "18.90"}
+        ]
+      }
+    ]
+  },
+  "B06": {
+    "family": "Compute",
+    "kind": "money_usd",
+    "component_id": "winch_dory_sum",
+    "instruction": "Sum the winch dory crate costs that the gantry quay note lists.",
+    "anchors": ["winch dory crate"],
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/dory_crates.csv",
+      "right": "Notes/gantry_quay_list.txt",
+      "left_where": [{"col": "yard", "eq": "winch"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/dory_crates.csv",
+        "format": "csv",
+        "columns": ["sku", "yard", "amount"],
+        "rows": [
+          {"sku": "dory-a", "yard": "winch", "amount": "12.80"},
+          {"sku": "dory-b", "yard": "winch", "amount": "33.45"},
+          {"sku": "dory-c", "yard": "mill", "amount": "5.05"},
+          {"sku": "dory-d", "yard": "hatch", "amount": "6.70"}
+        ]
+      },
+      {
+        "path": "Notes/gantry_quay_list.txt",
+        "format": "kv",
+        "rows": [
+          {"sku": "dory-a", "listed": "yes"},
+          {"sku": "dory-b", "listed": "yes"}
+        ]
+      },
+      {
+        "path": "Receipts/dory_spare.html",
+        "format": "html",
+        "columns": ["sku", "amount"],
+        "rows": [
+          {"sku": "dory-e", "amount": "8.15"}
+        ]
+      }
+    ]
+  },
+  "B07": {
+    "family": "Compute",
+    "kind": "integer",
+    "component_id": "hatch_mill_qty_sum",
+    "instruction": "Sum the hatch mill crate counts that the loft roster lists.",
+    "anchors": ["hatch mill crate"],
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/hatch_counts.csv",
+      "right": "Notes/loft_roster.txt",
+      "left_where": [{"col": "mill", "eq": "hatch"}],
+      "key": "sku",
+      "field": "qty"
+    },
+    "files": [
+      {
+        "path": "Finance/hatch_counts.csv",
+        "format": "csv",
+        "columns": ["sku", "mill", "qty"],
+        "rows": [
+          {"sku": "bin-a", "mill": "hatch", "qty": "6"},
+          {"sku": "bin-b", "mill": "hatch", "qty": "8"},
+          {"sku": "bin-c", "mill": "quay", "qty": "2"},
+          {"sku": "bin-d", "mill": "loft", "qty": "9"}
+        ]
+      },
+      {
+        "path": "Notes/loft_roster.txt",
+        "format": "kv",
+        "rows": [
+          {"sku": "bin-a", "listed": "yes"},
+          {"sku": "bin-b", "listed": "yes"}
+        ]
+      },
+      {
+        "path": "Calendar/spare_bins.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "bin-e", "location": "gantry", "hours": "11"}
+        ]
+      }
+    ]
+  },
+  "B08": {
+    "family": "Compute",
+    "kind": "integer",
+    "component_id": "spar_ketch_hours_sum",
+    "instruction": "Sum the spar ketch shift hours that the quay card lists.",
+    "anchors": ["spar ketch shift"],
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/ketch_hours.csv",
+      "right": "Notes/quay_card.txt",
+      "left_where": [{"col": "craft", "eq": "ketch"}],
+      "key": "shift",
+      "field": "hours"
+    },
+    "files": [
+      {
+        "path": "Finance/ketch_hours.csv",
+        "format": "csv",
+        "columns": ["shift", "craft", "hours"],
+        "rows": [
+          {"shift": "dawn", "craft": "ketch", "hours": "5"},
+          {"shift": "dusk", "craft": "ketch", "hours": "7"},
+          {"shift": "noon", "craft": "dory", "hours": "2"},
+          {"shift": "late", "craft": "barge", "hours": "9"}
+        ]
+      },
+      {
+        "path": "Notes/quay_card.txt",
+        "format": "kv",
+        "rows": [
+          {"shift": "dawn", "listed": "yes"},
+          {"shift": "dusk", "listed": "yes"}
+        ]
+      },
+      {
+        "path": "Calendar/other_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "idle", "location": "mill", "hours": "11"}
+        ]
+      }
+    ]
+  },
+  "B09": {
+    "family": "Reconcile",
+    "kind": "money_usd",
+    "component_id": "live_winch_cask",
+    "instruction": "Report the live winch cask total from the finance sheet, not the mail quote.",
+    "anchors": ["live winch cask"],
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/winch_live.csv",
+      "right": "Mail/winch_quote.eml",
+      "left_where": [{"col": "item", "eq": "winch-cask"}],
+      "right_where": [{"col": "item", "eq": "winch-cask"}],
+      "key": "item",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/winch_live.csv",
+        "format": "csv",
+        "columns": ["item", "amount"],
+        "rows": [
+          {"item": "winch-cask", "amount": "55.90"},
+          {"item": "loft-bin", "amount": "10.20"},
+          {"item": "mill-bin", "amount": "13.35"},
+          {"item": "quay-bin", "amount": "22.40"}
+        ]
+      },
+      {
+        "path": "Mail/winch_quote.eml",
+        "format": "kv",
+        "rows": [
+          {"item": "winch-cask", "amount": "41.00", "subject": "stale quote"}
+        ]
+      }
+    ]
+  },
+  "B10": {
+    "family": "Reconcile",
+    "kind": "money_usd",
+    "component_id": "live_hopper_bilge",
+    "instruction": "Report the live hopper bilge total from the finance sheet, not the mail quote.",
+    "anchors": ["live hopper bilge"],
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/hopper_live.csv",
+      "right": "Mail/hopper_quote.eml",
+      "left_where": [{"col": "item", "eq": "hopper-bilge"}],
+      "right_where": [{"col": "item", "eq": "hopper-bilge"}],
+      "key": "item",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/hopper_live.csv",
+        "format": "csv",
+        "columns": ["item", "amount"],
+        "rows": [
+          {"item": "hopper-bilge", "amount": "73.15"},
+          {"item": "cask-bin", "amount": "4.40"},
+          {"item": "spar-bin", "amount": "14.25"},
+          {"item": "dory-bin", "amount": "27.50"}
+        ]
+      },
+      {
+        "path": "Mail/hopper_quote.eml",
+        "format": "kv",
+        "rows": [
+          {"item": "hopper-bilge", "amount": "60.00", "subject": "stale quote"}
+        ]
+      }
+    ]
+  },
+  "B11": {
+    "family": "Reconcile",
+    "kind": "entity",
+    "component_id": "live_quay_mill_clerk",
+    "instruction": "Name the live quay mill clerk from the roster sheet, not the mail copy.",
+    "anchors": ["live quay mill"],
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/clerk_live.csv",
+      "right": "Mail/clerk_copy.eml",
+      "left_where": [{"col": "post", "eq": "quay-mill"}],
+      "right_where": [{"col": "post", "eq": "quay-mill"}],
+      "key": "post",
+      "field": "clerk"
+    },
+    "files": [
+      {
+        "path": "Finance/clerk_live.csv",
+        "format": "csv",
+        "columns": ["post", "clerk"],
+        "rows": [
+          {"post": "quay-mill", "clerk": "Tov Gale"},
+          {"post": "loft-hatch", "clerk": "Ned Quill"},
+          {"post": "gantry-cask", "clerk": "Asa Brink"},
+          {"post": "marsh-dory", "clerk": "Wren Cobb"}
+        ]
+      },
+      {
+        "path": "Mail/clerk_copy.eml",
+        "format": "kv",
+        "rows": [
+          {"post": "quay-mill", "clerk": "Pia Holt", "subject": "stale roster"}
+        ]
+      }
+    ]
+  },
+  "B12": {
+    "family": "Reconcile",
+    "kind": "categorical",
+    "component_id": "live_cask_loft_mark",
+    "instruction": "Give the live cask loft mark from the yard card, not the mail mark.",
+    "anchors": ["live cask loft"],
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Notes/yard_live.txt",
+      "right": "Mail/yard_mark.eml",
+      "left_where": [{"col": "bin", "eq": "cask-loft"}],
+      "right_where": [{"col": "bin", "eq": "cask-loft"}],
+      "key": "bin",
+      "field": "mark"
+    },
+    "files": [
+      {
+        "path": "Notes/yard_live.txt",
+        "format": "kv",
+        "rows": [
+          {"bin": "cask-loft", "mark": "dim"},
+          {"bin": "mill-hatch", "mark": "dull"},
+          {"bin": "gantry-quay", "mark": "spare"},
+          {"bin": "hopper-dory", "mark": "open"}
+        ]
+      },
+      {
+        "path": "Mail/yard_mark.eml",
+        "format": "kv",
+        "rows": [
+          {"bin": "cask-loft", "mark": "bright", "subject": "stale mark"}
+        ]
+      }
+    ]
+  },
+  "B13": {
+    "family": "Filter",
+    "kind": "money_usd",
+    "component_id": "gantry_rush_cost",
+    "instruction": "Report the crate cost for the gantry yard rush crate on the mill hatch sheet.",
+    "anchors": ["gantry yard rush"],
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/mill_hatch_sheet.csv",
+      "right": "Mail/rush_flag.eml",
+      "left_where": [{"col": "yard", "eq": "gantry"}, {"col": "rush", "eq": "yes"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/mill_hatch_sheet.csv",
+        "format": "csv",
+        "columns": ["sku", "yard", "rush", "amount"],
+        "rows": [
+          {"sku": "rush-a", "yard": "gantry", "rush": "yes", "amount": "29.60"},
+          {"sku": "rush-b", "yard": "gantry", "rush": "no", "amount": "15.00"},
+          {"sku": "rush-c", "yard": "loft", "rush": "yes", "amount": "18.20"},
+          {"sku": "rush-d", "yard": "mill", "rush": "no", "amount": "44.05"},
+          {"sku": "rush-e", "yard": "quay", "rush": "yes", "amount": "6.90"}
+        ]
+      },
+      {
+        "path": "Mail/rush_flag.eml",
+        "format": "kv",
+        "rows": [
+          {"sku": "rush-a", "flag": "active"}
+        ]
+      }
+    ]
+  },
+  "B14": {
+    "family": "Filter",
+    "kind": "money_usd",
+    "component_id": "loft_sealed_cost",
+    "instruction": "Report the crate cost for the loft yard sealed crate on the winch dory sheet.",
+    "anchors": ["loft yard sealed"],
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/winch_dory_sheet.csv",
+      "right": "Notes/sealed_index.txt",
+      "left_where": [{"col": "yard", "eq": "loft"}, {"col": "seal", "eq": "yes"}],
+      "key": "sku",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/winch_dory_sheet.csv",
+        "format": "csv",
+        "columns": ["sku", "yard", "seal", "amount"],
+        "rows": [
+          {"sku": "seal-a", "yard": "loft", "seal": "yes", "amount": "37.80"},
+          {"sku": "seal-b", "yard": "loft", "seal": "no", "amount": "16.10"},
+          {"sku": "seal-c", "yard": "hatch", "seal": "yes", "amount": "22.05"},
+          {"sku": "seal-d", "yard": "gantry", "seal": "no", "amount": "9.70"},
+          {"sku": "seal-e", "yard": "quay", "seal": "yes", "amount": "31.40"}
+        ]
+      },
+      {
+        "path": "Notes/sealed_index.txt",
+        "format": "kv",
+        "rows": [
+          {"sku": "seal-a", "listed": "yes"}
+        ]
+      }
+    ]
+  },
+  "B15": {
+    "family": "Filter",
+    "kind": "entity",
+    "component_id": "night_chute_notes",
+    "instruction": "Name the notes file under the loft mill folder that is tagged for the night chute.",
+    "anchors": ["night chute"],
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/loft_mill_index.csv",
+      "right": "Mail/night_tag.eml",
+      "left_where": [{"col": "tag", "eq": "night"}],
+      "key": "tag",
+      "field": "basename"
+    },
+    "files": [
+      {
+        "path": "Notes/loft_mill_index.csv",
+        "format": "csv",
+        "columns": ["basename", "tag"],
+        "rows": [
+          {"basename": "night_chute_card.txt", "tag": "night"},
+          {"basename": "spare_loft_note.txt", "tag": "day"},
+          {"basename": "mill_hatch_log.txt", "tag": "day"},
+          {"basename": "gantry_quay_memo.txt", "tag": "day"}
+        ]
+      },
+      {
+        "path": "Mail/night_tag.eml",
+        "format": "kv",
+        "rows": [
+          {"tag": "night", "active": "yes"}
+        ]
+      },
+      {
+        "path": "Notes/night_chute_card.txt",
+        "format": "kv",
+        "rows": [
+          {"note": "chute card"}
+        ]
+      }
+    ]
+  },
+  "B16": {
+    "family": "Filter",
+    "kind": "categorical",
+    "component_id": "long_north_slip_mark",
+    "instruction": "Give the slip mark for the long north quay dock berth.",
+    "anchors": ["north quay dock"],
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/slip_marks.csv",
+      "right": "Calendar/berth_watch.ics",
+      "left_where": [{"col": "dock", "eq": "north"}, {"col": "length", "eq": "long"}],
+      "key": "summary",
+      "field": "mark"
+    },
+    "files": [
+      {
+        "path": "Finance/slip_marks.csv",
+        "format": "csv",
+        "columns": ["summary", "dock", "length", "mark"],
+        "rows": [
+          {"summary": "n-long", "dock": "north", "length": "long", "mark": "brisk"},
+          {"summary": "n-short", "dock": "north", "length": "short", "mark": "calm"},
+          {"summary": "s-long", "dock": "south", "length": "long", "mark": "rough"},
+          {"summary": "e-long", "dock": "east", "length": "long", "mark": "slack"}
+        ]
+      },
+      {
+        "path": "Calendar/berth_watch.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "n-long", "location": "north", "hours": "8"},
+          {"summary": "n-short", "location": "north", "hours": "15"}
+        ]
+      }
+    ]
+  },
+  "B17": {
+    "family": "Tally",
+    "kind": "integer",
+    "component_id": "quay_mill_shift_count",
+    "instruction": "Count the quay mill shifts on the calendar that also appear on the loft roster.",
+    "anchors": ["quay mill shifts"],
+    "locator": {
+      "op": "count_join",
+      "left": "Calendar/quay_shifts.ics",
+      "right": "Notes/loft_names.txt",
+      "left_where": [{"col": "location", "eq": "quay"}],
+      "key": "summary",
+      "field": "summary"
+    },
+    "files": [
+      {
+        "path": "Calendar/quay_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "Olin Hart", "location": "quay", "hours": "8"},
+          {"summary": "Remy Voss", "location": "quay", "hours": "15"},
+          {"summary": "Asa Brink", "location": "quay", "hours": "11"},
+          {"summary": "Pia Holt", "location": "mill", "hours": "2"},
+          {"summary": "Ned Quill", "location": "loft", "hours": "9"}
+        ]
+      },
+      {
+        "path": "Notes/loft_names.txt",
+        "format": "kv",
+        "rows": [
+          {"summary": "Olin Hart", "listed": "yes"},
+          {"summary": "Remy Voss", "listed": "yes"},
+          {"summary": "Asa Brink", "listed": "yes"},
+          {"summary": "Tov Gale", "listed": "yes"}
+        ]
+      }
+    ]
+  },
+  "B18": {
+    "family": "Tally",
+    "kind": "integer",
+    "component_id": "rush_hatch_mail_count",
+    "instruction": "Count the rush hatch notes in the mail that also appear on the mill sheet.",
+    "anchors": ["rush hatch notes"],
+    "locator": {
+      "op": "count_join",
+      "left": "Mail/hatch_notes.eml",
+      "right": "Finance/mill_sheet.csv",
+      "left_where": [{"col": "rush", "eq": "yes"}],
+      "key": "sku",
+      "field": "sku"
+    },
+    "files": [
+      {
+        "path": "Mail/hatch_notes.eml",
+        "format": "kv",
+        "rows": [
+          {"sku": "hatch-a", "rush": "yes"},
+          {"sku": "hatch-b", "rush": "yes"},
+          {"sku": "hatch-c", "rush": "no"},
+          {"sku": "hatch-d", "rush": "no"}
+        ]
+      },
+      {
+        "path": "Finance/mill_sheet.csv",
+        "format": "csv",
+        "columns": ["sku", "bin"],
+        "rows": [
+          {"sku": "hatch-a", "bin": "8"},
+          {"sku": "hatch-b", "bin": "15"},
+          {"sku": "hatch-e", "bin": "11"}
+        ]
+      }
+    ]
+  },
+  "B19": {
+    "family": "Tally",
+    "kind": "integer",
+    "component_id": "hopper_bilge_shift_count",
+    "instruction": "Count the hopper bilge shifts on the calendar that also appear on the cask card.",
+    "anchors": ["hopper bilge shifts"],
+    "locator": {
+      "op": "count_join",
+      "left": "Calendar/hopper_shifts.ics",
+      "right": "Notes/cask_card.txt",
+      "left_where": [{"col": "location", "eq": "hopper"}],
+      "key": "summary",
+      "field": "summary"
+    },
+    "files": [
+      {
+        "path": "Calendar/hopper_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {"summary": "dawn", "location": "hopper", "hours": "8"},
+          {"summary": "dusk", "location": "hopper", "hours": "15"},
+          {"summary": "noon", "location": "hopper", "hours": "11"},
+          {"summary": "late", "location": "hopper", "hours": "2"},
+          {"summary": "idle", "location": "mill", "hours": "9"}
+        ]
+      },
+      {
+        "path": "Notes/cask_card.txt",
+        "format": "kv",
+        "rows": [
+          {"summary": "dawn", "listed": "yes"},
+          {"summary": "dusk", "listed": "yes"},
+          {"summary": "noon", "listed": "yes"},
+          {"summary": "late", "listed": "yes"}
+        ]
+      }
+    ]
+  },
+  "B20": {
+    "family": "Tally",
+    "kind": "integer",
+    "component_id": "dory_ketch_crate_count",
+    "instruction": "Count the dory ketch crates on the sheet that also appear on the marsh note.",
+    "anchors": ["dory ketch crates"],
+    "locator": {
+      "op": "count_join",
+      "left": "Finance/ketch_sheet.csv",
+      "right": "Notes/marsh_note.txt",
+      "left_where": [{"col": "craft", "eq": "ketch"}],
+      "key": "sku",
+      "field": "sku"
+    },
+    "files": [
+      {
+        "path": "Finance/ketch_sheet.csv",
+        "format": "csv",
+        "columns": ["sku", "craft", "bin"],
+        "rows": [
+          {"sku": "k-a", "craft": "ketch", "bin": "8"},
+          {"sku": "k-b", "craft": "ketch", "bin": "15"},
+          {"sku": "k-c", "craft": "ketch", "bin": "11"},
+          {"sku": "k-d", "craft": "ketch", "bin": "2"},
+          {"sku": "k-e", "craft": "ketch", "bin": "9"},
+          {"sku": "k-f", "craft": "dory", "bin": "7"}
+        ]
+      },
+      {
+        "path": "Notes/marsh_note.txt",
+        "format": "kv",
+        "rows": [
+          {"sku": "k-a", "listed": "yes"},
+          {"sku": "k-b", "listed": "yes"},
+          {"sku": "k-c", "listed": "yes"},
+          {"sku": "k-d", "listed": "yes"},
+          {"sku": "k-e", "listed": "yes"}
+        ]
+      }
+    ]
+  }
+}

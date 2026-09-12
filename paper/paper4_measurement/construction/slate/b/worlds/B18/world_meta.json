@@ -1,0 +1,27 @@
+{
+  "anchors": [
+    "rush hatch notes"
+  ],
+  "component_id": "rush_hatch_mail_count",
+  "family": "Tally",
+  "files": [
+    "Finance/mill_sheet.csv",
+    "Mail/hatch_notes.eml"
+  ],
+  "id": "B18",
+  "instruction": "Count the rush hatch notes in the mail that also appear on the mill sheet.",
+  "kind": "integer",
+  "locator": {
+    "field": "sku",
+    "key": "sku",
+    "left": "Mail/hatch_notes.eml",
+    "left_where": [
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "count_join",
+    "right": "Finance/mill_sheet.csv"
+  }
+}

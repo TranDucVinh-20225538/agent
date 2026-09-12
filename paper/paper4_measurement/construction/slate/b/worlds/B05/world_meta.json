@@ -1,0 +1,28 @@
+{
+  "anchors": [
+    "loft yard crate"
+  ],
+  "component_id": "loft_crate_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/crate_yard.csv",
+    "Notes/mill_hatch_list.txt",
+    "Receipts/spare_costs.html"
+  ],
+  "id": "B05",
+  "instruction": "Sum the loft yard crate costs that the mill hatch note lists.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/crate_yard.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "loft"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/mill_hatch_list.txt"
+  }
+}

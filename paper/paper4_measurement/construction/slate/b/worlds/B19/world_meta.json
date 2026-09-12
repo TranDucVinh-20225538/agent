@@ -1,0 +1,27 @@
+{
+  "anchors": [
+    "hopper bilge shifts"
+  ],
+  "component_id": "hopper_bilge_shift_count",
+  "family": "Tally",
+  "files": [
+    "Calendar/hopper_shifts.ics",
+    "Notes/cask_card.txt"
+  ],
+  "id": "B19",
+  "instruction": "Count the hopper bilge shifts on the calendar that also appear on the cask card.",
+  "kind": "integer",
+  "locator": {
+    "field": "summary",
+    "key": "summary",
+    "left": "Calendar/hopper_shifts.ics",
+    "left_where": [
+      {
+        "col": "location",
+        "eq": "hopper"
+      }
+    ],
+    "op": "count_join",
+    "right": "Notes/cask_card.txt"
+  }
+}

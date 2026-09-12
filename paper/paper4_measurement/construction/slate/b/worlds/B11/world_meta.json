@@ -1,0 +1,33 @@
+{
+  "anchors": [
+    "live quay mill"
+  ],
+  "component_id": "live_quay_mill_clerk",
+  "family": "Reconcile",
+  "files": [
+    "Finance/clerk_live.csv",
+    "Mail/clerk_copy.eml"
+  ],
+  "id": "B11",
+  "instruction": "Name the live quay mill clerk from the roster sheet, not the mail copy.",
+  "kind": "entity",
+  "locator": {
+    "field": "clerk",
+    "key": "post",
+    "left": "Finance/clerk_live.csv",
+    "left_where": [
+      {
+        "col": "post",
+        "eq": "quay-mill"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/clerk_copy.eml",
+    "right_where": [
+      {
+        "col": "post",
+        "eq": "quay-mill"
+      }
+    ]
+  }
+}

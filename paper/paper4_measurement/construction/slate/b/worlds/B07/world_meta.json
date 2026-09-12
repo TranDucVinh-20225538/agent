@@ -1,0 +1,28 @@
+{
+  "anchors": [
+    "hatch mill crate"
+  ],
+  "component_id": "hatch_mill_qty_sum",
+  "family": "Compute",
+  "files": [
+    "Calendar/spare_bins.ics",
+    "Finance/hatch_counts.csv",
+    "Notes/loft_roster.txt"
+  ],
+  "id": "B07",
+  "instruction": "Sum the hatch mill crate counts that the loft roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/hatch_counts.csv",
+    "left_where": [
+      {
+        "col": "mill",
+        "eq": "hatch"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/loft_roster.txt"
+  }
+}

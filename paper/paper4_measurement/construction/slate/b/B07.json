@@ -1,0 +1,49 @@
+{
+  "anchors": [
+    "hatch mill crate"
+  ],
+  "component_id": "hatch_mill_qty_sum",
+  "construction": {
+    "T1_gold_not_in_instruction": true,
+    "T2_toy_basename": true,
+    "T3_distractors": true,
+    "T4_no_observations": true,
+    "T5_no_llm_judge": true,
+    "T6_id_ok": true,
+    "T7_no_qvr_tokens": true,
+    "T8_two_sources": true,
+    "anchor_literal": true,
+    "anchors_ge_2_tokens": true,
+    "correspondence": true,
+    "exclusion_id_in_text": true,
+    "family_known": true,
+    "forbidden_gold": true,
+    "forbidden_substr": true,
+    "gold_locked": true,
+    "gold_not_in_anchor": true,
+    "kind_allowed": true,
+    "lock_error": null,
+    "n_anchors": true,
+    "one_component": true,
+    "own_cover_token": true,
+    "pass": true
+  },
+  "family": "Compute",
+  "gold": "14",
+  "id": "B07",
+  "instruction": "Sum the hatch mill crate counts that the loft roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/hatch_counts.csv",
+    "left_where": [
+      {
+        "col": "mill",
+        "eq": "hatch"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/loft_roster.txt"
+  }
+}

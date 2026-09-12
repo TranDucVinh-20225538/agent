@@ -1,0 +1,31 @@
+{
+  "anchors": [
+    "loft yard sealed"
+  ],
+  "component_id": "loft_sealed_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/winch_dory_sheet.csv",
+    "Notes/sealed_index.txt"
+  ],
+  "id": "B14",
+  "instruction": "Report the crate cost for the loft yard sealed crate on the winch dory sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/winch_dory_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "loft"
+      },
+      {
+        "col": "seal",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Notes/sealed_index.txt"
+  }
+}

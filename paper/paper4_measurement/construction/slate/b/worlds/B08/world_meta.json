@@ -1,0 +1,28 @@
+{
+  "anchors": [
+    "spar ketch shift"
+  ],
+  "component_id": "spar_ketch_hours_sum",
+  "family": "Compute",
+  "files": [
+    "Calendar/other_shifts.ics",
+    "Finance/ketch_hours.csv",
+    "Notes/quay_card.txt"
+  ],
+  "id": "B08",
+  "instruction": "Sum the spar ketch shift hours that the quay card lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "hours",
+    "key": "shift",
+    "left": "Finance/ketch_hours.csv",
+    "left_where": [
+      {
+        "col": "craft",
+        "eq": "ketch"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/quay_card.txt"
+  }
+}

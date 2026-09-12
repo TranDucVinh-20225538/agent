@@ -1,0 +1,31 @@
+{
+  "anchors": [
+    "north quay dock"
+  ],
+  "component_id": "long_north_slip_mark",
+  "family": "Filter",
+  "files": [
+    "Calendar/berth_watch.ics",
+    "Finance/slip_marks.csv"
+  ],
+  "id": "B16",
+  "instruction": "Give the slip mark for the long north quay dock berth.",
+  "kind": "categorical",
+  "locator": {
+    "field": "mark",
+    "key": "summary",
+    "left": "Finance/slip_marks.csv",
+    "left_where": [
+      {
+        "col": "dock",
+        "eq": "north"
+      },
+      {
+        "col": "length",
+        "eq": "long"
+      }
+    ],
+    "op": "select_join",
+    "right": "Calendar/berth_watch.ics"
+  }
+}
