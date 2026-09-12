@@ -76,10 +76,13 @@ after seeing values.
 
 HPC boots 14:26 (`qemu-img`) and 14:29 (stale `MYPCBENCH_OVMF_CODE`
 under `/mnt/data2/Vinh/...`) are **TECHNICAL_ABORT**, not scores.
-`.env` on this tree still carries node30 paths. `p3_cohort_hpc_guest_env.sh`
-drops any guest path that is not on disk, then resolves qcow2 / OVMF /
-QEMU from the HPC tree Study 2 already used. `apply_gate` stays off
-until `wave_b.json` status is `SCORED`.
+`.env` on this tree still carries node30 paths. Guest env drops missing
+paths, then uses Study 2’s QEMU **8.2.2** tree
+(`/data2/cmdir/home/toandq/MyPCBench/.opt/qemu-8.2`) with that tree’s
+`LD_LIBRARY_PATH` / `QEMU_MODULE_DIR`. The older `.opt/qemu` extract is
+not the Study 2 stack. Preflight requires version 8.2.2, `ldd` clean,
+and host `node002` or `node004` (not `bright92`). `apply_gate` stays
+off until `wave_b.json` status is `SCORED`.
 
 On HPC, tree `/data2/hpcshared/Vinh-/agent` (no agent keys):
 

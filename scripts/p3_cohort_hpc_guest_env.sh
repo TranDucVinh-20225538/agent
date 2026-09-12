@@ -67,12 +67,15 @@ _drop_if_missing MYPCBENCH_OVMF_CODE
 _drop_if_missing MYPCBENCH_OVMF_VARS
 _drop_if_missing MYPCBENCH_QEMU_EXTRACTED
 
-if [ -z "${MYPCBENCH_QEMU_EXTRACTED:-}" ]; then
+# Study 2 Flash: QEMU 8.2.2 TCG on node002/node004. The older
+# .opt/qemu extract is incomplete (libvirglrenderer and more missing).
+_QEMU82=/data2/cmdir/home/toandq/MyPCBench/.opt/qemu-8.2
+if [ -d "$_QEMU82" ]; then
+  export MYPCBENCH_QEMU_EXTRACTED="$_QEMU82"
+elif [ -z "${MYPCBENCH_QEMU_EXTRACTED:-}" ]; then
   MYPCBENCH_QEMU_EXTRACTED="$(_first_dir \
-    /data2/cmdir/home/toandq/MyPCBench/.opt/qemu \
-    "${HOME}/MyPCBench/.opt/qemu" \
-    "$A/../MyPCBench/.opt/qemu" \
-    "$H/.opt/qemu" || true)"
+    "${HOME}/MyPCBench/.opt/qemu-8.2" \
+    "$A/../MyPCBench/.opt/qemu-8.2" || true)"
   export MYPCBENCH_QEMU_EXTRACTED
 fi
 
@@ -114,6 +117,33 @@ command -v qemu-system-x86_64 >/dev/null || _missing+=("qemu-system-x86_64")
 [ -f "${MYPCBENCH_QCOW2:-}" ] || _missing+=("MYPCBENCH_QCOW2=${MYPCBENCH_QCOW2:-unset}")
 [ -f "${MYPCBENCH_OVMF_CODE:-}" ] || _missing+=("MYPCBENCH_OVMF_CODE=${MYPCBENCH_OVMF_CODE:-unset}")
 [ -f "${MYPCBENCH_OVMF_VARS:-}" ] || _missing+=("MYPCBENCH_OVMF_VARS=${MYPCBENCH_OVMF_VARS:-unset}")
+
+_hn="$(hostname -s 2>/dev/null || hostname || echo unknown)"
+echo "guest.env host=$_hn"
+case "$_hn" in
+  node002|node004) ;;
+  *) _missing+=("host=$_hn (Study 2 QEMU 8.2 TCG is node002/node004 only; not bright92)") ;;
+esac
+
+_real="${MYPCBENCH_QEMU_EXTRACTED:-}/usr/bin/qemu-system-x86_64"
+_ver=""
+if [ -x "$_real" ]; then
+  _ver="$("$_real" --version 2>&1 | head -n 1 || true)"
+fi
+echo "guest.env qemu-version=${_ver:-MISSING}"
+case "${_ver}" in
+  *8.2.2*) ;;
+  *) _missing+=("qemu-version=${_ver:-MISSING} (need 8.2.2)") ;;
+esac
+
+if [ -x "$_real" ] && command -v ldd >/dev/null; then
+  _nf="$(ldd "$_real" 2>&1 | grep 'not found' || true)"
+  if [ -n "$_nf" ]; then
+    echo "guest.env ldd-not-found:"
+    echo "$_nf"
+    _missing+=("ldd not found: $(printf '%s' "$_nf" | tr '\n' ';')")
+  fi
+fi
 
 echo "guest.env AGENT_ROOT=$A"
 echo "guest.env QCOW2=${MYPCBENCH_QCOW2:-}"
