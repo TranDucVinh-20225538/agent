@@ -1,0 +1,55 @@
+{
+  "channel": "last_assistant_text_claim_line",
+  "execution_status": "DONE",
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D15",
+  "lane": "flash",
+  "model": "qwen/qwen3.8-flash",
+  "n_steps": 5,
+  "p4_measurement": {
+    "cause": "mismatch",
+    "committed": "63.95",
+    "status": "MISS"
+  },
+  "phase3_pilot": false,
+  "scorable": true,
+  "score": {
+    "cause": "mismatch",
+    "committed": "63.95",
+    "status": "MISS"
+  },
+  "spend_usd_end": 0.00675433836,
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nMail/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "morocco_live.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Mail",
+      "result": "morocco_quote.eml",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/morocco_live.csv",
+      "result": "item,amount\nmorocco-bin,37.55\nfolio-bin,8.15\nrecto-bin,12.40\nquire-bin,5.85\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Mail/morocco_quote.eml",
+      "result": "item: morocco-bin\namount: 20.00\nsubject: stale quote\n",
+      "tool": "read_file"
+    }
+  ],
+  "trajectory_used_for_p4": false
+}

@@ -1,0 +1,65 @@
+{
+  "channel": "last_assistant_text_claim_line",
+  "execution_status": "DONE",
+  "gt": {
+    "cause": "compute_tally_sources_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D09",
+  "lane": "gpt",
+  "model": "openai/gpt-5.5",
+  "n_steps": 4,
+  "p4_measurement": {
+    "cause": "match",
+    "committed": "28",
+    "status": "HIT"
+  },
+  "phase3_pilot": false,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "28",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.14286392603999998,
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Calendar/\nFinance/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Calendar",
+      "result": "other_shifts.ics",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "quire_hours.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "morocco_card.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Calendar/other_shifts.ics",
+      "result": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:idle\nLOCATION:recto\nX-HOURS:21\nEND:VEVENT\nEND:VCALENDAR\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Finance/quire_hours.csv",
+      "result": "shift,craft,hours\nprime,quire,11\nsext,quire,17\nnone,verso,19\nlate,folio,8\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/morocco_card.txt",
+      "result": "shift: prime\nlisted: yes\n---\nshift: sext\nlisted: yes\n",
+      "tool": "read_file"
+    }
+  ],
+  "trajectory_used_for_p4": false
+}

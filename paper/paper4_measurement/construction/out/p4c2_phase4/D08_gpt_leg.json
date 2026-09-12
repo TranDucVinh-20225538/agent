@@ -1,0 +1,65 @@
+{
+  "channel": "last_assistant_text_claim_line",
+  "execution_status": "DONE",
+  "gt": {
+    "cause": "compute_tally_sources_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D08",
+  "lane": "gpt",
+  "model": "openai/gpt-5.5",
+  "n_steps": 4,
+  "p4_measurement": {
+    "cause": "match",
+    "committed": "25",
+    "status": "HIT"
+  },
+  "phase3_pilot": false,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "25",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.12677147603999997,
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Calendar/\nFinance/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Calendar",
+      "result": "spare_bins.ics",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "codex_counts.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "palimpsest_roster.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/codex_counts.csv",
+      "result": "sku,site,qty\nbin-a,codex,10\nbin-b,codex,15\nbin-c,folio,19\nbin-d,recto,21\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/palimpsest_roster.txt",
+      "result": "sku: bin-a\nlisted: yes\n---\nsku: bin-b\nlisted: yes\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Calendar/spare_bins.ics",
+      "result": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:bin-e\nLOCATION:verso\nX-HOURS:11\nEND:VEVENT\nEND:VCALENDAR\n",
+      "tool": "read_file"
+    }
+  ],
+  "trajectory_used_for_p4": false
+}

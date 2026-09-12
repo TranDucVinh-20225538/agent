@@ -1,0 +1,55 @@
+{
+  "channel": "last_assistant_text_claim_line",
+  "execution_status": "DONE",
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D19",
+  "lane": "gpt",
+  "model": "openai/gpt-5.5",
+  "n_steps": 4,
+  "p4_measurement": {
+    "cause": "match",
+    "committed": "bound",
+    "status": "HIT"
+  },
+  "phase3_pilot": false,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "bound",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.26978687604000007,
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Calendar/\nFinance/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Calendar",
+      "result": "berth_watch.ics",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "slip_marks.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Calendar/berth_watch.ics",
+      "result": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:n-long\nLOCATION:recto\nX-HOURS:8\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:n-short\nLOCATION:recto\nX-HOURS:15\nEND:VEVENT\nEND:VCALENDAR\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Finance/slip_marks.csv",
+      "result": "summary,dock,length,mark\nn-long,recto,long,bound\nn-short,recto,short,taut\ns-long,verso,long,slack\ne-long,folio,long,foxed\n",
+      "tool": "read_file"
+    }
+  ],
+  "trajectory_used_for_p4": false
+}

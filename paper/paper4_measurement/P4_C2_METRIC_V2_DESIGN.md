@@ -1,14 +1,15 @@
 # P4-C2 — Observation-Grounded Reliability Metric v2
 
-**Status: PHASE 3 FLASH PILOT PASS. Phase 4 confirmatory BLOCKED. Spend recorded; no retune.**  
+**Status: PHASE 4 CONFIRMATORY FAIL (H3 NOT_EVALUABLE). STOP. Do not retune. Do not open Phase 5.**  
 **Workstream:** `P4-C2 / Observation-Grounded Reliability Metric v2`  
 **This file is not a patch of Metric v1.** It does not reopen P4-B or P4-C.
 
 ```
 P4-B     CLOSED   positive-but-incomplete   immutable
 P4-C v1  CLOSED   Metric v1 FAIL            immutable  (falsification)
-P4-C2    PHASE 3  D01–D03 Flash scorable    $0.001577
-                  Phase 4 BLOCKED; τ not pooled
+P4-C2    PHASE 4  FAIL  H3 NOT_EVALUABLE (eligible 8 < 10; miss_rate 0)
+                  Form 0.9333 PASS; H1/H2/H4–H8 PASS; $0.450873
+                  STOP; do not retune; do not switch primary to GPT
 ```
 
 **Terminology lock (paper and gates).** v1 `Cov` measured whether
@@ -704,8 +705,9 @@ a new confirmatory corpus, a new seal, and a new spend ledger.
 
 Phase 0 accepted. Phase 1 construction **PASS**. Phase 2 seal **PASS**.
 Phase 3 Flash pilot **PASS** (D01–D03; n_scorable 3/3; `$0.001577`).
-H1–H8 and Form **not estimated**. Pilot τ **not pooled**, **not a retune signal**.
-This file does **not** authorize Phase 4 confirmatory agents.
+Pilot τ **not pooled**, **not a retune signal**. Phase 4 confirmatory
+was later authorized and **FAIL** (H3 NOT_EVALUABLE). Do not reopen
+Phase 5.
 
 ### 7.2 New corpora (do not reuse C or B)
 
@@ -880,10 +882,17 @@ External validation of a failed instrument would export the abstention.
 
 ## 10. Single recommendation
 
-**PHASE 3 PASS. STOP.**
+**PHASE 4 FAIL. STOP.**
 
-Phase 4 confirmatory is **BLOCKED** until separately authorized.
-Do not pool D01–D03 into N_D. Do not retune `score_v2` or the wrapper
-from this τ. Do not estimate Form from n=3.
+Confirmatory Flash+GPT × 30 completed. Phase-3 τ was not pooled.
+H5 PASS (Form 0.9333 ≥ 0.80). H3 NOT_EVALUABLE (C2-intended committed
+n=8 < floor 10; miss_rate 0.0 because the eight committed C2 claims
+were HIT). §7.5: eligibility floor missed after H5 passed → v2 fails
+this freeze; do not repair in place.
+
+Do not lower H3. Do not accept bare last-text (D07). Do not rerun D25
+to manufacture a tenth C2 claim. Do not switch primary to GPT. Do not
+open Phase 5. H5 did not fail, so the submit-tool branch is not forced
+by Form; any continuation is a **new** design freeze, not parser repair.
 
 v1 is closed and failed. That failure is the reason v2 exists.
