@@ -1,7 +1,7 @@
 # P4 — Observation-grounded correspondence (design-only pre-registration)
 
-**Status: Q qualification PASS 2026-09-12. Instrument implemented. V sealed
-unopened. No V* scoring. No agent.**
+**Status: Phase-2 gold-lock FAIL 2026-09-12. n_locked = 3 < N_A = 11.
+Freeze commit c35e828. Instrument unmodified. No agent validation.**
 Authored 2026-09-12. Construction and Q scoring the same day.
 
 P1–P3 stay frozen. This file does not edit them, does not enlarge `R`, does
@@ -269,20 +269,25 @@ and the 28-slate, leaves **at most ~12** leftover IDs. `N_A = 20`
 agent-clusters is therefore **not reachable** without relaxing §4.1.
 This file does not relax §4.1.
 
-**Phase-2 agents are not opened unless a mechanical leftover listing,
-produced from the pinned task file minus §4.1, contains ≥ 8 IDs.**
-Eight is locked now as the agent floor (above C7’s four; below the
-unreachable 20). If the listing has `L` IDs and `8 ≤ L < 20`,
-**`N_A = L`**, declared before gold-lock, not after. If `L < 8`, Phase 2
-is **not opened**. If `L ≥ 20`, `N_A = 20` and the first 20 in
-lexicographic order are the slate.
+**Phase-2 leftover listing, materialised 2026-09-12 (IDs/categories only).**
+From the pinned 184-task file minus §4.1: **L = 11.** Gate L ≥ 8 **PASS**.
+**N_A = min(L, 20) = 11**, declared before gold-lock. Lexicographic leftover:
+`contradiction-f013`, `contradiction-f015`, `contradiction-f016`,
+`contradiction-f021`, `contradiction-f023`, `counterfactual-f008`,
+`counterfactual-f014`, `retrieval-f020`, `retrieval-f032`,
+`retrieval-f033`, `retrieval-f035`. Record: `construction/out/phase2_leftover.md`.
 
-Gold-lock (probe-only, no agent, no I1, no G0/G1) then runs on that slate.
-A cluster enters `N_A` only if the determining component locks to a unique
-non-null value of an allowed kind. If survivors `< N_A` as declared from
-`L`, **stop**. Do not add IDs. Do not spend API budget. That is a
-construction fail of Phase 2, not a licence to lower `N_A` after seeing
-which probes passed.
+**Phase-2 gold-lock, materialised 2026-09-12.** Task-side instruction +
+rubric criteria only. No guest probe. No agent observation. No I1. No
+G0/G1. Uniform lock: unique P4 `money_usd` XOR unique `.txt`/`.m3u`
+basename (`entity`). Integers in `llm_judge` prose never lock. All 11
+attempted; none added or dropped for usefulness. **n_locked = 3**
+(`retrieval-f020`, `retrieval-f032`, `retrieval-f033`). Survivors **3 <
+N_A = 11**. Gate **FAIL**. Do not lower `N_A`. Do not add IDs. Do not
+spend API budget. Construction fail of Phase 2. Seal:
+`construction/sealed/PHASE2_GOLD_LOCK_SEAL.json`
+(`phase2_gold_lock_sha256 =
+138a0b43582fa24c58f25b571ce6bee67aec6b71e965bc1af2c0327f756db854`).
 
 Models named before any run: **Flash and GPT**, one uninjected leg each.
 A third model does not increase `N_A`. Completion (`DONE`) is not required.
@@ -502,7 +507,7 @@ validation run.
 | Construct frozen | **PASS** (§1) |
 | Measurement contract frozen | **PASS** (§2, line-located V2; money requires `$` or a decimal) |
 | Qualification controls frozen | **PASS** (C1–C6; §5) |
-| Corpus independent | **PASS** as a rule (§4.1); leftover ID list not yet materialised |
+| Corpus independent | **PASS** as a rule (§4.1); leftover L = 11 materialised |
 | `N` frozen | **PASS** (`N_V = 20` control-clusters; `n_Q = 6`; `N_A` rule §4.3) |
 | Estimands frozen | **PASS** (§7) |
 | Pass/fail criteria frozen | **PASS** (§7) |
@@ -515,25 +520,29 @@ validation run.
 | Q scored once | **PASS** (`construction/out/q_qualification.md`) |
 | Bugfix-to-spec | **not used** |
 | Q qualification | **PASS** (6/6 clusters, 36/36 controls) |
-| Freeze | **pending the git commit that names this PASS** |
-| No validation run yet | **PASS** (`V*` not scored) |
+| Freeze | **PASS** (`c35e828db89a9c7eb9d479601215a29221f5d744`) |
+| `V*` scored once | **PASS** (`construction/out/v_qualification.md`; 20/20, r_p=1) |
+| Agent validation | **not opened** (gold-lock survivors 3 < N_A 11) |
+| Phase-2 leftover listing | **PASS** (L = 11 ≥ 8; N_A = 11 declared) |
+| Phase-2 gold-lock | **FAIL** (n_locked = 3 < N_A = 11; seal `PHASE2_GOLD_LOCK_SEAL.json`) |
 
-**Checklist verdict: Q PASS. Licensed to freeze, then score `V*` in a
-later authorised step. This step stops here.**
+**Checklist verdict: gold-lock FAIL. Phase 2 closed. $0 API.**
 
 ---
 
-## 12. Q qualification (closed) and stop
+## 12. Phase-2 gold-lock (closed)
 
-**2026-09-12 construction: PASS.** **2026-09-12 Q scoring: PASS.** First
-score matched construction spec-traces. No bugfix-to-spec. `V*` not
-opened. Seal combined hash unchanged:
-`26df37a1fe10b05ebb674fea28cf2ac03dcc7772227df9de902f4aed08cb4189`.
+**2026-09-12 V* scoring: PASS.** One pass against freeze
+`c35e828db89a9c7eb9d479601215a29221f5d744`. Instrument hash
+`c43a920a1501bed5e3fab0c56290d8ba30ded1e5f0693ef6b9affe24083e7d59`
+unchanged.
 
-**Stop.** Do not score `V*`. Do not list leftover MyPCBench IDs. Do not
-run agents. Do not spend the $400.
+**2026-09-12 Phase-2 leftover listing: L = 11 ≥ 8.** N_A = 11 declared.
 
-The next licensed step, when separately authorised, is one pass of `V01`–
-`V20` against the freeze hash. That step is not this step.
+**2026-09-12 Phase-2 gold-lock: FAIL.** 11/11 attempted from task-side
+specification. 3 locked (entity file basename). 8 unlockable (no unique
+allowed-kind value, or nonunique file). Survivors 3 < N_A 11. Agents not
+run. API spend $0.
 
-This file does not skip AAMAS. P1–P3 remain the publishable fallback.
+**Stop.** Do not lower N_A. Do not add IDs. Do not open Flash/GPT/Claude.
+Do not spend the $400.

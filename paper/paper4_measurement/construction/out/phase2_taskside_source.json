@@ -1,0 +1,447 @@
+[
+  {
+    "category": "contradiction",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent pulls up a HooliShop order of Michael's containing multiple World's Best Boss mugs in one order, with its date, quantity, and shipping address (any qualifying multi-mug order is acceptable — the quantity-4 single-SKU order shipped to the Dunder Mifflin Scranton office, the Set-of-3 order, or the 2-pack order)",
+          "type": "llm_judge",
+          "weight": 0.133336
+        },
+        {
+          "criterion": "Agent notes the shipping address on the order and observes that all units shipped to one place rather than being routed to different recipients",
+          "type": "llm_judge",
+          "weight": 0.122222
+        },
+        {
+          "criterion": "Agent recognizes the mugs were purchased together in a single order (i.e. bulk-buy, not a spaced-out replacement pattern)",
+          "type": "llm_judge",
+          "weight": 0.122222
+        },
+        {
+          "criterion": "Agent reads the LockedIn headline as the identity signal for why Michael bought multiple World's Best Boss mugs",
+          "type": "llm_judge",
+          "weight": 0.133332
+        },
+        {
+          "criterion": "Agent searches HooliChat/HooliWork for mug-related conversation",
+          "type": "llm_judge",
+          "weight": 0.133332
+        },
+        {
+          "criterion": "Agent presents the most likely explanation for the bulk mug buy (gifts to coworkers, backup stock, replacements for breakage) with cited evidence",
+          "type": "llm_judge",
+          "weight": 0.133332
+        },
+        {
+          "criterion": "Agent cites the HooliShop mug order record, shipping address, and LockedIn headline as the data sources backing the explanation",
+          "type": "llm_judge",
+          "weight": 0.11111
+        },
+        {
+          "criterion": "Agent delivers a final explanation for Michael's bulk World's Best Boss mug purchase without leaving the gifts/backup/breakage question unresolved",
+          "type": "llm_judge",
+          "weight": 0.111114
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "contradiction-f013",
+    "instruction": "I bought multiple World's Best Boss mugs in a single HooliShop order. Why so many at once? Is it for gifts, replacements for breakage, or backups for myself? Figure it out. My LockedIn headline and any coworker chatter on HooliChat or HooliWork might hint at the why."
+  },
+  {
+    "category": "contradiction",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent checks TableFind and accurately identifies the earliest future reservation with its date and time — if two or more reservations share the earliest date and time, identifying either one (or noting both) is acceptable — or explicitly reports that no future reservation exists",
+          "type": "llm_judge",
+          "weight": 0.22
+        },
+        {
+          "criterion": "Agent navigates HooliCalendar to the exact date and time of the earliest future TableFind reservation — if two or more reservations tie for that earliest date and time, either one's date and time is acceptable. Skipping the calendar lookup earns credit only when the live TableFind state genuinely shows no future reservation.",
+          "type": "llm_judge",
+          "weight": 0.16
+        },
+        {
+          "criterion": "Agent checks the calendar events overlapping that reservation's date and time and reports either the overlapping events or a clear absence of overlap. Recording that no overlap check is possible earns credit only when the live TableFind state shows no future reservation.",
+          "type": "llm_judge",
+          "weight": 0.18
+        },
+        {
+          "criterion": "Agent searches HooliChat for messages confirming or rescheduling that reservation and reports either the matching evidence or a clean absence of any such message. Skipping the search earns credit only when the live TableFind state shows no future reservation.",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Agent gives a conclusion consistent with the observed state: when a calendar event overlaps the reservation, a conflict verdict with a practical resolution; when nothing on the calendar overlaps it, a clear no-conflict verdict without inventing one; and when the live TableFind state shows no future reservation, a clear no-future-reservation result. If two reservations sit at the same date and time and the agent raises that as the conflict, that is a legitimate conflict to flag and should be credited.",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent identifies the source records used and leaves no conditional branch of the requested check unresolved",
+          "type": "llm_judge",
+          "weight": 0.1
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "contradiction-f015",
+    "instruction": "I've got a TableFind reservation coming up — check my calendar for that exact date and time. Is there something else already scheduled that's going to conflict? Also peek at HooliChat in case we already rescheduled or confirmed this dinner."
+  },
+  {
+    "category": "contradiction",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent reads the Jamaica flight departure date and early morning time from Dinoco Airlines to anchor the calendar conflict check",
+          "type": "llm_judge",
+          "weight": 0.12
+        },
+        {
+          "criterion": "Agent lists every HooliCalendar event on the Jamaica flight departure date",
+          "type": "llm_judge",
+          "weight": 0.12
+        },
+        {
+          "criterion": "Agent determines whether any calendar event (meetings, improv, anything) is scheduled during the airport-arrival window before the Jamaica flight, correctly reporting that no pre-flight morning event exists if there is none",
+          "type": "llm_judge",
+          "weight": 0.12
+        },
+        {
+          "criterion": "Agent checks SprintBoard for any tasks due on the Jamaica flight date that conflict with the early morning departure — reporting that no SprintBoard tasks are due on that date is acceptable and correct when the live board shows none",
+          "type": "llm_judge",
+          "weight": 0.11
+        },
+        {
+          "criterion": "Agent searches HooliMail for meeting invites scheduled on the Jamaica flight date to surface any conflict with the early morning departure",
+          "type": "llm_judge",
+          "weight": 0.11
+        },
+        {
+          "criterion": "Agent reports the most serious scheduling conflict it finds against the departure date, or states clearly that the calendar, task list and mail show no conflict — whichever the live state supports",
+          "type": "llm_judge",
+          "weight": 0.12
+        },
+        {
+          "criterion": "Agent cites Dinoco Airlines Jamaica flight, HooliCalendar events, SprintBoard tasks, and HooliMail invites as the data sources backing the morning conflict check",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "Agent delivers a final answer that states the worst conflict on the Jamaica departure day as the live calendar shows it, without leaving subtasks unresolved. If nothing on the live calendar falls in the early-morning departure window, stating that plainly and naming the most serious same-day commitment instead is the correct answer and must not be penalised.",
+          "type": "llm_judge",
+          "weight": 0.2
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "contradiction-f016",
+    "instruction": "My upcoming Jamaica flight leaves early morning that day. Check my calendar for anything scheduled that morning (meetings, improv, whatever), plus any SprintBoard tasks due that day and any HooliMail invites landing on that date, and flag the worst conflict so I can deal with it."
+  },
+  {
+    "category": "contradiction",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent reads the LockedIn 'Author of Somehow I Manage' headline that Michael is claiming against the unfinished book",
+          "type": "llm_judge",
+          "weight": 0.155552
+        },
+        {
+          "criterion": "Agent opens the Chapter 1 file and reports its scope",
+          "type": "llm_judge",
+          "weight": 0.155556
+        },
+        {
+          "criterion": "Agent searches Firefox history for 'Somehow I Manage' book publishing or manuscript uploads that would back the LockedIn author claim",
+          "type": "llm_judge",
+          "weight": 0.155556
+        },
+        {
+          "criterion": "Agent searches HooliMail for correspondence bearing on whether Michael actually finished 'Somehow I Manage' — publisher, editor or literary-agent replies — and accurately reports what that search surfaces, identifying the messages it found by subject.",
+          "type": "llm_judge",
+          "weight": 0.155556
+        },
+        {
+          "criterion": "Agent states whether the author claim is supported or aspirational, and reconciles that statement with the evidence it actually found — the local Chapter 1 file, the Firefox history, and any book-related HooliMail it surfaced. No particular answer is required; credit follows from the verdict being consistent with the live evidence the agent cites.",
+          "type": "llm_judge",
+          "weight": 0.155556
+        },
+        {
+          "criterion": "Agent cites the LockedIn 'Author of Somehow I Manage' headline and the local Chapter 1 book file as the data sources backing the author-claim reconciliation",
+          "type": "llm_judge",
+          "weight": 0.11111
+        },
+        {
+          "criterion": "Agent delivers a final verdict on the 'Author of Somehow I Manage' claim that is consistent with both the live local book file and the live book-related HooliMail it surfaced, without leaving subtasks unresolved. The verdict need not land on any particular answer, but it must account for what the agent found on disk and in the mailbox rather than only one of the two.",
+          "type": "llm_judge",
+          "weight": 0.111114
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "contradiction-f021",
+    "instruction": "My LockedIn says I'm the Author of 'Somehow I Manage' but I'm pretty sure the file on my computer only has Chapter 1. Did I actually finish the book? Reconcile the claim with what's actually saved locally, and while you're at it, scan my Firefox history for any self-publishing/manuscript uploads and HooliMail for any publisher or editor replies."
+  },
+  {
+    "category": "contradiction",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent records the eTaxi saved workplace address (the location labeled Office or Work in eTaxi)",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent reads the LockedIn employer company and office location to audit workplace info across apps",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent reads the SpeedTax W-2 employer name (and any employer contact info available on the return) to audit workplace info across apps",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent explicitly flags any stale workplace info across the three apps or confirms the eTaxi, LockedIn, and W-2 entries all agree",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent completes the task end-to-end without stopping early or leaving unresolved state",
+          "type": "llm_judge",
+          "weight": 0.2
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "contradiction-f023",
+    "instruction": "Audit my workplace info across my apps: eTaxi Work address, LockedIn company, and my W-2 employer. Do they all agree, or is one of them stale?"
+  },
+  {
+    "category": "counterfactual",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent computes the GameStop + Rivian cost-basis sum from the seeded holdings (GME shares × avg_cost + RIVN shares × avg_cost) and reports that consolidation pool figure",
+          "type": "llm_judge",
+          "weight": 0.16
+        },
+        {
+          "criterion": "Agent reports the new total VTI position after the roll (existing VTI shares plus the additional shares funded by the GameStop+Rivian sell)",
+          "type": "llm_judge",
+          "weight": 0.16
+        },
+        {
+          "criterion": "Presents a before/after portfolio composition with percentages showing how each position changes",
+          "type": "llm_judge",
+          "weight": 0.13
+        },
+        {
+          "criterion": "Notes explicitly that the calculation uses cost basis (not market price) per the user's request",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Agent lists Michael's current BatBucks holdings (live count from /api/holdings) with shares times avg_cost before computing the GameStop and Rivian sell pool",
+          "type": "llm_judge",
+          "weight": 0.13
+        },
+        {
+          "criterion": "Agent divides the consolidation pool by VTI's avg_cost and reports the count of additional VTI shares to purchase from the GameStop+Rivian sell proceeds",
+          "type": "llm_judge",
+          "weight": 0.13
+        },
+        {
+          "criterion": "Agent produces the before/after report in LibreOffice Calc (opens Calc, enters the portfolio data and percentages into a spreadsheet, and saves or presents the file)",
+          "type": "llm_judge",
+          "weight": 0.15
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "counterfactual-f008",
+    "instruction": "What if I sold all my GameStop and Rivian and rolled the whole thing into VTI? Use cost basis (no live prices) and show me what my portfolio would look like before and after, with percentages. Use LibreOffice Calc to report this."
+  },
+  {
+    "category": "counterfactual",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent pulls the NYC Dinoco Airlines flight record and notes the original 7:30am scheduled NYC departure that would have slipped a day under the bump scenario",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Opens HooliCalendar UI and lists the events on the bumped NYC-flight day, taking that day from the departure date shown on the live Dinoco NYC flight record. HooliCalendar's own NYC trip mirror events may carry a date that disagrees with the live flight record; the Dinoco departure date is the one this item is scored against, and an agent that notes the discrepancy should not be penalised for it.",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Opens SprintBoard UI and enumerates tasks due around that day in Team Morale Initiative Q2 (acceptable to note that no tasks are due around that day if the board shows none)",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Opens HooliWork and reports whether the sales-pipeline channel shows any activity on the bumped NYC-flight day (acceptable to note absence if no messages that day)",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Agent inspects HooliMail for standing meeting invites on that day that the trip bump would clash with (acceptable to note absence if no invites that day)",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Agent computes the Greenwich Hotel cost consequence from the NYC flight bump as 1 night lost out of 3 nights (per-night cost derived from the Cheskepdia booking total)",
+          "type": "llm_judge",
+          "weight": 0.14
+        },
+        {
+          "criterion": "Agent produces a ranked list of missed Dunder Mifflin obligations on the bumped NYC-flight day across calendar events, SprintBoard project tasks, and sales channel activity with impact notes",
+          "type": "llm_judge",
+          "weight": 0.16
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "counterfactual-f014",
+    "instruction": "Imagine the scenario where my NYC flight had been cancelled on the morning of departure and I had to bump the whole trip a day. What Dunder Mifflin stuff would I have missed that day across calendar events, project tasks, sales channel activity, and standing meetings? And what would it have cost me on the hotel if I lost a night?"
+  },
+  {
+    "category": "retrieval",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent locates Threat_Level_Midnight_Sequel_Notes.txt under ~/Documents/Projects and reports its absolute path",
+          "type": "llm_judge",
+          "weight": 0.15
+        },
+        {
+          "criterion": "Agent reads the file and accurately summarizes its plot, cast, and other planning details",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent produces a draft script grounded in the sequel notes rather than a generic action script",
+          "type": "llm_judge",
+          "weight": 0.25
+        },
+        {
+          "criterion": "The draft script includes the coworkers named in the source notes' cast — Holly, Jim, and Dwight — as characters; including further Dunder Mifflin coworkers as additional characters is acceptable",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent locates and opens the notes file (via any file manager, terminal, or equivalent navigation) before summarizing or drafting",
+          "type": "llm_judge",
+          "weight": 0.1
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "retrieval-f020",
+    "instruction": "Where did I save my Threat Level Midnight sequel notes? Should be tucked somewhere under ~/Documents/Projects. Give me a quick rundown of what's in there (plot, cast, whatever I had going). Can you draft up a script that I can use as a starting point? Make sure you include everyone from work as a character, for casting reasons."
+  },
+  {
+    "category": "retrieval",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent locates ~/Documents/Dundies_2026_Categories.txt, reports its absolute path, and accurately enumerates its Dundies 2026 categories",
+          "type": "llm_judge",
+          "weight": 0.25
+        },
+        {
+          "criterion": "Agent creates a LibreOffice Impress presentation (.odp or .pptx) containing the categories from the saved Dundies 2026 document",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent sends an attendance message to the Dundies nominees the source document names, excluding anyone the document explicitly rules out; any defensible reading of that list is acceptable provided the agent is consistent with the document",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent opens and reads Dundies_2026_Categories.txt before creating the presentation or candidate messages",
+          "type": "llm_judge",
+          "weight": 0.1
+        },
+        {
+          "criterion": "Agent's recipient list follows the candidates recorded in the source document rather than adding people the document does not name",
+          "type": "llm_judge",
+          "weight": 0.05
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "retrieval-f032",
+    "instruction": "I remember making a Dundies categorization document. Show me the Dundies 2026 categories I came up with. Where is the doc and what categories did I put down? Can you make a presentation with these categories using LibreOffice Impress so I can prepare for the Dundies? Message each of the candidates to make sure they show up to the Dundies."
+  },
+  {
+    "category": "retrieval",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent locates Somehow_I_Manage_Chapter_1.txt in ~/Documents and reports its absolute path",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent provides a faithful, coherent summary of Chapter 1's content",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent writes two additional chapters (Chapter 2 and Chapter 3, or equivalent) that continue the 'Somehow I Manage' book in Michael Scott's boss-lore style",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent opens or creates a LibreOffice Writer document (.odt or .docx) to write the two new chapter extensions",
+          "type": "llm_judge",
+          "weight": 0.133333
+        },
+        {
+          "criterion": "Agent's chapter extensions maintain Michael's over-the-top, self-aggrandizing management-wisdom tone consistent with Chapter 1",
+          "type": "llm_judge",
+          "weight": 0.066667
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "retrieval-f033",
+    "instruction": "I'm working on my book, 'Somehow I Manage'. Where did I save Chapter 1, and can you give me a quick summary of what's in it? If you can write an extension for two more chapters in LibreOffice Writer, that would be great."
+  },
+  {
+    "category": "retrieval",
+    "grading": {
+      "rubrics": [
+        {
+          "criterion": "Agent locates a Holly playlist file on Michael's filesystem and reports the absolute path where it was found. Any of the seeded Holly playlists is an acceptable find — e.g. ~/Documents/Personal/holly_road_trip_playlist.txt, ~/Desktop/holly_playlist.txt, or a Holly playlist saved under ~/Music such as Holly_Road_Trip_Playlist.m3u — as long as the tracks reported come from the file the agent actually opened.",
+          "type": "llm_judge",
+          "weight": 0.35
+        },
+        {
+          "criterion": "Agent opens / reads the file (does not summarize from memory)",
+          "type": "llm_judge",
+          "weight": 0.2
+        },
+        {
+          "criterion": "Agent lists the actual tracks that appear in the playlist file (not generic love songs)",
+          "type": "llm_judge",
+          "weight": 0.3
+        },
+        {
+          "criterion": "Agent's response is grounded in the file content, not in fan-fiction guesses about what Michael would put on a Holly playlist",
+          "type": "llm_judge",
+          "weight": 0.15
+        }
+      ],
+      "type": "llm_judge"
+    },
+    "id": "retrieval-f035",
+    "instruction": "I made Holly a music playlist a while back and saved the track list as a text file somewhere on my computer. Where did I put it, and what songs are on it? I want to add a couple new ones tonight."
+  }
+]
