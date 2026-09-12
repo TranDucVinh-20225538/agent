@@ -1,0 +1,50 @@
+{
+  "component_id": "verso_rush_cost",
+  "construction": {
+    "T1_gold_not_in_instruction": true,
+    "T2_toy_basename": true,
+    "T3_distractors": true,
+    "T4_no_gold_in_params": true,
+    "T4_no_observations": true,
+    "T5_no_llm_judge": true,
+    "T6_id_ok": true,
+    "T7_no_foreign_tokens": true,
+    "T8_two_sources": true,
+    "correspondence": true,
+    "exclusion_id_in_text": true,
+    "family_known": true,
+    "forbidden_gold": true,
+    "forbidden_substr": true,
+    "gold_locked": true,
+    "kind_allowed": true,
+    "lock_error": null,
+    "no_anchors": true,
+    "one_component": true,
+    "own_cover_token": true,
+    "pass": true,
+    "slot_known": true
+  },
+  "family": "Filter",
+  "gold": "55.15",
+  "id": "D16",
+  "instruction": "Report the crate cost for the verso yard rush crate on the rubric sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/rubric_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "verso"
+      },
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/rush_flag.eml"
+  },
+  "slot": "C1-intended"
+}

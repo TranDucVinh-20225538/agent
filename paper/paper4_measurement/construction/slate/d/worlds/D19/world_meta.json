@@ -1,0 +1,29 @@
+{
+  "component_id": "long_recto_mark",
+  "family": "Filter",
+  "files": [
+    "Calendar/berth_watch.ics",
+    "Finance/slip_marks.csv"
+  ],
+  "id": "D19",
+  "instruction": "Give the slip mark for the long recto pressmark berth.",
+  "kind": "categorical",
+  "locator": {
+    "field": "mark",
+    "key": "summary",
+    "left": "Finance/slip_marks.csv",
+    "left_where": [
+      {
+        "col": "dock",
+        "eq": "recto"
+      },
+      {
+        "col": "length",
+        "eq": "long"
+      }
+    ],
+    "op": "select_join",
+    "right": "Calendar/berth_watch.ics"
+  },
+  "slot": "ordinary"
+}

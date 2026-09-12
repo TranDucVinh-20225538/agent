@@ -1,0 +1,31 @@
+{
+  "component_id": "live_folio_crate",
+  "family": "Reconcile",
+  "files": [
+    "Finance/folio_live.csv",
+    "Mail/folio_quote.eml"
+  ],
+  "id": "D11",
+  "instruction": "Report the live folio crate total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/folio_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "folio-crate"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/folio_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "folio-crate"
+      }
+    ]
+  },
+  "slot": "C1-intended"
+}

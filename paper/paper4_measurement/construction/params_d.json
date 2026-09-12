@@ -1,0 +1,2625 @@
+{
+  "D01": {
+    "family": "Locate",
+    "kind": "money_usd",
+    "slot": "C1-intended",
+    "component_id": "folio_vellum_fee",
+    "instruction": "Report the folio vellum fee posted on the quire rubric sheet.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/quire_rubric.csv",
+      "right": "Mail/folio_note.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "vellum-folio"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/quire_rubric.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "vellum-folio",
+            "amount": "81.60"
+          },
+          {
+            "sku": "codex-gilt",
+            "amount": "18.45"
+          },
+          {
+            "sku": "recto-verso",
+            "amount": "9.35"
+          },
+          {
+            "sku": "flyleaf-uncial",
+            "amount": "22.70"
+          }
+        ]
+      },
+      {
+        "path": "Mail/folio_note.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "vellum-folio",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D02": {
+    "family": "Locate",
+    "kind": "money_usd",
+    "slot": "C2-intended",
+    "component_id": "quire_recto_due",
+    "instruction": "Report the quire recto due on the morocco gilt sheet.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/morocco_gilt.csv",
+      "right": "Mail/quire_quote.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "recto-quire"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/morocco_gilt.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "recto-quire",
+            "amount": "46.75"
+          },
+          {
+            "sku": "folio-codex",
+            "amount": "14.80"
+          },
+          {
+            "sku": "uncial-verso",
+            "amount": "6.55"
+          },
+          {
+            "sku": "colophon-rubric",
+            "amount": "31.20"
+          }
+        ]
+      },
+      {
+        "path": "Mail/quire_quote.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "recto-quire",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Notes/posted_board.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "recto-quire",
+            "amount": "90.00",
+            "mark": "draft board"
+          }
+        ]
+      }
+    ]
+  },
+  "D03": {
+    "family": "Locate",
+    "kind": "entity",
+    "slot": "C1-intended",
+    "component_id": "uncial_keeper",
+    "instruction": "Name the uncial keeper listed on the flyleaf colophon card.",
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/flyleaf_colophon.txt",
+      "right": "Finance/uncial_roster.csv",
+      "key": "keeper",
+      "field": "keeper",
+      "left_where": []
+    },
+    "files": [
+      {
+        "path": "Notes/flyleaf_colophon.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "keeper": "Tesfaye Holm",
+            "post": "uncial"
+          }
+        ]
+      },
+      {
+        "path": "Finance/uncial_roster.csv",
+        "format": "csv",
+        "columns": [
+          "keeper",
+          "post"
+        ],
+        "rows": [
+          {
+            "keeper": "Tesfaye Holm",
+            "post": "uncial"
+          },
+          {
+            "keeper": "Anouk Veld",
+            "post": "recto"
+          },
+          {
+            "keeper": "Ilaria Moss",
+            "post": "verso"
+          },
+          {
+            "keeper": "Joren Pike",
+            "post": "quire"
+          }
+        ]
+      }
+    ]
+  },
+  "D04": {
+    "family": "Locate",
+    "kind": "categorical",
+    "slot": "C2-intended",
+    "component_id": "pressmark_bind",
+    "instruction": "Give the bind status for the pressmark gathering slip.",
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/pressmark_gathering.txt",
+      "right": "Calendar/gathering_watch.ics",
+      "key": "location",
+      "field": "bind_status",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "pressmark-gathering"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Notes/pressmark_gathering.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "location": "pressmark-gathering",
+            "bind_status": "foxed"
+          }
+        ]
+      },
+      {
+        "path": "Calendar/gathering_watch.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "watch",
+            "location": "pressmark-gathering",
+            "hours": "8"
+          },
+          {
+            "summary": "spare",
+            "location": "recto-folio",
+            "hours": "15"
+          },
+          {
+            "summary": "open",
+            "location": "verso-codex",
+            "hours": "11"
+          },
+          {
+            "summary": "sealed",
+            "location": "quire-gilt",
+            "hours": "19"
+          }
+        ]
+      },
+      {
+        "path": "Notes/draft_bind.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "location": "pressmark-gathering",
+            "bind_status": "bound",
+            "note": "board draft"
+          }
+        ]
+      }
+    ]
+  },
+  "D05": {
+    "family": "Locate",
+    "kind": "money_usd",
+    "slot": "ordinary",
+    "component_id": "morocco_gilt_fee",
+    "instruction": "Report the morocco gilt fee on the palimpsest incunable sheet.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/palimpsest_incunable.csv",
+      "right": "Mail/morocco_note.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "gilt-morocco"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/palimpsest_incunable.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "gilt-morocco",
+            "amount": "63.20"
+          },
+          {
+            "sku": "rubric-codex",
+            "amount": "7.15"
+          },
+          {
+            "sku": "folio-quire",
+            "amount": "19.40"
+          },
+          {
+            "sku": "recto-flyleaf",
+            "amount": "3.85"
+          }
+        ]
+      },
+      {
+        "path": "Mail/morocco_note.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "gilt-morocco",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D06": {
+    "family": "Compute",
+    "kind": "money_usd",
+    "slot": "C1-intended",
+    "component_id": "folio_crate_sum",
+    "instruction": "Sum the folio vellum crate costs that the quire rubric note lists.",
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/crate_vellum.csv",
+      "right": "Notes/quire_rubric_list.txt",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "folio"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/crate_vellum.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "yard",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "crate-a",
+            "yard": "folio",
+            "amount": "31.40"
+          },
+          {
+            "sku": "crate-b",
+            "yard": "folio",
+            "amount": "20.70"
+          },
+          {
+            "sku": "crate-c",
+            "yard": "recto",
+            "amount": "8.15"
+          },
+          {
+            "sku": "crate-d",
+            "yard": "verso",
+            "amount": "12.55"
+          }
+        ]
+      },
+      {
+        "path": "Notes/quire_rubric_list.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "crate-a",
+            "listed": "yes"
+          },
+          {
+            "sku": "crate-b",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Receipts/spare_costs.html",
+        "format": "html",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "crate-e",
+            "amount": "15.90"
+          }
+        ]
+      }
+    ]
+  },
+  "D07": {
+    "family": "Compute",
+    "kind": "money_usd",
+    "slot": "C2-intended",
+    "component_id": "recto_crate_sum",
+    "instruction": "Sum the recto flyleaf crate costs that the colophon note lists.",
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/recto_crates.csv",
+      "right": "Notes/colophon_list.txt",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "recto"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/recto_crates.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "yard",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "t-a",
+            "yard": "recto",
+            "amount": "15.55"
+          },
+          {
+            "sku": "t-b",
+            "yard": "recto",
+            "amount": "22.80"
+          },
+          {
+            "sku": "t-c",
+            "yard": "folio",
+            "amount": "5.50"
+          },
+          {
+            "sku": "t-d",
+            "yard": "verso",
+            "amount": "9.65"
+          }
+        ]
+      },
+      {
+        "path": "Notes/colophon_list.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "t-a",
+            "listed": "yes"
+          },
+          {
+            "sku": "t-b",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Notes/pre_sum.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "yard": "recto",
+            "amount": "50.00",
+            "note": "draft total"
+          }
+        ]
+      }
+    ]
+  },
+  "D08": {
+    "family": "Compute",
+    "kind": "integer",
+    "slot": "C1-intended",
+    "component_id": "codex_bin_sum",
+    "instruction": "Sum the codex rubric crate counts that the palimpsest roster lists.",
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/codex_counts.csv",
+      "right": "Notes/palimpsest_roster.txt",
+      "key": "sku",
+      "field": "qty",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "codex"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/codex_counts.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "site",
+          "qty"
+        ],
+        "rows": [
+          {
+            "sku": "bin-a",
+            "site": "codex",
+            "qty": "10"
+          },
+          {
+            "sku": "bin-b",
+            "site": "codex",
+            "qty": "15"
+          },
+          {
+            "sku": "bin-c",
+            "site": "folio",
+            "qty": "19"
+          },
+          {
+            "sku": "bin-d",
+            "site": "recto",
+            "qty": "21"
+          }
+        ]
+      },
+      {
+        "path": "Notes/palimpsest_roster.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "bin-a",
+            "listed": "yes"
+          },
+          {
+            "sku": "bin-b",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Calendar/spare_bins.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "bin-e",
+            "location": "verso",
+            "hours": "11"
+          }
+        ]
+      }
+    ]
+  },
+  "D09": {
+    "family": "Compute",
+    "kind": "integer",
+    "slot": "ordinary",
+    "component_id": "quire_hours_sum",
+    "instruction": "Sum the quire colophon shift hours that the morocco card lists.",
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/quire_hours.csv",
+      "right": "Notes/morocco_card.txt",
+      "key": "shift",
+      "field": "hours",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "quire"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/quire_hours.csv",
+        "format": "csv",
+        "columns": [
+          "shift",
+          "craft",
+          "hours"
+        ],
+        "rows": [
+          {
+            "shift": "prime",
+            "craft": "quire",
+            "hours": "11"
+          },
+          {
+            "shift": "sext",
+            "craft": "quire",
+            "hours": "17"
+          },
+          {
+            "shift": "none",
+            "craft": "verso",
+            "hours": "19"
+          },
+          {
+            "shift": "late",
+            "craft": "folio",
+            "hours": "8"
+          }
+        ]
+      },
+      {
+        "path": "Notes/morocco_card.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "shift": "prime",
+            "listed": "yes"
+          },
+          {
+            "shift": "sext",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Calendar/other_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "idle",
+            "location": "recto",
+            "hours": "21"
+          }
+        ]
+      }
+    ]
+  },
+  "D10": {
+    "family": "Compute",
+    "kind": "integer",
+    "slot": "C2-intended",
+    "component_id": "verso_qty_sum",
+    "instruction": "Sum the verso palimpsest crate counts that the rubric roster lists.",
+    "locator": {
+      "op": "sum_join",
+      "left": "Finance/verso_counts.csv",
+      "right": "Notes/rubric_roster.txt",
+      "key": "sku",
+      "field": "qty",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "verso"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/verso_counts.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "site",
+          "qty"
+        ],
+        "rows": [
+          {
+            "sku": "p-a",
+            "site": "verso",
+            "qty": "9"
+          },
+          {
+            "sku": "p-b",
+            "site": "verso",
+            "qty": "18"
+          },
+          {
+            "sku": "p-c",
+            "site": "recto",
+            "qty": "16"
+          },
+          {
+            "sku": "p-d",
+            "site": "folio",
+            "qty": "8"
+          }
+        ]
+      },
+      {
+        "path": "Notes/rubric_roster.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "p-a",
+            "listed": "yes"
+          },
+          {
+            "sku": "p-b",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Notes/board_total.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "site": "verso",
+            "qty": "30",
+            "note": "draft count"
+          }
+        ]
+      }
+    ]
+  },
+  "D11": {
+    "family": "Reconcile",
+    "kind": "money_usd",
+    "slot": "C1-intended",
+    "component_id": "live_folio_crate",
+    "instruction": "Report the live folio crate total from the finance sheet, not the mail quote.",
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/folio_live.csv",
+      "right": "Mail/folio_quote.eml",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "folio-crate"
+        }
+      ],
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "folio-crate"
+        }
+      ],
+      "key": "item",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/folio_live.csv",
+        "format": "csv",
+        "columns": [
+          "item",
+          "amount"
+        ],
+        "rows": [
+          {
+            "item": "folio-crate",
+            "amount": "68.40"
+          },
+          {
+            "item": "recto-bin",
+            "amount": "10.20"
+          },
+          {
+            "item": "verso-bin",
+            "amount": "13.75"
+          },
+          {
+            "item": "quire-bin",
+            "amount": "22.90"
+          }
+        ]
+      },
+      {
+        "path": "Mail/folio_quote.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "item": "folio-crate",
+            "amount": "31.00",
+            "subject": "stale quote"
+          }
+        ]
+      }
+    ]
+  },
+  "D12": {
+    "family": "Reconcile",
+    "kind": "money_usd",
+    "slot": "C2-intended",
+    "component_id": "live_quire_gilt",
+    "instruction": "Report the live quire gilt total from the finance sheet, not the mail quote.",
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/quire_live.csv",
+      "right": "Mail/quire_mail.eml",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "quire-gilt"
+        }
+      ],
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "quire-gilt"
+        }
+      ],
+      "key": "item",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/quire_live.csv",
+        "format": "csv",
+        "columns": [
+          "item",
+          "amount"
+        ],
+        "rows": [
+          {
+            "item": "quire-gilt",
+            "amount": "41.25"
+          },
+          {
+            "item": "codex-bin",
+            "amount": "4.90"
+          },
+          {
+            "item": "uncial-bin",
+            "amount": "14.25"
+          },
+          {
+            "item": "flyleaf-bin",
+            "amount": "27.50"
+          }
+        ]
+      },
+      {
+        "path": "Mail/quire_mail.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "item": "quire-gilt",
+            "amount": "88.00",
+            "subject": "posted quote"
+          }
+        ]
+      }
+    ]
+  },
+  "D13": {
+    "family": "Reconcile",
+    "kind": "entity",
+    "slot": "C2-intended",
+    "component_id": "live_recto_clerk",
+    "instruction": "Name the live recto rubric clerk from the roster sheet, not the mail copy.",
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/clerk_live.csv",
+      "right": "Mail/clerk_copy.eml",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "recto-rubric"
+        }
+      ],
+      "right_where": [
+        {
+          "col": "post",
+          "eq": "recto-rubric"
+        }
+      ],
+      "key": "post",
+      "field": "clerk"
+    },
+    "files": [
+      {
+        "path": "Finance/clerk_live.csv",
+        "format": "csv",
+        "columns": [
+          "post",
+          "clerk"
+        ],
+        "rows": [
+          {
+            "post": "recto-rubric",
+            "clerk": "Anouk Veld"
+          },
+          {
+            "post": "verso-codex",
+            "clerk": "Ilaria Moss"
+          },
+          {
+            "post": "folio-crate",
+            "clerk": "Joren Pike"
+          },
+          {
+            "post": "quire-gilt",
+            "clerk": "Tesfaye Holm"
+          }
+        ]
+      },
+      {
+        "path": "Mail/clerk_copy.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "post": "recto-rubric",
+            "clerk": "Mira Solt",
+            "subject": "stale roster"
+          }
+        ]
+      }
+    ]
+  },
+  "D14": {
+    "family": "Reconcile",
+    "kind": "categorical",
+    "slot": "C1-intended",
+    "component_id": "live_incunable_mark",
+    "instruction": "Give the live incunable palimpsest mark from the yard card, not the mail mark.",
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Notes/yard_live.txt",
+      "right": "Mail/yard_mark.eml",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "incunable-palimpsest"
+        }
+      ],
+      "right_where": [
+        {
+          "col": "bin",
+          "eq": "incunable-palimpsest"
+        }
+      ],
+      "key": "bin",
+      "field": "mark"
+    },
+    "files": [
+      {
+        "path": "Notes/yard_live.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "bin": "incunable-palimpsest",
+            "mark": "taut"
+          },
+          {
+            "bin": "verso-codex",
+            "mark": "slack"
+          },
+          {
+            "bin": "folio-quire",
+            "mark": "bound"
+          },
+          {
+            "bin": "recto-gilt",
+            "mark": "foxed"
+          }
+        ]
+      },
+      {
+        "path": "Mail/yard_mark.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "bin": "incunable-palimpsest",
+            "mark": "slack",
+            "subject": "stale mark"
+          }
+        ]
+      }
+    ]
+  },
+  "D15": {
+    "family": "Reconcile",
+    "kind": "money_usd",
+    "slot": "ordinary",
+    "component_id": "live_morocco_bin",
+    "instruction": "Report the live morocco bin total from the finance sheet, not the mail quote.",
+    "locator": {
+      "op": "live_not_stale",
+      "left": "Finance/morocco_live.csv",
+      "right": "Mail/morocco_quote.eml",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "morocco-bin"
+        }
+      ],
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "morocco-bin"
+        }
+      ],
+      "key": "item",
+      "field": "amount"
+    },
+    "files": [
+      {
+        "path": "Finance/morocco_live.csv",
+        "format": "csv",
+        "columns": [
+          "item",
+          "amount"
+        ],
+        "rows": [
+          {
+            "item": "morocco-bin",
+            "amount": "37.55"
+          },
+          {
+            "item": "folio-bin",
+            "amount": "8.15"
+          },
+          {
+            "item": "recto-bin",
+            "amount": "12.40"
+          },
+          {
+            "item": "quire-bin",
+            "amount": "5.85"
+          }
+        ]
+      },
+      {
+        "path": "Mail/morocco_quote.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "item": "morocco-bin",
+            "amount": "20.00",
+            "subject": "stale quote"
+          }
+        ]
+      }
+    ]
+  },
+  "D16": {
+    "family": "Filter",
+    "kind": "money_usd",
+    "slot": "C1-intended",
+    "component_id": "verso_rush_cost",
+    "instruction": "Report the crate cost for the verso yard rush crate on the rubric sheet.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/rubric_sheet.csv",
+      "right": "Mail/rush_flag.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "verso"
+        },
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/rubric_sheet.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "yard",
+          "rush",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "rush-a",
+            "yard": "verso",
+            "rush": "yes",
+            "amount": "55.15"
+          },
+          {
+            "sku": "rush-b",
+            "yard": "verso",
+            "rush": "no",
+            "amount": "15.00"
+          },
+          {
+            "sku": "rush-c",
+            "yard": "folio",
+            "rush": "yes",
+            "amount": "18.20"
+          },
+          {
+            "sku": "rush-d",
+            "yard": "recto",
+            "rush": "no",
+            "amount": "44.05"
+          },
+          {
+            "sku": "rush-e",
+            "yard": "quire",
+            "rush": "yes",
+            "amount": "6.90"
+          }
+        ]
+      },
+      {
+        "path": "Mail/rush_flag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "rush-a",
+            "flag": "active"
+          }
+        ]
+      }
+    ]
+  },
+  "D17": {
+    "family": "Filter",
+    "kind": "money_usd",
+    "slot": "C2-intended",
+    "component_id": "folio_sealed_cost",
+    "instruction": "Report the crate cost for the folio yard sealed crate on the palimpsest sheet.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/palimpsest_sheet.csv",
+      "right": "Notes/sealed_index.txt",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "folio"
+        },
+        {
+          "col": "seal",
+          "eq": "yes"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/palimpsest_sheet.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "yard",
+          "seal",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "seal-a",
+            "yard": "folio",
+            "seal": "yes",
+            "amount": "26.45"
+          },
+          {
+            "sku": "seal-b",
+            "yard": "folio",
+            "seal": "no",
+            "amount": "16.10"
+          },
+          {
+            "sku": "seal-c",
+            "yard": "verso",
+            "seal": "yes",
+            "amount": "22.05"
+          },
+          {
+            "sku": "seal-d",
+            "yard": "recto",
+            "seal": "no",
+            "amount": "9.65"
+          },
+          {
+            "sku": "seal-e",
+            "yard": "codex",
+            "seal": "yes",
+            "amount": "31.40"
+          }
+        ]
+      },
+      {
+        "path": "Notes/sealed_index.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "seal-a",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Notes/board_seal.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "seal-b",
+            "amount": "99.00",
+            "note": "posted unsealed"
+          }
+        ]
+      }
+    ]
+  },
+  "D18": {
+    "family": "Filter",
+    "kind": "entity",
+    "slot": "ordinary",
+    "component_id": "night_uncial_clerk",
+    "instruction": "Name the night uncial clerk tagged on the gathering index.",
+    "locator": {
+      "op": "select_join",
+      "left": "Notes/gathering_index.csv",
+      "right": "Mail/night_tag.eml",
+      "key": "tag",
+      "field": "clerk",
+      "left_where": [
+        {
+          "col": "tag",
+          "eq": "night"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Notes/gathering_index.csv",
+        "format": "csv",
+        "columns": [
+          "clerk",
+          "tag"
+        ],
+        "rows": [
+          {
+            "clerk": "Joren Pike",
+            "tag": "night"
+          },
+          {
+            "clerk": "Tesfaye Holm",
+            "tag": "day"
+          },
+          {
+            "clerk": "Anouk Veld",
+            "tag": "day"
+          },
+          {
+            "clerk": "Ilaria Moss",
+            "tag": "day"
+          }
+        ]
+      },
+      {
+        "path": "Mail/night_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "tag": "night",
+            "active": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D19": {
+    "family": "Filter",
+    "kind": "categorical",
+    "slot": "ordinary",
+    "component_id": "long_recto_mark",
+    "instruction": "Give the slip mark for the long recto pressmark berth.",
+    "locator": {
+      "op": "select_join",
+      "left": "Finance/slip_marks.csv",
+      "right": "Calendar/berth_watch.ics",
+      "key": "summary",
+      "field": "mark",
+      "left_where": [
+        {
+          "col": "dock",
+          "eq": "recto"
+        },
+        {
+          "col": "length",
+          "eq": "long"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/slip_marks.csv",
+        "format": "csv",
+        "columns": [
+          "summary",
+          "dock",
+          "length",
+          "mark"
+        ],
+        "rows": [
+          {
+            "summary": "n-long",
+            "dock": "recto",
+            "length": "long",
+            "mark": "bound"
+          },
+          {
+            "summary": "n-short",
+            "dock": "recto",
+            "length": "short",
+            "mark": "taut"
+          },
+          {
+            "summary": "s-long",
+            "dock": "verso",
+            "length": "long",
+            "mark": "slack"
+          },
+          {
+            "summary": "e-long",
+            "dock": "folio",
+            "length": "long",
+            "mark": "foxed"
+          }
+        ]
+      },
+      {
+        "path": "Calendar/berth_watch.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "n-long",
+            "location": "recto",
+            "hours": "8"
+          },
+          {
+            "summary": "n-short",
+            "location": "recto",
+            "hours": "15"
+          }
+        ]
+      }
+    ]
+  },
+  "D20": {
+    "family": "Filter",
+    "kind": "integer",
+    "slot": "C1-intended",
+    "component_id": "rush_hours",
+    "instruction": "Report the shift hours for the rush verso watch on the colophon card.",
+    "locator": {
+      "op": "select_join",
+      "left": "Calendar/verso_watch.ics",
+      "right": "Notes/rush_list.txt",
+      "key": "summary",
+      "field": "hours",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "verso"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Calendar/verso_watch.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "rush-a",
+            "location": "verso",
+            "hours": "19"
+          },
+          {
+            "summary": "idle-b",
+            "location": "recto",
+            "hours": "8"
+          },
+          {
+            "summary": "open-c",
+            "location": "folio",
+            "hours": "15"
+          },
+          {
+            "summary": "late-d",
+            "location": "quire",
+            "hours": "21"
+          }
+        ]
+      },
+      {
+        "path": "Notes/rush_list.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "summary": "rush-a",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D21": {
+    "family": "Tally",
+    "kind": "integer",
+    "slot": "C1-intended",
+    "component_id": "folio_shift_count",
+    "instruction": "Count the folio rubric shifts on the calendar that also appear on the palimpsest roster.",
+    "locator": {
+      "op": "count_join",
+      "left": "Calendar/folio_shifts.ics",
+      "right": "Notes/palimpsest_names.txt",
+      "key": "summary",
+      "field": "summary",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "folio"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Calendar/folio_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "Tesfaye Holm",
+            "location": "folio",
+            "hours": "8"
+          },
+          {
+            "summary": "Anouk Veld",
+            "location": "folio",
+            "hours": "15"
+          },
+          {
+            "summary": "Ilaria Moss",
+            "location": "folio",
+            "hours": "11"
+          },
+          {
+            "summary": "Joren Pike",
+            "location": "folio",
+            "hours": "9"
+          },
+          {
+            "summary": "Saskia Bel",
+            "location": "folio",
+            "hours": "16"
+          },
+          {
+            "summary": "Oren Falk",
+            "location": "folio",
+            "hours": "7"
+          },
+          {
+            "summary": "Mira Solt",
+            "location": "folio",
+            "hours": "21"
+          },
+          {
+            "summary": "Pavel Orth",
+            "location": "folio",
+            "hours": "19"
+          },
+          {
+            "summary": "Nila Ort",
+            "location": "folio",
+            "hours": "18"
+          },
+          {
+            "summary": "Cadence Rue",
+            "location": "folio",
+            "hours": "23"
+          },
+          {
+            "summary": "Mael Quill",
+            "location": "recto",
+            "hours": "21"
+          },
+          {
+            "summary": "Beren Ink",
+            "location": "verso",
+            "hours": "19"
+          }
+        ]
+      },
+      {
+        "path": "Notes/palimpsest_names.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "summary": "Tesfaye Holm",
+            "listed": "yes"
+          },
+          {
+            "summary": "Anouk Veld",
+            "listed": "yes"
+          },
+          {
+            "summary": "Ilaria Moss",
+            "listed": "yes"
+          },
+          {
+            "summary": "Joren Pike",
+            "listed": "yes"
+          },
+          {
+            "summary": "Saskia Bel",
+            "listed": "yes"
+          },
+          {
+            "summary": "Oren Falk",
+            "listed": "yes"
+          },
+          {
+            "summary": "Mira Solt",
+            "listed": "yes"
+          },
+          {
+            "summary": "Pavel Orth",
+            "listed": "yes"
+          },
+          {
+            "summary": "Nila Ort",
+            "listed": "yes"
+          },
+          {
+            "summary": "Cadence Rue",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D22": {
+    "family": "Tally",
+    "kind": "integer",
+    "slot": "C2-intended",
+    "component_id": "rush_uncial_count",
+    "instruction": "Count the rush uncial notes in the mail that also appear on the rubric sheet.",
+    "locator": {
+      "op": "count_join",
+      "left": "Mail/uncial_notes.eml",
+      "right": "Finance/rubric_mail.csv",
+      "key": "sku",
+      "field": "sku",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Mail/uncial_notes.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "u-0",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-1",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-2",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-3",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-4",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-5",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-6",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-7",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-8",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-9",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-10",
+            "rush": "yes"
+          },
+          {
+            "sku": "u-11",
+            "rush": "no"
+          }
+        ]
+      },
+      {
+        "path": "Finance/rubric_mail.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "bin"
+        ],
+        "rows": [
+          {
+            "sku": "u-0",
+            "bin": "8"
+          },
+          {
+            "sku": "u-1",
+            "bin": "9"
+          },
+          {
+            "sku": "u-2",
+            "bin": "10"
+          },
+          {
+            "sku": "u-3",
+            "bin": "11"
+          },
+          {
+            "sku": "u-4",
+            "bin": "12"
+          },
+          {
+            "sku": "u-5",
+            "bin": "13"
+          },
+          {
+            "sku": "u-6",
+            "bin": "14"
+          },
+          {
+            "sku": "u-7",
+            "bin": "15"
+          },
+          {
+            "sku": "u-8",
+            "bin": "16"
+          },
+          {
+            "sku": "u-9",
+            "bin": "17"
+          },
+          {
+            "sku": "u-10",
+            "bin": "18"
+          },
+          {
+            "sku": "u-z",
+            "bin": "21"
+          }
+        ]
+      },
+      {
+        "path": "Notes/board_count.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "note": "posted tally 18"
+          }
+        ]
+      }
+    ]
+  },
+  "D23": {
+    "family": "Tally",
+    "kind": "integer",
+    "slot": "ordinary",
+    "component_id": "codex_palimpsest_count",
+    "instruction": "Count the codex palimpsest shifts on the calendar that also appear on the quire card.",
+    "locator": {
+      "op": "count_join",
+      "left": "Calendar/codex_shifts.ics",
+      "right": "Notes/quire_card.txt",
+      "key": "summary",
+      "field": "summary",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "codex"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Calendar/codex_shifts.ics",
+        "format": "ics",
+        "rows": [
+          {
+            "summary": "prime",
+            "location": "codex",
+            "hours": "8"
+          },
+          {
+            "summary": "terce",
+            "location": "codex",
+            "hours": "15"
+          },
+          {
+            "summary": "sext",
+            "location": "codex",
+            "hours": "11"
+          },
+          {
+            "summary": "none",
+            "location": "codex",
+            "hours": "16"
+          },
+          {
+            "summary": "vesper",
+            "location": "codex",
+            "hours": "19"
+          },
+          {
+            "summary": "compline",
+            "location": "codex",
+            "hours": "7"
+          },
+          {
+            "summary": "matins",
+            "location": "codex",
+            "hours": "9"
+          },
+          {
+            "summary": "lauds",
+            "location": "codex",
+            "hours": "21"
+          },
+          {
+            "summary": "vigil",
+            "location": "codex",
+            "hours": "18"
+          },
+          {
+            "summary": "nocturn",
+            "location": "codex",
+            "hours": "23"
+          },
+          {
+            "summary": "chapter",
+            "location": "codex",
+            "hours": "10"
+          },
+          {
+            "summary": "silence",
+            "location": "codex",
+            "hours": "13"
+          },
+          {
+            "summary": "copy",
+            "location": "codex",
+            "hours": "17"
+          },
+          {
+            "summary": "bind",
+            "location": "codex",
+            "hours": "25"
+          },
+          {
+            "summary": "press",
+            "location": "codex",
+            "hours": "27"
+          },
+          {
+            "summary": "idle",
+            "location": "codex",
+            "hours": "18"
+          },
+          {
+            "summary": "idle",
+            "location": "recto",
+            "hours": "18"
+          }
+        ]
+      },
+      {
+        "path": "Notes/quire_card.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "summary": "prime",
+            "listed": "yes"
+          },
+          {
+            "summary": "terce",
+            "listed": "yes"
+          },
+          {
+            "summary": "sext",
+            "listed": "yes"
+          },
+          {
+            "summary": "none",
+            "listed": "yes"
+          },
+          {
+            "summary": "vesper",
+            "listed": "yes"
+          },
+          {
+            "summary": "compline",
+            "listed": "yes"
+          },
+          {
+            "summary": "matins",
+            "listed": "yes"
+          },
+          {
+            "summary": "lauds",
+            "listed": "yes"
+          },
+          {
+            "summary": "vigil",
+            "listed": "yes"
+          },
+          {
+            "summary": "nocturn",
+            "listed": "yes"
+          },
+          {
+            "summary": "chapter",
+            "listed": "yes"
+          },
+          {
+            "summary": "silence",
+            "listed": "yes"
+          },
+          {
+            "summary": "copy",
+            "listed": "yes"
+          },
+          {
+            "summary": "bind",
+            "listed": "yes"
+          },
+          {
+            "summary": "press",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D24": {
+    "family": "Tally",
+    "kind": "integer",
+    "slot": "ordinary",
+    "component_id": "verso_quire_count",
+    "instruction": "Count the verso quire crates on the sheet that also appear on the morocco note.",
+    "locator": {
+      "op": "count_join",
+      "left": "Finance/quire_sheet.csv",
+      "right": "Notes/morocco_note.txt",
+      "key": "sku",
+      "field": "sku",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "quire"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/quire_sheet.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "craft",
+          "bin"
+        ],
+        "rows": [
+          {
+            "sku": "k-0",
+            "craft": "quire",
+            "bin": "8"
+          },
+          {
+            "sku": "k-1",
+            "craft": "quire",
+            "bin": "9"
+          },
+          {
+            "sku": "k-2",
+            "craft": "quire",
+            "bin": "10"
+          },
+          {
+            "sku": "k-3",
+            "craft": "quire",
+            "bin": "11"
+          },
+          {
+            "sku": "k-4",
+            "craft": "quire",
+            "bin": "12"
+          },
+          {
+            "sku": "k-5",
+            "craft": "quire",
+            "bin": "13"
+          },
+          {
+            "sku": "k-6",
+            "craft": "quire",
+            "bin": "14"
+          },
+          {
+            "sku": "k-7",
+            "craft": "quire",
+            "bin": "15"
+          },
+          {
+            "sku": "k-8",
+            "craft": "quire",
+            "bin": "16"
+          },
+          {
+            "sku": "k-9",
+            "craft": "quire",
+            "bin": "17"
+          },
+          {
+            "sku": "k-10",
+            "craft": "quire",
+            "bin": "18"
+          },
+          {
+            "sku": "k-11",
+            "craft": "quire",
+            "bin": "19"
+          },
+          {
+            "sku": "k-12",
+            "craft": "quire",
+            "bin": "20"
+          },
+          {
+            "sku": "k-13",
+            "craft": "quire",
+            "bin": "21"
+          },
+          {
+            "sku": "k-14",
+            "craft": "quire",
+            "bin": "22"
+          },
+          {
+            "sku": "k-15",
+            "craft": "quire",
+            "bin": "23"
+          },
+          {
+            "sku": "k-16",
+            "craft": "quire",
+            "bin": "24"
+          },
+          {
+            "sku": "k-17",
+            "craft": "quire",
+            "bin": "25"
+          },
+          {
+            "sku": "k-x",
+            "craft": "verso",
+            "bin": "6"
+          }
+        ]
+      },
+      {
+        "path": "Notes/morocco_note.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "k-0",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-1",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-2",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-3",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-4",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-5",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-6",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-7",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-8",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-9",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-10",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-11",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-12",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-13",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-14",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-15",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-16",
+            "listed": "yes"
+          },
+          {
+            "sku": "k-17",
+            "listed": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D25": {
+    "family": "Tally",
+    "kind": "integer",
+    "slot": "C2-intended",
+    "component_id": "gilt_mail_count",
+    "instruction": "Count the gilt rubric notes in the mail that also appear on the colophon sheet.",
+    "locator": {
+      "op": "count_join",
+      "left": "Mail/gilt_notes.eml",
+      "right": "Finance/colophon_sheet.csv",
+      "key": "sku",
+      "field": "sku",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Mail/gilt_notes.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "g-0",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-1",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-2",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-3",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-4",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-5",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-6",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-7",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-8",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-9",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-10",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-11",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-12",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-13",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-14",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-15",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-16",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-17",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-18",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-19",
+            "rush": "yes"
+          },
+          {
+            "sku": "g-20",
+            "rush": "no"
+          }
+        ]
+      },
+      {
+        "path": "Finance/colophon_sheet.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "bin"
+        ],
+        "rows": [
+          {
+            "sku": "g-0",
+            "bin": "8"
+          },
+          {
+            "sku": "g-1",
+            "bin": "9"
+          },
+          {
+            "sku": "g-2",
+            "bin": "10"
+          },
+          {
+            "sku": "g-3",
+            "bin": "11"
+          },
+          {
+            "sku": "g-4",
+            "bin": "12"
+          },
+          {
+            "sku": "g-5",
+            "bin": "13"
+          },
+          {
+            "sku": "g-6",
+            "bin": "14"
+          },
+          {
+            "sku": "g-7",
+            "bin": "15"
+          },
+          {
+            "sku": "g-8",
+            "bin": "16"
+          },
+          {
+            "sku": "g-9",
+            "bin": "17"
+          },
+          {
+            "sku": "g-10",
+            "bin": "18"
+          },
+          {
+            "sku": "g-11",
+            "bin": "19"
+          },
+          {
+            "sku": "g-12",
+            "bin": "8"
+          },
+          {
+            "sku": "g-13",
+            "bin": "9"
+          },
+          {
+            "sku": "g-14",
+            "bin": "10"
+          },
+          {
+            "sku": "g-15",
+            "bin": "11"
+          },
+          {
+            "sku": "g-16",
+            "bin": "12"
+          },
+          {
+            "sku": "g-17",
+            "bin": "13"
+          },
+          {
+            "sku": "g-18",
+            "bin": "14"
+          },
+          {
+            "sku": "g-19",
+            "bin": "15"
+          },
+          {
+            "sku": "g-z",
+            "bin": "21"
+          }
+        ]
+      },
+      {
+        "path": "Notes/posted_n.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "n": "18",
+            "note": "board tally"
+          }
+        ]
+      }
+    ]
+  },
+  "D26": {
+    "family": "Multi-step",
+    "kind": "entity",
+    "slot": "C1-intended",
+    "component_id": "triple_folio_clerk",
+    "instruction": "Name the folio gathering clerk who appears on the rubric sheet, the palimpsest card, and the uncial tag.",
+    "locator": {
+      "op": "select_join3",
+      "left": "Finance/rubric_clerks.csv",
+      "mid": "Notes/palimpsest_card.txt",
+      "right": "Mail/uncial_tag.eml",
+      "key": "clerk",
+      "field": "clerk",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "folio"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/rubric_clerks.csv",
+        "format": "csv",
+        "columns": [
+          "clerk",
+          "post"
+        ],
+        "rows": [
+          {
+            "clerk": "Saskia Bel",
+            "post": "folio"
+          },
+          {
+            "clerk": "Tesfaye Holm",
+            "post": "recto"
+          },
+          {
+            "clerk": "Anouk Veld",
+            "post": "verso"
+          },
+          {
+            "clerk": "Ilaria Moss",
+            "post": "quire"
+          }
+        ]
+      },
+      {
+        "path": "Notes/palimpsest_card.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "clerk": "Saskia Bel",
+            "listed": "yes"
+          },
+          {
+            "clerk": "Tesfaye Holm",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Mail/uncial_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "clerk": "Saskia Bel",
+            "tag": "live"
+          }
+        ]
+      }
+    ]
+  },
+  "D27": {
+    "family": "Multi-step",
+    "kind": "entity",
+    "slot": "C2-intended",
+    "component_id": "triple_verso_hand",
+    "instruction": "Name the verso rubric hand who appears on the gilt sheet, the colophon card, and the morocco tag.",
+    "locator": {
+      "op": "select_join3",
+      "left": "Finance/gilt_hands.csv",
+      "mid": "Notes/colophon_card.txt",
+      "right": "Mail/morocco_tag.eml",
+      "key": "hand",
+      "field": "hand",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "verso"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/gilt_hands.csv",
+        "format": "csv",
+        "columns": [
+          "hand",
+          "yard"
+        ],
+        "rows": [
+          {
+            "hand": "Oren Falk",
+            "yard": "verso"
+          },
+          {
+            "hand": "Mira Solt",
+            "yard": "folio"
+          },
+          {
+            "hand": "Pavel Orth",
+            "yard": "recto"
+          },
+          {
+            "hand": "Joren Pike",
+            "yard": "quire"
+          }
+        ]
+      },
+      {
+        "path": "Notes/colophon_card.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "hand": "Oren Falk",
+            "listed": "yes"
+          },
+          {
+            "hand": "Mira Solt",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Mail/morocco_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "hand": "Oren Falk",
+            "tag": "live"
+          }
+        ]
+      },
+      {
+        "path": "Notes/board_hand.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "hand": "Mira Solt",
+            "note": "posted hand"
+          }
+        ]
+      }
+    ]
+  },
+  "D28": {
+    "family": "Multi-step",
+    "kind": "categorical",
+    "slot": "ordinary",
+    "component_id": "triple_recto_mark",
+    "instruction": "Give the recto palimpsest mark that appears on the quire sheet, the flyleaf card, and the folio tag.",
+    "locator": {
+      "op": "select_join3",
+      "left": "Finance/quire_marks.csv",
+      "mid": "Notes/flyleaf_card.txt",
+      "right": "Mail/folio_tag.eml",
+      "key": "bin",
+      "field": "mark",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "recto-palimpsest"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/quire_marks.csv",
+        "format": "csv",
+        "columns": [
+          "bin",
+          "mark"
+        ],
+        "rows": [
+          {
+            "bin": "recto-palimpsest",
+            "mark": "slack"
+          },
+          {
+            "bin": "verso-folio",
+            "mark": "taut"
+          },
+          {
+            "bin": "codex-uncial",
+            "mark": "bound"
+          },
+          {
+            "bin": "quire-gilt",
+            "mark": "foxed"
+          }
+        ]
+      },
+      {
+        "path": "Notes/flyleaf_card.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "bin": "recto-palimpsest",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Mail/folio_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "bin": "recto-palimpsest",
+            "live": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D29": {
+    "family": "Multi-step",
+    "kind": "money_usd",
+    "slot": "ordinary",
+    "component_id": "triple_colophon_fee",
+    "instruction": "Report the colophon rubric fee that appears on the live sheet, the palimpsest index, and the gathering tag.",
+    "locator": {
+      "op": "select_join3",
+      "left": "Finance/colophon_live.csv",
+      "mid": "Notes/palimpsest_index.txt",
+      "right": "Mail/gathering_tag.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "colophon-rubric"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/colophon_live.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "colophon-rubric",
+            "amount": "72.80"
+          },
+          {
+            "sku": "recto-bin",
+            "amount": "6.40"
+          },
+          {
+            "sku": "verso-bin",
+            "amount": "11.35"
+          },
+          {
+            "sku": "folio-bin",
+            "amount": "8.05"
+          }
+        ]
+      },
+      {
+        "path": "Notes/palimpsest_index.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "colophon-rubric",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Mail/gathering_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "colophon-rubric",
+            "live": "yes"
+          }
+        ]
+      }
+    ]
+  },
+  "D30": {
+    "family": "Multi-step",
+    "kind": "money_usd",
+    "slot": "ordinary",
+    "component_id": "triple_morocco_due",
+    "instruction": "Report the morocco incunable due that appears on the live sheet, the flyleaf index, and the quire tag.",
+    "locator": {
+      "op": "select_join3",
+      "left": "Finance/morocco_due.csv",
+      "mid": "Notes/flyleaf_index.txt",
+      "right": "Mail/quire_tag.eml",
+      "key": "sku",
+      "field": "amount",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "morocco-incunable"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "Finance/morocco_due.csv",
+        "format": "csv",
+        "columns": [
+          "sku",
+          "amount"
+        ],
+        "rows": [
+          {
+            "sku": "morocco-incunable",
+            "amount": "29.15"
+          },
+          {
+            "sku": "quire-bin",
+            "amount": "5.15"
+          },
+          {
+            "sku": "gilt-bin",
+            "amount": "10.80"
+          },
+          {
+            "sku": "folio-bin",
+            "amount": "7.35"
+          }
+        ]
+      },
+      {
+        "path": "Notes/flyleaf_index.txt",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "morocco-incunable",
+            "listed": "yes"
+          }
+        ]
+      },
+      {
+        "path": "Mail/quire_tag.eml",
+        "format": "kv",
+        "rows": [
+          {
+            "sku": "morocco-incunable",
+            "live": "yes"
+          }
+        ]
+      }
+    ]
+  }
+}

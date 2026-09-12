@@ -1,0 +1,26 @@
+{
+  "component_id": "folio_crate_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/crate_vellum.csv",
+    "Notes/quire_rubric_list.txt",
+    "Receipts/spare_costs.html"
+  ],
+  "id": "D06",
+  "instruction": "Sum the folio vellum crate costs that the quire rubric note lists.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/crate_vellum.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "folio"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/quire_rubric_list.txt"
+  },
+  "slot": "C1-intended"
+}

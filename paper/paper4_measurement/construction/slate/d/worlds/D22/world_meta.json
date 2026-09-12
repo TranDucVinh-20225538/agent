@@ -1,0 +1,26 @@
+{
+  "component_id": "rush_uncial_count",
+  "family": "Tally",
+  "files": [
+    "Finance/rubric_mail.csv",
+    "Mail/uncial_notes.eml",
+    "Notes/board_count.txt"
+  ],
+  "id": "D22",
+  "instruction": "Count the rush uncial notes in the mail that also appear on the rubric sheet.",
+  "kind": "integer",
+  "locator": {
+    "field": "sku",
+    "key": "sku",
+    "left": "Mail/uncial_notes.eml",
+    "left_where": [
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "count_join",
+    "right": "Finance/rubric_mail.csv"
+  },
+  "slot": "C2-intended"
+}

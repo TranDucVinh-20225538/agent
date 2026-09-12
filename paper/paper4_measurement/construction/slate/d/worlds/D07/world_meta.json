@@ -1,0 +1,26 @@
+{
+  "component_id": "recto_crate_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/recto_crates.csv",
+    "Notes/colophon_list.txt",
+    "Notes/pre_sum.txt"
+  ],
+  "id": "D07",
+  "instruction": "Sum the recto flyleaf crate costs that the colophon note lists.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/recto_crates.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "recto"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/colophon_list.txt"
+  },
+  "slot": "C2-intended"
+}

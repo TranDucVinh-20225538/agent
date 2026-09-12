@@ -1,0 +1,26 @@
+{
+  "component_id": "codex_bin_sum",
+  "family": "Compute",
+  "files": [
+    "Calendar/spare_bins.ics",
+    "Finance/codex_counts.csv",
+    "Notes/palimpsest_roster.txt"
+  ],
+  "id": "D08",
+  "instruction": "Sum the codex rubric crate counts that the palimpsest roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/codex_counts.csv",
+    "left_where": [
+      {
+        "col": "site",
+        "eq": "codex"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/palimpsest_roster.txt"
+  },
+  "slot": "C1-intended"
+}

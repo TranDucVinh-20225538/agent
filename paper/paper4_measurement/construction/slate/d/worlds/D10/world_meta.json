@@ -1,0 +1,26 @@
+{
+  "component_id": "verso_qty_sum",
+  "family": "Compute",
+  "files": [
+    "Finance/verso_counts.csv",
+    "Notes/board_total.txt",
+    "Notes/rubric_roster.txt"
+  ],
+  "id": "D10",
+  "instruction": "Sum the verso palimpsest crate counts that the rubric roster lists.",
+  "kind": "integer",
+  "locator": {
+    "field": "qty",
+    "key": "sku",
+    "left": "Finance/verso_counts.csv",
+    "left_where": [
+      {
+        "col": "site",
+        "eq": "verso"
+      }
+    ],
+    "op": "sum_join",
+    "right": "Notes/rubric_roster.txt"
+  },
+  "slot": "C2-intended"
+}

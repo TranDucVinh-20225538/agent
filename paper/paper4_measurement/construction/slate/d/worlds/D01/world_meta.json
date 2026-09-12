@@ -1,0 +1,25 @@
+{
+  "component_id": "folio_vellum_fee",
+  "family": "Locate",
+  "files": [
+    "Finance/quire_rubric.csv",
+    "Mail/folio_note.eml"
+  ],
+  "id": "D01",
+  "instruction": "Report the folio vellum fee posted on the quire rubric sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/quire_rubric.csv",
+    "left_where": [
+      {
+        "col": "sku",
+        "eq": "vellum-folio"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/folio_note.eml"
+  },
+  "slot": "C1-intended"
+}

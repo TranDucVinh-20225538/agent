@@ -1,0 +1,27 @@
+{
+  "component_id": "triple_colophon_fee",
+  "family": "Multi-step",
+  "files": [
+    "Finance/colophon_live.csv",
+    "Mail/gathering_tag.eml",
+    "Notes/palimpsest_index.txt"
+  ],
+  "id": "D29",
+  "instruction": "Report the colophon rubric fee that appears on the live sheet, the palimpsest index, and the gathering tag.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/colophon_live.csv",
+    "left_where": [
+      {
+        "col": "sku",
+        "eq": "colophon-rubric"
+      }
+    ],
+    "mid": "Notes/palimpsest_index.txt",
+    "op": "select_join3",
+    "right": "Mail/gathering_tag.eml"
+  },
+  "slot": "ordinary"
+}

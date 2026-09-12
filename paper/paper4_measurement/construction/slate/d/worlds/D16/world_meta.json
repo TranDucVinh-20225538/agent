@@ -1,0 +1,29 @@
+{
+  "component_id": "verso_rush_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/rubric_sheet.csv",
+    "Mail/rush_flag.eml"
+  ],
+  "id": "D16",
+  "instruction": "Report the crate cost for the verso yard rush crate on the rubric sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/rubric_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "verso"
+      },
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Mail/rush_flag.eml"
+  },
+  "slot": "C1-intended"
+}

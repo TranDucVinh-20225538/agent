@@ -1,0 +1,26 @@
+{
+  "component_id": "gilt_mail_count",
+  "family": "Tally",
+  "files": [
+    "Finance/colophon_sheet.csv",
+    "Mail/gilt_notes.eml",
+    "Notes/posted_n.txt"
+  ],
+  "id": "D25",
+  "instruction": "Count the gilt rubric notes in the mail that also appear on the colophon sheet.",
+  "kind": "integer",
+  "locator": {
+    "field": "sku",
+    "key": "sku",
+    "left": "Mail/gilt_notes.eml",
+    "left_where": [
+      {
+        "col": "rush",
+        "eq": "yes"
+      }
+    ],
+    "op": "count_join",
+    "right": "Finance/colophon_sheet.csv"
+  },
+  "slot": "C2-intended"
+}

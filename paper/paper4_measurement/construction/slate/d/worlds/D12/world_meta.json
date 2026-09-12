@@ -1,0 +1,31 @@
+{
+  "component_id": "live_quire_gilt",
+  "family": "Reconcile",
+  "files": [
+    "Finance/quire_live.csv",
+    "Mail/quire_mail.eml"
+  ],
+  "id": "D12",
+  "instruction": "Report the live quire gilt total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/quire_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "quire-gilt"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/quire_mail.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "quire-gilt"
+      }
+    ]
+  },
+  "slot": "C2-intended"
+}

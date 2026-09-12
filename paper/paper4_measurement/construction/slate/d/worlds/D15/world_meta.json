@@ -1,0 +1,31 @@
+{
+  "component_id": "live_morocco_bin",
+  "family": "Reconcile",
+  "files": [
+    "Finance/morocco_live.csv",
+    "Mail/morocco_quote.eml"
+  ],
+  "id": "D15",
+  "instruction": "Report the live morocco bin total from the finance sheet, not the mail quote.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "item",
+    "left": "Finance/morocco_live.csv",
+    "left_where": [
+      {
+        "col": "item",
+        "eq": "morocco-bin"
+      }
+    ],
+    "op": "live_not_stale",
+    "right": "Mail/morocco_quote.eml",
+    "right_where": [
+      {
+        "col": "item",
+        "eq": "morocco-bin"
+      }
+    ]
+  },
+  "slot": "ordinary"
+}

@@ -1,0 +1,30 @@
+{
+  "component_id": "folio_sealed_cost",
+  "family": "Filter",
+  "files": [
+    "Finance/palimpsest_sheet.csv",
+    "Notes/board_seal.txt",
+    "Notes/sealed_index.txt"
+  ],
+  "id": "D17",
+  "instruction": "Report the crate cost for the folio yard sealed crate on the palimpsest sheet.",
+  "kind": "money_usd",
+  "locator": {
+    "field": "amount",
+    "key": "sku",
+    "left": "Finance/palimpsest_sheet.csv",
+    "left_where": [
+      {
+        "col": "yard",
+        "eq": "folio"
+      },
+      {
+        "col": "seal",
+        "eq": "yes"
+      }
+    ],
+    "op": "select_join",
+    "right": "Notes/sealed_index.txt"
+  },
+  "slot": "C2-intended"
+}
