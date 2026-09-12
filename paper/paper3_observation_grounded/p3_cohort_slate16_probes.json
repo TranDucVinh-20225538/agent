@@ -1,0 +1,269 @@
+{
+  "_note": "Wave B declarations. Frozen before guest boot. SELECT-only. Do not edit after seeing values.",
+  "email": "michael.scott@dundermifflin.com",
+  "models": ["flash", "gpt"],
+  "clusters": [
+    {
+      "id": "aggregation-f001",
+      "determining": [
+        {
+          "id": "miles_flown_12mo",
+          "kind": "integer",
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT ifnull(sum(miles_earned),0) AS miles_flown_12mo FROM flights WHERE user_email = :email AND lower(status) IN ('completed','landed','arrived') AND departure_date >= date('now','-12 months')",
+          "path": "probe_before.0.miles_flown_12mo"
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f002",
+      "determining": [
+        {
+          "id": "card_charges_since_midnight",
+          "kind": "money_usd",
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS card_since_midnight FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND lower(a.type) LIKE '%credit%' AND t.date = date('now') AND t.amount < 0",
+          "path": "probe_before.0.card_since_midnight"
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f005",
+      "determining": [
+        {
+          "id": "barbados_hotel_total",
+          "kind": "money_usd",
+          "db": "cheskepdia.sqlite",
+          "sql": "SELECT ifnull(sum(total_price),0) AS barbados_hotel_total FROM bookings WHERE user_email = :email AND (lower(property_name) LIKE '%barbados%' OR lower(location) LIKE '%barbados%')",
+          "path": "probe_before.0.barbados_hotel_total"
+        },
+        {
+          "id": "barbados_flight_fare",
+          "kind": "money_usd",
+          "db": "dinoco-airlines.sqlite",
+          "sql": "SELECT ifnull(sum(fare_paid),0) AS barbados_flight_fare FROM flights WHERE user_email = :email AND (lower(destination_city) LIKE '%barbados%' OR upper(destination) IN ('BGI','BAI'))",
+          "path": "extra_probes.0.result.0.barbados_flight_fare"
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f008",
+      "determining": [
+        {
+          "id": "improv_spend_last_full_year",
+          "kind": "money_usd",
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(t.amount),0) AS improv_spend FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT)",
+          "path": "probe_before.0.improv_spend",
+          "note": "Current-pace annual projection is not a stored field. The locked construct is last-full-year spend, same formula as aggregation-f036. If this is null, fail; do not invent a pace formula after seeing rows."
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f009",
+      "determining": [
+        {
+          "id": "n_open_sprint_issues",
+          "kind": "integer",
+          "db": "sprintboard.sqlite",
+          "sql": "SELECT count(*) AS n_open FROM issues WHERE user_email = :email AND lower(ifnull(status,'')) NOT IN ('closed','done','resolved')",
+          "path": "probe_before.0.n_open",
+          "schema_first": true,
+          "note": "Schema dump if table/column names differ. Freeze SQL before values. Wrong table → FAIL, do not harvest another app."
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f010",
+      "determining": [
+        {
+          "id": "dundies_shop_spend_ytd",
+          "kind": "money_usd",
+          "db": "hoolishop.sqlite",
+          "sql": "SELECT ifnull(sum(total),0) AS dundies_ytd FROM orders WHERE user_email = :email AND strftime('%Y', date) = strftime('%Y','now') AND (lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%dundie%' OR lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%trophy%')",
+          "path": "probe_before.0.dundies_ytd",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f011",
+      "determining": [
+        {
+          "id": "n_closed_sprint_last_quarter",
+          "kind": "integer",
+          "db": "sprintboard.sqlite",
+          "sql": "SELECT count(*) AS n_closed FROM issues WHERE user_email = :email AND lower(ifnull(status,'')) IN ('closed','done','resolved') AND date(ifnull(closed_at,updated_at)) >= date('now','-3 months')",
+          "path": "probe_before.0.n_closed",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f019",
+      "determining": [
+        {
+          "id": "etaxi_office_commute_ytd",
+          "kind": "money_usd",
+          "db": "etaxi.sqlite",
+          "sql": "SELECT ifnull(sum(fare),0) AS commute_ytd FROM rides WHERE user_email = :email AND strftime('%Y', date) = strftime('%Y','now') AND (lower(ifnull(destination,ifnull(dropoff,''))) LIKE '%dunder%' OR lower(ifnull(destination,ifnull(dropoff,''))) LIKE '%scranton%office%')",
+          "path": "probe_before.0.commute_ytd",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f023",
+      "determining": [
+        {
+          "id": "oddsmarket_balance",
+          "kind": "money_usd",
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT balance FROM accounts WHERE user_email = :email",
+          "path": "probe_before.0.balance",
+          "schema_first": true
+        },
+        {
+          "id": "oddsmarket_total_invested",
+          "kind": "money_usd",
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT ifnull(sum(cost),0) AS total_invested FROM positions WHERE user_email = :email AND lower(ifnull(status,'')) LIKE '%open%'",
+          "path": "extra_probes.0.result.0.total_invested",
+          "schema_first": true
+        },
+        {
+          "id": "n_open_positions",
+          "kind": "integer",
+          "db": "oddsmarket.sqlite",
+          "sql": "SELECT count(*) AS n FROM positions WHERE user_email = :email AND lower(ifnull(status,'')) LIKE '%open%'",
+          "path": "extra_probes.1.result.0.n",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f029",
+      "determining": [
+        {
+          "id": "top_sent_recipient",
+          "kind": "entity",
+          "db": "mail.sqlite",
+          "sql": "SELECT to_email AS top_sent_recipient, count(*) AS n FROM emails WHERE user_email = :email AND lower(ifnull(folder,ifnull(mailbox,''))) LIKE '%sent%' GROUP BY to_email ORDER BY count(*) DESC LIMIT 1",
+          "path": "probe_before.0.top_sent_recipient",
+          "note": "Mail argmax. Same failure family as aggregation-f037. Unstable or empty → FAIL."
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f030",
+      "determining": [
+        {
+          "id": "zelle_sent_m1",
+          "kind": "money_usd",
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS zelle_m1 FROM zelle_transfers WHERE user_email = :email AND lower(direction) LIKE '%sent%' AND strftime('%Y-%m', date) = strftime('%Y-%m','now','start of month','-1 month')",
+          "path": "probe_before.0.zelle_m1"
+        },
+        {
+          "id": "zelle_sent_m2",
+          "kind": "money_usd",
+          "db": "vaultbank.sqlite",
+          "sql": "SELECT ifnull(sum(amount),0) AS zelle_m2 FROM zelle_transfers WHERE user_email = :email AND lower(direction) LIKE '%sent%' AND strftime('%Y-%m', date) = strftime('%Y-%m','now','start of month','-2 month')",
+          "path": "extra_probes.0.result.0.zelle_m2"
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f031",
+      "determining": [
+        {
+          "id": "hangry_spend_last_month",
+          "kind": "money_usd",
+          "db": "hangrydash.sqlite",
+          "sql": "SELECT ifnull(sum(total),0) AS hangry_m1 FROM orders WHERE user_email = :email AND strftime('%Y-%m', date) = strftime('%Y-%m','now','start of month','-1 month')",
+          "path": "probe_before.0.hangry_m1"
+        },
+        {
+          "id": "hangry_spend_month_minus_3",
+          "kind": "money_usd",
+          "db": "hangrydash.sqlite",
+          "sql": "SELECT ifnull(sum(total),0) AS hangry_m3 FROM orders WHERE user_email = :email AND strftime('%Y-%m', date) = strftime('%Y-%m','now','start of month','-3 month')",
+          "path": "extra_probes.0.result.0.hangry_m3"
+        }
+      ]
+    },
+    {
+      "id": "aggregation-f033",
+      "determining": [
+        {
+          "id": "n_thursday_events_quarter",
+          "kind": "integer",
+          "db": "hoolicalendar.sqlite",
+          "sql": "SELECT count(*) AS n_thu FROM events WHERE user_email = :email AND strftime('%w', date) = '4' AND date >= date('now','start of month','-2 months') AND date < date('now','start of month','+1 month')",
+          "path": "probe_before.0.n_thu",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "contradiction-f005",
+      "determining": [
+        {
+          "id": "gme_shares",
+          "kind": "integer",
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(shares),0) AS gme_shares FROM holdings WHERE user_email = :email AND upper(ticker) = 'GME'",
+          "path": "probe_before.0.gme_shares"
+        },
+        {
+          "id": "rivn_shares",
+          "kind": "integer",
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(shares),0) AS rivn_shares FROM holdings WHERE user_email = :email AND upper(ticker) = 'RIVN'",
+          "path": "extra_probes.0.result.0.rivn_shares"
+        },
+        {
+          "id": "vti_shares",
+          "kind": "integer",
+          "db": "batbucks.sqlite",
+          "sql": "SELECT ifnull(sum(shares),0) AS vti_shares FROM holdings WHERE user_email = :email AND upper(ticker) = 'VTI'",
+          "path": "extra_probes.1.result.0.vti_shares"
+        }
+      ]
+    },
+    {
+      "id": "contradiction-f008",
+      "determining": [
+        {
+          "id": "n_open_morale_tasks",
+          "kind": "integer",
+          "db": "sprintboard.sqlite",
+          "sql": "SELECT count(*) AS n_open FROM issues WHERE user_email = :email AND (lower(ifnull(project,ifnull(title,''))) LIKE '%morale%' OR lower(ifnull(project,ifnull(title,''))) LIKE '%karaoke%' OR lower(ifnull(project,ifnull(title,''))) LIKE '%dundie%') AND lower(ifnull(status,'')) NOT IN ('closed','done','resolved')",
+          "path": "probe_before.0.n_open",
+          "schema_first": true
+        },
+        {
+          "id": "morale_shop_spend",
+          "kind": "money_usd",
+          "db": "hoolishop.sqlite",
+          "sql": "SELECT ifnull(sum(total),0) AS shop_spend FROM orders WHERE user_email = :email AND (lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%karaoke%' OR lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%dundie%' OR lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%trophy%')",
+          "path": "extra_probes.0.result.0.shop_spend",
+          "schema_first": true
+        }
+      ]
+    },
+    {
+      "id": "contradiction-f012",
+      "determining": [
+        {
+          "id": "n_trophy_shop_orders",
+          "kind": "integer",
+          "db": "hoolishop.sqlite",
+          "sql": "SELECT count(*) AS n_trophy FROM orders WHERE user_email = :email AND (lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%trophy%' OR lower(ifnull(item_name,ifnull(title,ifnull(description,'')))) LIKE '%dundie%')",
+          "path": "probe_before.0.n_trophy",
+          "schema_first": true
+        }
+      ]
+    }
+  ]
+}
