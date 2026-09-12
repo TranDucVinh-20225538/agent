@@ -1,0 +1,45 @@
+{
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D03",
+  "n_steps": 4,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "Tesfaye Holm",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.00157748184,
+  "tau": "The flyleaf colophon card lists \"keeper: Tesfaye Holm\" with the post \"uncial,\" which matches the entry in the uncial roster (Tesfaye Holm \u2014 uncial).\n\n**Tesfaye Holm** is the uncial keeper listed on the flyleaf colophon card.\n\nCLAIM: Tesfaye Holm",
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "uncial_roster.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "flyleaf_colophon.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes/flyleaf_colophon.txt",
+      "result": "keeper: Tesfaye Holm\npost: uncial\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Finance/uncial_roster.csv",
+      "result": "keeper,post\nTesfaye Holm,uncial\nAnouk Veld,recto\nIlaria Moss,verso\nJoren Pike,quire\n",
+      "tool": "read_file"
+    }
+  ]
+}

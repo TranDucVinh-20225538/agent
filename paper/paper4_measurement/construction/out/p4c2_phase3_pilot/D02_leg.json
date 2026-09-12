@@ -1,0 +1,60 @@
+{
+  "gt": {
+    "cause": "live_gold_read",
+    "gt": "SUCCESS"
+  },
+  "harness_exception": null,
+  "id": "D02",
+  "n_steps": 5,
+  "scorable": true,
+  "score": {
+    "cause": "match",
+    "committed": "46.75",
+    "status": "HIT"
+  },
+  "spend_usd_end": 0.00125815932,
+  "tau": "**Quire recto on the morocco gilt sheet: $46.75**\n\nDetails:\n- **Finance/morocco_gilt.csv** \u2192 SKU `recto-quire` = **46.75**\n- **Mail/quire_quote.eml** confirms `recto-quire` is `listed: yes` on that sheet.\n- **Notes/posted_board.txt** shows 90.00, but it is marked \"draft board,\" so it is not the posted sheet figure.\n\nCLAIM: $46.75",
+  "terminated": "DONE",
+  "tool_trace": [
+    {
+      "path": ".",
+      "result": "Finance/\nMail/\nNotes/",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Notes",
+      "result": "posted_board.txt",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance",
+      "result": "morocco_gilt.csv",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Mail",
+      "result": "quire_quote.eml",
+      "tool": "list_dir"
+    },
+    {
+      "path": "Finance/morocco_gilt.csv",
+      "result": "sku,amount\nrecto-quire,46.75\nfolio-codex,14.80\nuncial-verso,6.55\ncolophon-rubric,31.20\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Mail/quire_quote.eml",
+      "result": "sku: recto-quire\nlisted: yes\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Notes/posted_board.txt",
+      "result": "sku: recto-quire\namount: 90.00\nmark: draft board\n",
+      "tool": "read_file"
+    },
+    {
+      "path": "Finance",
+      "result": "morocco_gilt.csv",
+      "tool": "list_dir"
+    }
+  ]
+}

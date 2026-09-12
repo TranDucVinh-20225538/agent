@@ -1,14 +1,14 @@
 # P4-C2 — Observation-Grounded Reliability Metric v2
 
-**Status: PHASE 2 SEALED. Phase 3 Flash pilot BLOCKED. NO AGENT EXECUTION. SPEND $0.**  
+**Status: PHASE 3 FLASH PILOT PASS. Phase 4 confirmatory BLOCKED. Spend recorded; no retune.**  
 **Workstream:** `P4-C2 / Observation-Grounded Reliability Metric v2`  
 **This file is not a patch of Metric v1.** It does not reopen P4-B or P4-C.
 
 ```
 P4-B     CLOSED   positive-but-incomplete   immutable
 P4-C v1  CLOSED   Metric v1 FAIL            immutable  (falsification)
-P4-C2    PHASE 2  D01–D30 + Q2 SEALED       $0; no τ
-                  Phase 3 BLOCKED
+P4-C2    PHASE 3  D01–D03 Flash scorable    $0.001577
+                  Phase 4 BLOCKED; τ not pooled
 ```
 
 **Terminology lock (paper and gates).** v1 `Cov` measured whether
@@ -702,9 +702,10 @@ a new confirmatory corpus, a new seal, and a new spend ledger.
 | 4 | confirmatory API | Flash+GPT × `N` | Gates H1–H8 below |
 | 5 | only if Phase 4 PASS | Optional third model | Descriptive |
 
-Phase 0 accepted. Phase 1 construction **PASS**. Phase 2 seal **PASS**
-(D01–D30 locker-replay, Q2 6/6, A2 + transforms_d hashed). `$0`; no agents.
-This file does **not** authorize Phase 3 agents.
+Phase 0 accepted. Phase 1 construction **PASS**. Phase 2 seal **PASS**.
+Phase 3 Flash pilot **PASS** (D01–D03; n_scorable 3/3; `$0.001577`).
+H1–H8 and Form **not estimated**. Pilot τ **not pooled**, **not a retune signal**.
+This file does **not** authorize Phase 4 confirmatory agents.
 
 ### 7.2 New corpora (do not reuse C or B)
 
@@ -879,10 +880,10 @@ External validation of a failed instrument would export the abstention.
 
 ## 10. Single recommendation
 
-**PHASE 2 SEALED. STOP.**
+**PHASE 3 PASS. STOP.**
 
-Phase 3 Flash pilot is **BLOCKED** until separately authorized.
-Do not execute agents. Do not rescore C/B. Do not repair v1.
-Do not edit the sealed D corpus, `score_v2`, wrapper, or A2.
+Phase 4 confirmatory is **BLOCKED** until separately authorized.
+Do not pool D01–D03 into N_D. Do not retune `score_v2` or the wrapper
+from this τ. Do not estimate Form from n=3.
 
 v1 is closed and failed. That failure is the reason v2 exists.
