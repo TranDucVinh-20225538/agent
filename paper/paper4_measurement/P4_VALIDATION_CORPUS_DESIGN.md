@@ -1,6 +1,6 @@
 # P4-B — Independent CUA validation corpus (design memo)
 
-**Status: Phase 2 qualification PASS. Phase 3 BLOCKED. $0. No agents.**
+**Status: Phase 2 PASS. Phase 3 licensed for HPC Flash pilot. Local $0.**
 Authored 2026-09-12.
 
 This file is a **new workstream**. It does not amend `P4_PREREG.md` §2, does
@@ -565,15 +565,15 @@ agents. `$0`. Record: `construction/out/p4b_phase1_construction.md`.
 **Phase 2 qualification, 2026-09-12: PASS.** §12 conjunction holds. Locker
 replay matches sealed gold on 20/20. Transform templates hashed with no
 per-id branch. E1–E4 not scored (zero natural τ; Phase 4). Seal:
-`construction/sealed/P4B_PHASE2_SEAL.json`. Phase 3 Flash remains
-**BLOCKED** until authorized.
+`construction/sealed/P4B_PHASE2_SEAL.json`. Phase 3 Flash is licensed on
+HPC (`P4B_PHASE3_HPC.md`). Do not open Phase 4 from the laptop.
 
 ```yaml
 phase: 2
 workstream: P4-B
 status: PASS
 next: PHASE_3_FLASH_PILOT
-next_status: BLOCKED
+next_status: LICENSED_HPC
 N_B: 20
 n_pass: 20
 api_spend_usd: 0
