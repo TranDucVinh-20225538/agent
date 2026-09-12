@@ -1,6 +1,6 @@
 # P4-B — Independent CUA validation corpus (design memo)
 
-**Status: Phase 1 construction PASS. Phase 2 BLOCKED. $0. No agents.**
+**Status: Phase 2 qualification PASS. Phase 3 BLOCKED. $0. No agents.**
 Authored 2026-09-12.
 
 This file is a **new workstream**. It does not amend `P4_PREREG.md` §2, does
@@ -562,18 +562,23 @@ construction and qualification.
 kind quotas. Gold locked from `L` on authored worlds. No observations. No
 agents. `$0`. Record: `construction/out/p4b_phase1_construction.md`.
 
-Phase 2 qualification remains **BLOCKED** until authorized.
+**Phase 2 qualification, 2026-09-12: PASS.** §12 conjunction holds. Locker
+replay matches sealed gold on 20/20. Transform templates hashed with no
+per-id branch. E1–E4 not scored (zero natural τ; Phase 4). Seal:
+`construction/sealed/P4B_PHASE2_SEAL.json`. Phase 3 Flash remains
+**BLOCKED** until authorized.
 
 ```yaml
-phase: 1
+phase: 2
 workstream: P4-B
 status: PASS
-next: PHASE_2_QUALIFICATION
+next: PHASE_3_FLASH_PILOT
 next_status: BLOCKED
 N_B: 20
 n_pass: 20
 api_spend_usd: 0
 instrument_modified: false
+corpus_modified: false
 my_pcbench_phase2: FAIL_RECORDED
 agents_run: 0
 ```
