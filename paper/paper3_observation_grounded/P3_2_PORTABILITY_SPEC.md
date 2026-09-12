@@ -454,7 +454,7 @@ entries of a 30-entry hand-written table were dead weight throughout. This is a 
 instance of the pattern A-15 named: the instrument's label layer contains content whose
 behaviour nobody had measured. G2's threshold is **not** restated; it remains 30/30.
 
-### 12.7 Where G2's difficulty concentrates — method, pending execution
+### 12.7 Where G2's difficulty concentrates — method
 
 Stage 2 settled the four flagged components. It did not say where the constraint actually
 lives among the other 26. That is measurable on the calibration corpus before `R` exists,
@@ -476,5 +476,78 @@ could not have seen, and would be resolved by amendment, not by quietly weakenin
 It is not calibration: it declares no parameter and produces no `R`. A surviving span may
 **not** be adopted as a label (G1b). It reads only Study 2, which `R` is expressly
 permitted to be calibrated on. It writes nothing.
+
+The result is §12.8.
+
+### 12.8 Concentration result — two singleton-unreachable, not yet a contradiction
+
+Run at `8c7b4bc`, read-only, no artefact written, exit 5.
+
+```
+reachable 22  vacuous 6  unreachable 2  undecided 0
+valued-on-at-least-one-leg: 24/30
+```
+
+| | |
+|---|---|
+| `contradiction-f006/credit_headroom` | UNREACHABLE · 5/5 valued · 0/1094 |
+| `preference_inference-f014/designated_booking_total` | UNREACHABLE · 1/7 valued · 0/983 |
+| vacuous (frozen extracts nothing on every leg) | 6, not 2: `card_limit`, both of `aggregation-f037`, both of `preference_inference-f010`, `designated_booking_property` |
+
+The script then printed that G1 and G2 are genuinely incompatible and that G2 at 30/30 is
+unattainable by any grounded rule. **That sentence overclaims**, and it is the same
+overclaim stage 1 made in the other direction. The audit tested **singleton** label sets.
+`R` is permitted to emit a set. `extract_money` unions every label hit and then demands
+agreement (`_unique_or_none`), so a second label can be load-bearing either as a value
+source or as a disagreement injector. Singleton `UNREACHABLE` is therefore a determinate
+obstruction to one route to G2, and a risk flag on the other — not a proof.
+
+The two components share a structure that is visible from the task text and the singleton
+result together, without adopting any span. Each frozen list has two entries; exactly one
+is absent from that task's `instruction`/`grading`:
+
+```
+credit_headroom              headroom              GROUNDED
+                             available credit      NOT IN TASK TEXT
+designated_booking_total     total                 GROUNDED
+                             price                 NOT IN TASK TEXT
+```
+
+Stage 1 counted both components G1-feasible because it asked only whether *at least one*
+frozen label was groundable. The grounded partner (`headroom`, `total`) is itself a
+literal span, so it was in the candidate set, and it did not survive. The grounded-only
+subset of each frozen list is therefore already known not to reproduce the frozen
+vector. The ungrounded synonym is **load-bearing**. That is a fourth instance of the
+A-15 pattern: the label layer contains content whose behaviour nobody had measured —
+here, a synonym that G1 would forbid `R` to emit.
+
+G2's threshold is **not** restated; it remains 30/30. Effective components that can vary
+are 24, not 30. Among the 22 singleton-reachable, several one-survivor rows have the
+mixed quality already named in §12.5 (`'could'`, `'am'`, `'or'`, `'and I'`). Those are
+not adopted as labels.
+
+### 12.9 Set-valued reachability on the two — method, pending execution
+
+What remains is whether **some other** grounded set reproduces the frozen vector. That is
+the question §12.8 left in the same position stage 1 left stage 2.
+
+`scripts/p3_2_g2_set_reachability.py` runs only on those two components. It does two
+things, in that order, and writes nothing:
+
+1. **Decomposition** (confirmation, not a search). Per leg: the frozen set, each frozen
+   label alone, and the grounded-only subset. This records *how* the ungrounded synonym
+   is load-bearing — value source vs disagreement injector — which the inference in
+   §12.8 cannot see.
+2. **Pair exhaustion.** Every size-2 set of grounded literal spans is tested as a label
+   set against the frozen vector. Size 2 is the frozen cardinality of both lists, and it
+   is the smallest step beyond the singleton audit. A surviving pair is reachability
+   only; adopting it is G1b-forbidden.
+
+`UNREACHABLE` at size ≤ 2 means no grounded singleton or pair reproduces the frozen
+vector. It does **not** mean no finite grounded set can, and it must not be written as
+G2 being unattainable by any grounded rule. If both components have a surviving pair,
+G2 at 30/30 remains attainable in principle by a rule that emits more than one label.
+Either way the resolution, if one is needed, is an amendment recorded as one — not a
+quietly weakened gate, and not a larger bound chosen after seeing the pair result.
 
 `R` is still undesigned, and no parameter set has been declared.
