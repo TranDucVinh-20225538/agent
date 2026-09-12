@@ -1,14 +1,14 @@
 # P4-C2 — Observation-Grounded Reliability Metric v2
 
-**Status: PHASE 1 CONSTRUCTION PASS. Phase 2 seal BLOCKED. NO AGENT EXECUTION. SPEND $0.**  
+**Status: PHASE 2 SEALED. Phase 3 Flash pilot BLOCKED. NO AGENT EXECUTION. SPEND $0.**  
 **Workstream:** `P4-C2 / Observation-Grounded Reliability Metric v2`  
 **This file is not a patch of Metric v1.** It does not reopen P4-B or P4-C.
 
 ```
 P4-B     CLOSED   positive-but-incomplete   immutable
 P4-C v1  CLOSED   Metric v1 FAIL            immutable  (falsification)
-P4-C2    PHASE 1  D01–D30 gold locked       $0; no τ
-                  Phase 2 BLOCKED
+P4-C2    PHASE 2  D01–D30 + Q2 SEALED       $0; no τ
+                  Phase 3 BLOCKED
 ```
 
 **Terminology lock (paper and gates).** v1 `Cov` measured whether
@@ -702,8 +702,9 @@ a new confirmatory corpus, a new seal, and a new spend ledger.
 | 4 | confirmatory API | Flash+GPT × `N` | Gates H1–H8 below |
 | 5 | only if Phase 4 PASS | Optional third model | Descriptive |
 
-Phase 0 accepted. Phase 1 construction **PASS** (D01–D30; `$0`; no agents).
-This file does **not** authorize Phase 2 seal or Phase 3 agents.
+Phase 0 accepted. Phase 1 construction **PASS**. Phase 2 seal **PASS**
+(D01–D30 locker-replay, Q2 6/6, A2 + transforms_d hashed). `$0`; no agents.
+This file does **not** authorize Phase 3 agents.
 
 ### 7.2 New corpora (do not reuse C or B)
 
@@ -878,9 +879,10 @@ External validation of a failed instrument would export the abstention.
 
 ## 10. Single recommendation
 
-**PHASE 1 PASS. STOP.**
+**PHASE 2 SEALED. STOP.**
 
-Phase 2 qualification/seal is **BLOCKED** until separately authorized.
+Phase 3 Flash pilot is **BLOCKED** until separately authorized.
 Do not execute agents. Do not rescore C/B. Do not repair v1.
+Do not edit the sealed D corpus, `score_v2`, wrapper, or A2.
 
 v1 is closed and failed. That failure is the reason v2 exists.

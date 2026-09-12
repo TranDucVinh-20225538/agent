@@ -1,0 +1,704 @@
+[
+  {
+    "component_id": "folio_vellum_fee",
+    "family": "Locate",
+    "gold": "81.60",
+    "id": "D01",
+    "instruction": "Report the folio vellum fee posted on the quire rubric sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/quire_rubric.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "vellum-folio"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/folio_note.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "quire_recto_due",
+    "family": "Locate",
+    "gold": "46.75",
+    "id": "D02",
+    "instruction": "Report the quire recto due on the morocco gilt sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/morocco_gilt.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "recto-quire"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/quire_quote.eml"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "uncial_keeper",
+    "family": "Locate",
+    "gold": "Tesfaye Holm",
+    "id": "D03",
+    "instruction": "Name the uncial keeper listed on the flyleaf colophon card.",
+    "kind": "entity",
+    "locator": {
+      "field": "keeper",
+      "key": "keeper",
+      "left": "Notes/flyleaf_colophon.txt",
+      "left_where": [],
+      "op": "select_join",
+      "right": "Finance/uncial_roster.csv"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "pressmark_bind",
+    "family": "Locate",
+    "gold": "foxed",
+    "id": "D04",
+    "instruction": "Give the bind status for the pressmark gathering slip.",
+    "kind": "categorical",
+    "locator": {
+      "field": "bind_status",
+      "key": "location",
+      "left": "Notes/pressmark_gathering.txt",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "pressmark-gathering"
+        }
+      ],
+      "op": "select_join",
+      "right": "Calendar/gathering_watch.ics"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "morocco_gilt_fee",
+    "family": "Locate",
+    "gold": "63.20",
+    "id": "D05",
+    "instruction": "Report the morocco gilt fee on the palimpsest incunable sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/palimpsest_incunable.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "gilt-morocco"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/morocco_note.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "folio_crate_sum",
+    "family": "Compute",
+    "gold": "52.10",
+    "id": "D06",
+    "instruction": "Sum the folio vellum crate costs that the quire rubric note lists.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/crate_vellum.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "folio"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/quire_rubric_list.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "recto_crate_sum",
+    "family": "Compute",
+    "gold": "38.35",
+    "id": "D07",
+    "instruction": "Sum the recto flyleaf crate costs that the colophon note lists.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/recto_crates.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "recto"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/colophon_list.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "codex_bin_sum",
+    "family": "Compute",
+    "gold": "25",
+    "id": "D08",
+    "instruction": "Sum the codex rubric crate counts that the palimpsest roster lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "qty",
+      "key": "sku",
+      "left": "Finance/codex_counts.csv",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "codex"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/palimpsest_roster.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "quire_hours_sum",
+    "family": "Compute",
+    "gold": "28",
+    "id": "D09",
+    "instruction": "Sum the quire colophon shift hours that the morocco card lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "hours",
+      "key": "shift",
+      "left": "Finance/quire_hours.csv",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "quire"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/morocco_card.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "verso_qty_sum",
+    "family": "Compute",
+    "gold": "27",
+    "id": "D10",
+    "instruction": "Sum the verso palimpsest crate counts that the rubric roster lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "qty",
+      "key": "sku",
+      "left": "Finance/verso_counts.csv",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "verso"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/rubric_roster.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "live_folio_crate",
+    "family": "Reconcile",
+    "gold": "68.40",
+    "id": "D11",
+    "instruction": "Report the live folio crate total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/folio_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "folio-crate"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/folio_quote.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "folio-crate"
+        }
+      ]
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "live_quire_gilt",
+    "family": "Reconcile",
+    "gold": "41.25",
+    "id": "D12",
+    "instruction": "Report the live quire gilt total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/quire_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "quire-gilt"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/quire_mail.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "quire-gilt"
+        }
+      ]
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "live_recto_clerk",
+    "family": "Reconcile",
+    "gold": "Anouk Veld",
+    "id": "D13",
+    "instruction": "Name the live recto rubric clerk from the roster sheet, not the mail copy.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "post",
+      "left": "Finance/clerk_live.csv",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "recto-rubric"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/clerk_copy.eml",
+      "right_where": [
+        {
+          "col": "post",
+          "eq": "recto-rubric"
+        }
+      ]
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "live_incunable_mark",
+    "family": "Reconcile",
+    "gold": "taut",
+    "id": "D14",
+    "instruction": "Give the live incunable palimpsest mark from the yard card, not the mail mark.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "bin",
+      "left": "Notes/yard_live.txt",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "incunable-palimpsest"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/yard_mark.eml",
+      "right_where": [
+        {
+          "col": "bin",
+          "eq": "incunable-palimpsest"
+        }
+      ]
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "live_morocco_bin",
+    "family": "Reconcile",
+    "gold": "37.55",
+    "id": "D15",
+    "instruction": "Report the live morocco bin total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/morocco_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "morocco-bin"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/morocco_quote.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "morocco-bin"
+        }
+      ]
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "verso_rush_cost",
+    "family": "Filter",
+    "gold": "55.15",
+    "id": "D16",
+    "instruction": "Report the crate cost for the verso yard rush crate on the rubric sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/rubric_sheet.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "verso"
+        },
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/rush_flag.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "folio_sealed_cost",
+    "family": "Filter",
+    "gold": "26.45",
+    "id": "D17",
+    "instruction": "Report the crate cost for the folio yard sealed crate on the palimpsest sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/palimpsest_sheet.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "folio"
+        },
+        {
+          "col": "seal",
+          "eq": "yes"
+        }
+      ],
+      "op": "select_join",
+      "right": "Notes/sealed_index.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "night_uncial_clerk",
+    "family": "Filter",
+    "gold": "Joren Pike",
+    "id": "D18",
+    "instruction": "Name the night uncial clerk tagged on the gathering index.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "tag",
+      "left": "Notes/gathering_index.csv",
+      "left_where": [
+        {
+          "col": "tag",
+          "eq": "night"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/night_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "long_recto_mark",
+    "family": "Filter",
+    "gold": "bound",
+    "id": "D19",
+    "instruction": "Give the slip mark for the long recto pressmark berth.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "summary",
+      "left": "Finance/slip_marks.csv",
+      "left_where": [
+        {
+          "col": "dock",
+          "eq": "recto"
+        },
+        {
+          "col": "length",
+          "eq": "long"
+        }
+      ],
+      "op": "select_join",
+      "right": "Calendar/berth_watch.ics"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "rush_hours",
+    "family": "Filter",
+    "gold": "19",
+    "id": "D20",
+    "instruction": "Report the shift hours for the rush verso watch on the colophon card.",
+    "kind": "integer",
+    "locator": {
+      "field": "hours",
+      "key": "summary",
+      "left": "Calendar/verso_watch.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "verso"
+        }
+      ],
+      "op": "select_join",
+      "right": "Notes/rush_list.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "folio_shift_count",
+    "family": "Tally",
+    "gold": "10",
+    "id": "D21",
+    "instruction": "Count the folio rubric shifts on the calendar that also appear on the palimpsest roster.",
+    "kind": "integer",
+    "locator": {
+      "field": "summary",
+      "key": "summary",
+      "left": "Calendar/folio_shifts.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "folio"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/palimpsest_names.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "rush_uncial_count",
+    "family": "Tally",
+    "gold": "11",
+    "id": "D22",
+    "instruction": "Count the rush uncial notes in the mail that also appear on the rubric sheet.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Mail/uncial_notes.eml",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "count_join",
+      "right": "Finance/rubric_mail.csv"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "codex_palimpsest_count",
+    "family": "Tally",
+    "gold": "15",
+    "id": "D23",
+    "instruction": "Count the codex palimpsest shifts on the calendar that also appear on the quire card.",
+    "kind": "integer",
+    "locator": {
+      "field": "summary",
+      "key": "summary",
+      "left": "Calendar/codex_shifts.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "codex"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/quire_card.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "verso_quire_count",
+    "family": "Tally",
+    "gold": "18",
+    "id": "D24",
+    "instruction": "Count the verso quire crates on the sheet that also appear on the morocco note.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Finance/quire_sheet.csv",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "quire"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/morocco_note.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "gilt_mail_count",
+    "family": "Tally",
+    "gold": "20",
+    "id": "D25",
+    "instruction": "Count the gilt rubric notes in the mail that also appear on the colophon sheet.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Mail/gilt_notes.eml",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "count_join",
+      "right": "Finance/colophon_sheet.csv"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "triple_folio_clerk",
+    "family": "Multi-step",
+    "gold": "Saskia Bel",
+    "id": "D26",
+    "instruction": "Name the folio gathering clerk who appears on the rubric sheet, the palimpsest card, and the uncial tag.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "clerk",
+      "left": "Finance/rubric_clerks.csv",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "folio"
+        }
+      ],
+      "mid": "Notes/palimpsest_card.txt",
+      "op": "select_join3",
+      "right": "Mail/uncial_tag.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "component_id": "triple_verso_hand",
+    "family": "Multi-step",
+    "gold": "Oren Falk",
+    "id": "D27",
+    "instruction": "Name the verso rubric hand who appears on the gilt sheet, the colophon card, and the morocco tag.",
+    "kind": "entity",
+    "locator": {
+      "field": "hand",
+      "key": "hand",
+      "left": "Finance/gilt_hands.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "verso"
+        }
+      ],
+      "mid": "Notes/colophon_card.txt",
+      "op": "select_join3",
+      "right": "Mail/morocco_tag.eml"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "component_id": "triple_recto_mark",
+    "family": "Multi-step",
+    "gold": "slack",
+    "id": "D28",
+    "instruction": "Give the recto palimpsest mark that appears on the quire sheet, the flyleaf card, and the folio tag.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "bin",
+      "left": "Finance/quire_marks.csv",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "recto-palimpsest"
+        }
+      ],
+      "mid": "Notes/flyleaf_card.txt",
+      "op": "select_join3",
+      "right": "Mail/folio_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "triple_colophon_fee",
+    "family": "Multi-step",
+    "gold": "72.80",
+    "id": "D29",
+    "instruction": "Report the colophon rubric fee that appears on the live sheet, the palimpsest index, and the gathering tag.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/colophon_live.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "colophon-rubric"
+        }
+      ],
+      "mid": "Notes/palimpsest_index.txt",
+      "op": "select_join3",
+      "right": "Mail/gathering_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "component_id": "triple_morocco_due",
+    "family": "Multi-step",
+    "gold": "29.15",
+    "id": "D30",
+    "instruction": "Report the morocco incunable due that appears on the live sheet, the flyleaf index, and the quire tag.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/morocco_due.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "morocco-incunable"
+        }
+      ],
+      "mid": "Notes/flyleaf_index.txt",
+      "op": "select_join3",
+      "right": "Mail/quire_tag.eml"
+    },
+    "slot": "ordinary"
+  }
+]
