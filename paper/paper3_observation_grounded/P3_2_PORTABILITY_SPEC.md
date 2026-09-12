@@ -380,12 +380,29 @@ So the finding is a determinate obstruction to one route to G2, and a risk flag 
 other. It is **not** yet a proof that G1 and G2 contradict each other, and must not be
 written as one.
 
-### 12.4 Open
+### 12.4 Stage 2, implemented and pending execution
 
-Whether to run a second-stage audit on the calibration corpus — for each of the four,
-does any task-side-grounded span select the same extraction window as the frozen label? —
-which would convert the risk flag into a determinate answer before `R` is designed. It
-reads Study 2 answer text, which is the calibration corpus and is permitted; it reads no
-validation answer text.
+`scripts/p3_2_stage2_reachability.py` settles the open half by **exhaustion**. For each of
+the four it enumerates every literal substring of the task-side text up to 6 tokens — 786
+to 1117 candidates per task — and asks whether any of them, used as the sole label,
+reproduces the frozen extracted value on every calibration leg of that task. Every
+candidate is a literal substring taken by offset, so it is G1-compliant by construction.
+
+Exhaustiveness is the point: if no grounded span works, no grounded rule can work, however
+written. The 6-token bound is deliberately generous, because a negative result at 6 is
+stronger than at 2.
+
+It also tests a possibility stage 1 could not see: if a frozen label extracts **nothing**
+on every leg, the component constrains G2 only to also extract nothing, and the stage-1
+obstruction is **vacuous** rather than binding. That is reported as `VACUOUS`.
+
+Two things it is not. It is not calibration — it declares no parameter and produces no
+`R`. And a surviving span may **not** be adopted as a label: that would be hand-authoring
+by search, which is exactly what G1b forbids. The only output is reachability.
+
+Verdicts: `UNREACHABLE` on any component means G1 and G2 genuinely contradict, G2 at 30/30
+is unattainable by any grounded rule, and the resolution is an amendment rather than a
+quietly weakened gate. `REACHABLE` or `VACUOUS` everywhere means G2 at 30/30 remains
+attainable in principle.
 
 `R` remains undesigned, and no parameter set has been declared.
