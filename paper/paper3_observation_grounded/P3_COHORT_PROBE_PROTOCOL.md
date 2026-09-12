@@ -74,10 +74,12 @@ SELECT-only. Snapshot never patched. If a database’s schema is unknown,
 dump schema (no `SELECT *`) then freeze SQL, then run; do not edit SQL
 after seeing values.
 
-HPC boot of 2026-09-12 14:26+07 **TECHNICAL_ABORT** (`qemu-img` not
-on PATH). The written 0/16 is void. Not a Wave B score. `apply_gate`
-must not run on it. Wrapper now sources `qemu_datadir_wrap.sh` (same
-extracted QEMU Study 2 already used).
+HPC boots 14:26 (`qemu-img`) and 14:29 (stale `MYPCBENCH_OVMF_CODE`
+under `/mnt/data2/Vinh/...`) are **TECHNICAL_ABORT**, not scores.
+`.env` on this tree still carries node30 paths. `p3_cohort_hpc_guest_env.sh`
+drops any guest path that is not on disk, then resolves qcow2 / OVMF /
+QEMU from the HPC tree Study 2 already used. `apply_gate` stays off
+until `wave_b.json` status is `SCORED`.
 
 On HPC, tree `/data2/hpcshared/Vinh-/agent` (no agent keys):
 
