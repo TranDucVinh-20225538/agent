@@ -1,0 +1,794 @@
+[
+  {
+    "anchors": [
+      "ridge tarn fee"
+    ],
+    "component_id": "ridge_tarn_fee",
+    "family": "Locate",
+    "gold": "71.30",
+    "id": "C01",
+    "instruction": "Report the ridge tarn fee posted on the bothy grit sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/bothy_grit.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "tarn-ridge"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/ridge_note.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "scree fell due"
+    ],
+    "component_id": "scree_fell_due",
+    "family": "Locate",
+    "gold": "53.80",
+    "id": "C02",
+    "instruction": "Report the scree fell due on the glen peat sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/glen_peat.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "fell-scree"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/scree_quote.eml"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "bothy skipper"
+    ],
+    "component_id": "bothy_skipper",
+    "family": "Locate",
+    "gold": "Ivo Nair",
+    "id": "C03",
+    "instruction": "Name the bothy skipper listed on the tarn crag card.",
+    "kind": "entity",
+    "locator": {
+      "field": "skipper",
+      "key": "skipper",
+      "left": "Notes/tarn_crag.txt",
+      "left_where": [],
+      "op": "select_join",
+      "right": "Finance/bothy_roster.csv"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "wire status"
+    ],
+    "component_id": "north_tor_wire",
+    "family": "Locate",
+    "gold": "pale",
+    "id": "C04",
+    "instruction": "Give the wire status for the north tor dock slip.",
+    "kind": "categorical",
+    "locator": {
+      "field": "wire_status",
+      "key": "location",
+      "left": "Notes/north_tor.txt",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "north-tor"
+        }
+      ],
+      "op": "select_join",
+      "right": "Calendar/tor_watch.ics"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "bracken howe fee"
+    ],
+    "component_id": "bracken_howe_fee",
+    "family": "Locate",
+    "gold": "44.15",
+    "id": "C05",
+    "instruction": "Report the bracken howe fee on the kist clough sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/kist_clough.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "howe-bracken"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/bracken_note.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "glen wold crate"
+    ],
+    "component_id": "glen_crate_sum",
+    "family": "Compute",
+    "gold": "39.25",
+    "id": "C06",
+    "instruction": "Sum the glen wold crate costs that the bothy grit note lists.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/crate_wold.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "glen"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/bothy_grit_list.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "tor beck crate"
+    ],
+    "component_id": "tor_crate_sum",
+    "family": "Compute",
+    "gold": "39.25",
+    "id": "C07",
+    "instruction": "Sum the tor beck crate costs that the ridge note lists.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/tor_crates.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "tor"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/ridge_list.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "crag grit crate"
+    ],
+    "component_id": "crag_bin_sum",
+    "family": "Compute",
+    "gold": "16",
+    "id": "C08",
+    "instruction": "Sum the crag grit crate counts that the peat roster lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "qty",
+      "key": "sku",
+      "left": "Finance/crag_counts.csv",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "crag"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/peat_roster.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "kist clough shift"
+    ],
+    "component_id": "kist_hours_sum",
+    "family": "Compute",
+    "gold": "13",
+    "id": "C09",
+    "instruction": "Sum the kist clough shift hours that the howe card lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "hours",
+      "key": "shift",
+      "left": "Finance/kist_hours.csv",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "kist"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/howe_card.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "beck peat crate"
+    ],
+    "component_id": "beck_qty_sum",
+    "family": "Compute",
+    "gold": "16",
+    "id": "C10",
+    "instruction": "Sum the beck peat crate counts that the grit roster lists.",
+    "kind": "integer",
+    "locator": {
+      "field": "qty",
+      "key": "sku",
+      "left": "Finance/beck_counts.csv",
+      "left_where": [
+        {
+          "col": "site",
+          "eq": "beck"
+        }
+      ],
+      "op": "sum_join",
+      "right": "Notes/grit_roster.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "live ridge crate"
+    ],
+    "component_id": "live_ridge_crate",
+    "family": "Reconcile",
+    "gold": "48.70",
+    "id": "C11",
+    "instruction": "Report the live ridge crate total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/ridge_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "ridge-crate"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/ridge_quote.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "ridge-crate"
+        }
+      ]
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "live scree peat"
+    ],
+    "component_id": "live_scree_peat",
+    "family": "Reconcile",
+    "gold": "62.45",
+    "id": "C12",
+    "instruction": "Report the live scree peat total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/scree_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "scree-peat"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/scree_mail.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "scree-peat"
+        }
+      ]
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "live glen grit"
+    ],
+    "component_id": "live_glen_clerk",
+    "family": "Reconcile",
+    "gold": "Rune Pell",
+    "id": "C13",
+    "instruction": "Name the live glen grit clerk from the roster sheet, not the mail copy.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "post",
+      "left": "Finance/clerk_live.csv",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "glen-grit"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/clerk_copy.eml",
+      "right_where": [
+        {
+          "col": "post",
+          "eq": "glen-grit"
+        }
+      ]
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "live kist peat"
+    ],
+    "component_id": "live_kist_mark",
+    "family": "Reconcile",
+    "gold": "keen",
+    "id": "C14",
+    "instruction": "Give the live kist peat mark from the yard card, not the mail mark.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "bin",
+      "left": "Notes/yard_live.txt",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "kist-peat"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/yard_mark.eml",
+      "right_where": [
+        {
+          "col": "bin",
+          "eq": "kist-peat"
+        }
+      ]
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "live bracken bin"
+    ],
+    "component_id": "live_bracken_bin",
+    "family": "Reconcile",
+    "gold": "36.90",
+    "id": "C15",
+    "instruction": "Report the live bracken bin total from the finance sheet, not the mail quote.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "item",
+      "left": "Finance/bracken_live.csv",
+      "left_where": [
+        {
+          "col": "item",
+          "eq": "bracken-bin"
+        }
+      ],
+      "op": "live_not_stale",
+      "right": "Mail/bracken_quote.eml",
+      "right_where": [
+        {
+          "col": "item",
+          "eq": "bracken-bin"
+        }
+      ]
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "fell yard rush"
+    ],
+    "component_id": "fell_rush_cost",
+    "family": "Filter",
+    "gold": "27.40",
+    "id": "C16",
+    "instruction": "Report the crate cost for the fell yard rush crate on the grit sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/grit_sheet.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "fell"
+        },
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/rush_flag.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "glen yard sealed"
+    ],
+    "component_id": "glen_sealed_cost",
+    "family": "Filter",
+    "gold": "33.50",
+    "id": "C17",
+    "instruction": "Report the crate cost for the glen yard sealed crate on the peat sheet.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/peat_sheet.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "glen"
+        },
+        {
+          "col": "seal",
+          "eq": "yes"
+        }
+      ],
+      "op": "select_join",
+      "right": "Notes/sealed_index.txt"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "night tarn"
+    ],
+    "component_id": "night_tarn_clerk",
+    "family": "Filter",
+    "gold": "Odas Wynn",
+    "id": "C18",
+    "instruction": "Name the night tarn clerk tagged on the bothy index.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "tag",
+      "left": "Notes/bothy_index.csv",
+      "left_where": [
+        {
+          "col": "tag",
+          "eq": "night"
+        }
+      ],
+      "op": "select_join",
+      "right": "Mail/night_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "north tor dock"
+    ],
+    "component_id": "long_north_mark",
+    "family": "Filter",
+    "gold": "still",
+    "id": "C19",
+    "instruction": "Give the slip mark for the long north tor dock berth.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "summary",
+      "left": "Finance/slip_marks.csv",
+      "left_where": [
+        {
+          "col": "dock",
+          "eq": "north"
+        },
+        {
+          "col": "length",
+          "eq": "long"
+        }
+      ],
+      "op": "select_join",
+      "right": "Calendar/berth_watch.ics"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "rush fell watch"
+    ],
+    "component_id": "rush_hours",
+    "family": "Filter",
+    "gold": "13",
+    "id": "C20",
+    "instruction": "Report the shift hours for the rush fell watch on the clough card.",
+    "kind": "integer",
+    "locator": {
+      "field": "hours",
+      "key": "summary",
+      "left": "Calendar/fell_watch.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "fell"
+        }
+      ],
+      "op": "select_join",
+      "right": "Notes/rush_list.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "glen grit shifts"
+    ],
+    "component_id": "glen_shift_count",
+    "family": "Tally",
+    "gold": "6",
+    "id": "C21",
+    "instruction": "Count the glen grit shifts on the calendar that also appear on the peat roster.",
+    "kind": "integer",
+    "locator": {
+      "field": "summary",
+      "key": "summary",
+      "left": "Calendar/glen_shifts.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "glen"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/peat_names.txt"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "rush tarn notes"
+    ],
+    "component_id": "rush_tarn_count",
+    "family": "Tally",
+    "gold": "7",
+    "id": "C22",
+    "instruction": "Count the rush tarn notes in the mail that also appear on the grit sheet.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Mail/tarn_notes.eml",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "count_join",
+      "right": "Finance/grit_mail.csv"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "bothy peat shifts"
+    ],
+    "component_id": "bothy_peat_count",
+    "family": "Tally",
+    "gold": "8",
+    "id": "C23",
+    "instruction": "Count the bothy peat shifts on the calendar that also appear on the kist card.",
+    "kind": "integer",
+    "locator": {
+      "field": "summary",
+      "key": "summary",
+      "left": "Calendar/bothy_shifts.ics",
+      "left_where": [
+        {
+          "col": "location",
+          "eq": "bothy"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/kist_card.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "fell kist crates"
+    ],
+    "component_id": "fell_kist_count",
+    "family": "Tally",
+    "gold": "9",
+    "id": "C24",
+    "instruction": "Count the fell kist crates on the sheet that also appear on the howe note.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Finance/kist_sheet.csv",
+      "left_where": [
+        {
+          "col": "craft",
+          "eq": "kist"
+        }
+      ],
+      "op": "count_join",
+      "right": "Notes/howe_note.txt"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "wold grit notes"
+    ],
+    "component_id": "wold_mail_count",
+    "family": "Tally",
+    "gold": "6",
+    "id": "C25",
+    "instruction": "Count the wold grit notes in the mail that also appear on the clough sheet.",
+    "kind": "integer",
+    "locator": {
+      "field": "sku",
+      "key": "sku",
+      "left": "Mail/wold_notes.eml",
+      "left_where": [
+        {
+          "col": "rush",
+          "eq": "yes"
+        }
+      ],
+      "op": "count_join",
+      "right": "Finance/clough_sheet.csv"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "ridge bothy clerk"
+    ],
+    "component_id": "triple_ridge_clerk",
+    "family": "Multi-step",
+    "gold": "Sera Pell",
+    "id": "C26",
+    "instruction": "Name the ridge bothy clerk who appears on the grit sheet, the peat card, and the tarn tag.",
+    "kind": "entity",
+    "locator": {
+      "field": "clerk",
+      "key": "clerk",
+      "left": "Finance/grit_clerks.csv",
+      "left_where": [
+        {
+          "col": "post",
+          "eq": "ridge"
+        }
+      ],
+      "mid": "Notes/peat_card.txt",
+      "op": "select_join3",
+      "right": "Mail/tarn_tag.eml"
+    },
+    "slot": "C1-intended"
+  },
+  {
+    "anchors": [
+      "fell grit hand"
+    ],
+    "component_id": "triple_fell_hand",
+    "family": "Multi-step",
+    "gold": "Bram Kist",
+    "id": "C27",
+    "instruction": "Name the fell grit hand who appears on the wold sheet, the clough card, and the howe tag.",
+    "kind": "entity",
+    "locator": {
+      "field": "hand",
+      "key": "hand",
+      "left": "Finance/wold_hands.csv",
+      "left_where": [
+        {
+          "col": "yard",
+          "eq": "fell"
+        }
+      ],
+      "mid": "Notes/clough_card.txt",
+      "op": "select_join3",
+      "right": "Mail/howe_tag.eml"
+    },
+    "slot": "C2-intended"
+  },
+  {
+    "anchors": [
+      "tor peat mark"
+    ],
+    "component_id": "triple_tor_mark",
+    "family": "Multi-step",
+    "gold": "raw",
+    "id": "C28",
+    "instruction": "Give the tor peat mark that appears on the kist sheet, the beck card, and the glen tag.",
+    "kind": "categorical",
+    "locator": {
+      "field": "mark",
+      "key": "bin",
+      "left": "Finance/kist_marks.csv",
+      "left_where": [
+        {
+          "col": "bin",
+          "eq": "tor-peat"
+        }
+      ],
+      "mid": "Notes/beck_card.txt",
+      "op": "select_join3",
+      "right": "Mail/glen_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "clough grit fee"
+    ],
+    "component_id": "triple_clough_fee",
+    "family": "Multi-step",
+    "gold": "19.85",
+    "id": "C29",
+    "instruction": "Report the clough grit fee that appears on the live sheet, the peat index, and the bothy tag.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/clough_live.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "clough-grit"
+        }
+      ],
+      "mid": "Notes/peat_index.txt",
+      "op": "select_join3",
+      "right": "Mail/bothy_tag.eml"
+    },
+    "slot": "ordinary"
+  },
+  {
+    "anchors": [
+      "howe bracken due"
+    ],
+    "component_id": "triple_howe_due",
+    "family": "Multi-step",
+    "gold": "24.60",
+    "id": "C30",
+    "instruction": "Report the howe bracken due that appears on the live sheet, the tarn index, and the scree tag.",
+    "kind": "money_usd",
+    "locator": {
+      "field": "amount",
+      "key": "sku",
+      "left": "Finance/howe_live.csv",
+      "left_where": [
+        {
+          "col": "sku",
+          "eq": "howe-bracken"
+        }
+      ],
+      "mid": "Notes/tarn_index.txt",
+      "op": "select_join3",
+      "right": "Mail/scree_tag.eml"
+    },
+    "slot": "ordinary"
+  }
+]

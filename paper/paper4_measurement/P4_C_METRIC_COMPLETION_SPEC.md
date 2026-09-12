@@ -1,7 +1,7 @@
 # P4-C — Metric completion specification (design freeze)
 
-**Status: PHASE 1 CONSTRUCTION PASS. No agents. $0 API. P4-B immutable. Phase 2 BLOCKED.**  
-Spec authored 2026-09-12. Phase 1 recorded 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
+**Status: PHASE 2 SEALED. No agents. $0 API. P4-B immutable. Phase 3 BLOCKED.**  
+Spec authored 2026-09-12. Phase 1 recorded 2026-09-12. Phase 2 sealed 2026-09-12. `N_C`, floors, and G1–G6 are unchanged.
 
 This file opens a **new workstream**. It does not amend `P4_PREREG.md` §2,
 does not edit `p4_instrument.py`, does not change P4-B E1–E4, gold, worlds,
@@ -477,4 +477,35 @@ instrument_modified: false
 p4b_modified: false
 agents_run: 0
 api_spend_usd: 0
+```
+
+---
+
+## 18. Phase 2 gate (seal; $0)
+
+PASS iff C01–C30 locker-replay gold, T1–T8, quotas, CQ pre-gate 6/6, and
+hashed `adjudicator_c.py` + `transforms_c.py` with no per-id branch.
+No agents. No natural-τ scoring. Corpus not rewritten. RC unused discarded.
+
+Seal: `construction/sealed/P4C_PHASE2_SEAL.json`
+
+```yaml
+phase: 2
+workstream: P4-C
+status: SEALED
+next: PHASE_3_FLASH_PILOT
+next_status: BLOCKED
+N_C: 30
+n_pass: 30
+instrument_modified: false
+p4b_modified: false
+corpus_modified: false
+agents_run: 0
+api_spend_usd: 0
+instrument_sha256: c43a920a1501bed5e3fab0c56290d8ba30ded1e5f0693ef6b9affe24083e7d59
+adjudicator_c_sha256: 595b02f50a2ad968b56051bb4d0b8d8686697a29a94ac39afaf2e1d53b97a8b2
+transforms_c_sha256: e6a000c62413be724d6452c27dbf755defac8baa173ed146ea7d092778d2bcd3
+clusters_sha256: bd30104becac546169ce62f921e6079a3df758a9a0fccf95106f9aa59060352f
+worlds_sha256: b39c1e082a21c18f4a2b105e94586b3d0584b57af6c3a6904e50fa903ef75c4b
+gold_spec_sha256: dfe9e6a308bc5b21e59c8ca27f2182b7e7773441ba185012371dc2fc1fd8c2d8
 ```
