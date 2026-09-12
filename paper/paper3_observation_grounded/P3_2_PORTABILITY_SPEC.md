@@ -380,7 +380,7 @@ So the finding is a determinate obstruction to one route to G2, and a risk flag 
 other. It is **not** yet a proof that G1 and G2 contradict each other, and must not be
 written as one.
 
-### 12.4 Stage 2, implemented and pending execution
+### 12.4 Stage 2, method
 
 `scripts/p3_2_stage2_reachability.py` settles the open half by **exhaustion**. For each of
 the four it enumerates every literal substring of the task-side text up to 6 tokens — 786
@@ -405,4 +405,76 @@ is unattainable by any grounded rule, and the resolution is an amendment rather 
 quietly weakened gate. `REACHABLE` or `VACUOUS` everywhere means G2 at 30/30 remains
 attainable in principle.
 
-`R` remains undesigned, and no parameter set has been declared.
+The result is §12.5.
+
+### 12.5 Stage-2 result — no contradiction, with the evidence graded
+
+Run at `677702b`, read-only, no artefact written, exit 0.
+
+```
+aggregation-f037/top_sender              VACUOUS      4 legs, all None
+aggregation-f037/top_sender_count        VACUOUS      4 legs, all None
+contradiction-f004/batbucks_gme_shares   REACHABLE    7/966 spans survived
+counterfactual-f005/gme_avg_cost         REACHABLE    1/1117 spans survived
+```
+
+**Nothing is `UNREACHABLE`, so G2 at 30/30 is not provably blocked.** That is the
+determinate answer to the question stage 2 asked, and it is the basis for continuing. The
+two invariants do not contradict each other.
+
+The evidence is not of uniform quality, and recording it as if it were would overstate it.
+
+**`gme_avg_cost` is a genuine reachability.** The single surviving span is `'avg'`, and the
+frozen label is `avg(erage)? cost` — the optional group exists precisely because the corpus
+realises the term both ways, and the task text carries the abbreviated form. A generic rule
+with abbreviation handling could plausibly reach it. One survivor in 1117 candidates,
+0.09%, so the test was highly selective here.
+
+**`batbucks_gme_shares` is mixed.** `'in BatBucks'` is apt — tokenising the component id
+yields `batbucks`, which occurs in the task text, so a generic rule has a plausible path.
+But `'and I'` also survived, and that is coincidence. Coincidence is possible because the
+frozen values on this component are `None, None, 100`: a span need only fail to match twice
+and match once. 7 survivors in 966, 0.72%.
+
+**The more useful statement is where G2's difficulty is not.** Across these four
+components, **13 of 16** leg-values are `None`. G2 therefore constrains them mostly to
+"extract nothing", which is satisfied by any label that fails to match — though violated by
+one that matches, so the constraint is weak rather than absent. The stage-1 obstruction was
+never where G2's difficulty lies.
+
+### 12.6 An incidental finding about the frozen instrument
+
+`aggregation-f037`'s two components extracted **nothing on every leg**. Their hand-written
+labels — `top (inbox )?sender`, `most (emails|messages)`, `top_sender_count`,
+`message count`, `email count` — never fired in 0.6, 0.7, A-10 or §4.
+
+No published number changes, since a `None` extraction contributes nothing. But the
+effective count of label-sensitive components that can vary is **28, not 30**, and two
+entries of a 30-entry hand-written table were dead weight throughout. This is a third
+instance of the pattern A-15 named: the instrument's label layer contains content whose
+behaviour nobody had measured. G2's threshold is **not** restated; it remains 30/30.
+
+### 12.7 Where G2's difficulty concentrates — method, pending execution
+
+Stage 2 settled the four flagged components. It did not say where the constraint actually
+lives among the other 26. That is measurable on the calibration corpus before `R` exists,
+and knowing it would say what a grounded rule must get right rather than leaving it to be
+discovered during calibration.
+
+`scripts/p3_2_g2_concentration.py` extends the same exhaustion to all 30 label-sensitive
+Study 2 components. For each it reports two numbers, not a verdict dressed as a parameter:
+
+- **constraint weight** — how many calibration legs have a non-`None` frozen extraction
+- **selectivity** — how many grounded literal spans reproduce the frozen extraction
+  vector on every leg of that component
+
+A component that is valued on many legs and has few surviving spans is where G2's
+difficulty concentrates. A component that is `None` everywhere is `VACUOUS`, as §12.5
+already named. `UNREACHABLE` on any of the 30 would be a protocol contradiction stage 2
+could not have seen, and would be resolved by amendment, not by quietly weakening G2.
+
+It is not calibration: it declares no parameter and produces no `R`. A surviving span may
+**not** be adopted as a label (G1b). It reads only Study 2, which `R` is expressly
+permitted to be calibrated on. It writes nothing.
+
+`R` is still undesigned, and no parameter set has been declared.
