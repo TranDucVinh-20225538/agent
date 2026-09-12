@@ -111,12 +111,37 @@ fi
 # shellcheck disable=SC1091
 source "$A/scripts/qemu_datadir_wrap.sh"
 
+# Flash/env.py: -vnc :(PORT-5900). Display :1 is 5901 and is taken on
+# node002. Pick a free display 20–90. Do not kill the Flash QEMU.
+if [ -z "${MYPCBENCH_HOST_VNC_PORT:-}" ]; then
+  MYPCBENCH_HOST_VNC_PORT="$(python3 - <<'PY'
+import socket
+import sys
+for display in range(20, 91):
+    port = 5900 + display
+    s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.bind(("127.0.0.1", port))
+    except OSError:
+        s.close()
+        continue
+    s.close()
+    print(port)
+    sys.exit(0)
+sys.exit(1)
+PY
+)" || MYPCBENCH_HOST_VNC_PORT=""
+  export MYPCBENCH_HOST_VNC_PORT
+fi
+
 _missing=()
 command -v qemu-img >/dev/null || _missing+=("qemu-img")
 command -v qemu-system-x86_64 >/dev/null || _missing+=("qemu-system-x86_64")
 [ -f "${MYPCBENCH_QCOW2:-}" ] || _missing+=("MYPCBENCH_QCOW2=${MYPCBENCH_QCOW2:-unset}")
 [ -f "${MYPCBENCH_OVMF_CODE:-}" ] || _missing+=("MYPCBENCH_OVMF_CODE=${MYPCBENCH_OVMF_CODE:-unset}")
 [ -f "${MYPCBENCH_OVMF_VARS:-}" ] || _missing+=("MYPCBENCH_OVMF_VARS=${MYPCBENCH_OVMF_VARS:-unset}")
+[ -n "${MYPCBENCH_HOST_VNC_PORT:-}" ] || _missing+=("MYPCBENCH_HOST_VNC_PORT (no free display 20-90)")
 
 _hn="$(hostname -s 2>/dev/null || hostname || echo unknown)"
 echo "guest.env host=$_hn"
@@ -152,6 +177,8 @@ echo "guest.env OVMF_VARS=${MYPCBENCH_OVMF_VARS:-}"
 echo "guest.env EXTRACTED=${MYPCBENCH_QEMU_EXTRACTED:-}"
 echo "guest.env qemu-img=$(command -v qemu-img || echo MISSING)"
 echo "guest.env qemu-system=$(command -v qemu-system-x86_64 || echo MISSING)"
+echo "guest.env VNC_PORT=${MYPCBENCH_HOST_VNC_PORT:-unset} (display $((${MYPCBENCH_HOST_VNC_PORT:-5900} - 5900)))"
+echo "guest.env REAL_QEMU=${PREFIX:-$MYPCBENCH_QEMU_EXTRACTED}/usr/bin/qemu-system-x86_64"
 
 if [ "${#_missing[@]}" -gt 0 ]; then
   echo "TECHNICAL_ABORT missing: ${_missing[*]}"

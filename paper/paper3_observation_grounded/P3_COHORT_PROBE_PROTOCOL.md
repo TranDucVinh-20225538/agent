@@ -81,7 +81,10 @@ paths, then uses Study 2’s QEMU **8.2.2** tree
 (`/data2/cmdir/home/toandq/MyPCBench/.opt/qemu-8.2`) with that tree’s
 `LD_LIBRARY_PATH` / `QEMU_MODULE_DIR`. The older `.opt/qemu` extract is
 not the Study 2 stack. Preflight requires version 8.2.2, `ldd` clean,
-and host `node002` or `node004` (not `bright92`). `apply_gate` stays
+and host `node002` or `node004` (not `bright92`). The Wave B wrap
+calls the 8.2 **binary** (not `wrap/`), remaps `-vnc` to a unix socket
+even when `-L` is present, and sets `MYPCBENCH_HOST_VNC_PORT` to a
+free display 20–90 so Flash’s `:1` is not reused. `apply_gate` stays
 off until `wave_b.json` status is `SCORED`.
 
 On HPC, tree `/data2/hpcshared/Vinh-/agent` (no agent keys):
