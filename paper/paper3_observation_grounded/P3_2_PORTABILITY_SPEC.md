@@ -695,3 +695,35 @@ gold, no answer text). Components are not invented for the other tasks in the
 
 `scripts/p3_2_r.py` is the implementation. `scripts/p3_2_r_check.py` is G1, G1b,
 and the synthetic fixtures. Neither reads answer text.
+
+### 13.7 G2 runner
+
+`scripts/p3_2_g2.py`. Study 2 only. It does not open the sealed transcription, does
+not read validation answer text, does not modify `R`, and does not select a label
+from any audit.
+
+```
+selftest  →  pre-replay gates  →  materialise R on Study 2  →  escape
+          →  replace LABELS  →  FROZEN replay on the 134  →  compare  →  stop
+```
+
+Pre-replay, all required, else abort (this is not a G2 verdict):
+
+* `scripts/p3_2_r.py` has no uncommitted edits; its blob is printed and is the
+  version the verdict is about
+* frozen extractor / apply / 0.7 classifier blobs match `p3_1_repair.FROZEN_BLOBS`
+* live calibration components are exactly the 30 (`kind ≠ state`)
+* population is the frozen 134 rows / 57 legs
+* G1b still holds on `R`'s source after materialisation
+* every injected label set equals `R.escaped_labels(...)` for that component;
+  `LABELS` contains nothing else
+
+Compare, under `FROZEN` only: the 134-row categorisation, the 0.7 cause taxonomy
+split by baseline category, and the published FROZEN row of A-10 (sensitivity
+20/59, abstention 89/134, confident-wrong 25/45). Shortfall is counted in
+components: a component is reconstructed iff every one of its rows has the same
+`reported` and `extractor_match` as 0.6.
+
+G2 FAIL is a verdict, not a prompt. The runner prints `G2 FAIL — N components
+not reconstructed` and exits. It does not suggest a parameter, an exception, or
+a second run. Nothing is written.
