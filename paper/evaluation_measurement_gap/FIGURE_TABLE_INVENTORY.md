@@ -1,13 +1,13 @@
-# Figure / table inventory (v0.3)
+# Figure / table inventory (v0.4)
 
 Only existing rasters plus TikZ from locked counts. No new data.
 
-## Raster (P1)
+## Raster (P1, appendix only)
 
-| File | In v0.3 | Notes |
+| File | In v0.4 | Notes |
 |---|---|---|
-| `out/stage4_counterfactual_analysis_final/score_pairs_primary.png` | Fig `fig:s1pairs` | Primary lanes; not pooled |
-| `out/stage4_counterfactual_analysis_final/gold_state_change.png` | Fig `fig:gold` | Protocol check |
+| `out/stage4_counterfactual_analysis_final/score_pairs_primary.png` | Appendix Fig `fig:s1pairs` | Primary lanes; not pooled |
+| `gold_state_change.png` | omitted | File is a Type A/B classification chart including non-primary lanes; caption in v0.3 did not match the image |
 | `invariance_by_tier.png` | omitted | Avoid invariance-headline |
 | `score_pairs_ablation.png` | omitted | Ablation not primary |
 
@@ -15,19 +15,26 @@ Only existing rasters plus TikZ from locked counts. No new data.
 
 | ID | Content | Status |
 |---|---|---|
-| `fig:gap` | \(\tau\to I\to P\to E\to Y\to S\) with three organizing categories | Drawn |
-| `fig:p4seq` | P4-B → C → C2 → D constructive sequence | Drawn |
+| `fig:gap` | Horizontal \(\tau\to I\to P\to E\to Y\to S\) with P3/P4 marks | Main Fig 1 |
+| `fig:p4seq` | removed | Sequence is Table 4 + §5 prose |
 
-## Tables
+## Main tables
 
 | ID | Content |
 |---|---|
-| `tab:s1` | S1 Type A/B existence sample |
-| `tab:coverage` | S2 DONE, \|A\|, S⁰, STS |
+| `tab:map` | Evidence hierarchy (core / secondary / supporting) |
 | `tab:causes` | P3 M1a–M4 |
-| `tab:repairs` | P3 layer repairs |
-| `tab:p4seq` | Constructive boundaries |
-| `tab:core` | Evidence for the central contribution |
+| `tab:repairs` | Compact FROZEN / R-AGG / ALL |
+| `tab:p4seq` | Three constructive boundaries |
+| `tab:slots` | Eight reporting questions |
+
+## Appendix tables
+
+| ID | Content |
+|---|---|
+| `tab:s1` | S1 Type A/B existence sample + CIs in prose |
+| `tab:coverage` | S2 DONE, \|A\|, S⁰, STS |
+| `tab:repairs-full` | Six-configuration repair diagnostic |
 
 ## Do not create
 

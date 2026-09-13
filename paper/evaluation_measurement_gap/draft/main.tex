@@ -1,7 +1,6 @@
-% Full-paper draft v0.3 (venue unset). Major revision: narrower contribution.
+% Full-paper draft v0.4 (venue unset). Final structural revision: center P3; compress P1/P2; fold P4-M.
 % Numbers: paper/evaluation_measurement_gap/EVIDENCE_MAP.md
 % Wording lock: CLAIM_LEDGER.md
-% Revision: REVISION_PLAN.md
 % Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
 \documentclass[11pt]{article}
 
@@ -18,6 +17,8 @@
 \usepackage{enumitem}
 \usepackage{caption}
 \usepackage{natbib}
+\usepackage{array}
+\usepackage{float}
 
 \graphicspath{{../../../out/stage4_counterfactual_analysis_final/}}
 
@@ -32,88 +33,81 @@
 \title{From Trajectories to Evidence:\\
 Auditing Observation Loss and Identifiability\\
 in Computer-Use Agent Evaluation}
-\author{Draft v0.3 --- authors unset --- venue unset}
+\author{Draft v0.4 --- authors unset --- venue unset}
 \date{13 September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Computer-use-agent reliability scores are evaluation outputs, not direct observations of episodes.
-That fact is established background: validity theory already treats scores as interpretations requiring support, and recent CUA audits already treat a score as the output of a pipeline.
-This paper instead freezes an evaluation instrument and treats the instrument as the experimental object.
-In a locked trajectory-to-evidence transformation, 39 of 59 rows with recoverable gold were missed, including 13 cases in which gold had already entered the extractor's accumulator and was then discarded.
-A pre-specified permissive repair recovered eight additional correct matches but released eighteen wrong ones; composing all repairs was worse than leaving the extractor frozen.
-Constructing an observation-grounded last-text measurement then exposed further boundaries: 40 completed episodes with 30 abstentions; unstructured last-text coverage $0.1667$; interface Form $0.9333$ with two-sided correspondence unevaluable; and a competent sample of 30 HIT and 0~MISS ($I_{CC}=0$).
-We do not propose a replacement reliability metric.
-A reliability number in this frozen setting should be accompanied by its observation channel, evidence rule, abstention policy, non-leakage constraint, and identifiability status before it is interpreted as a reliability claim.
+Computer-use-agent (CUA) reliability scores depend on how an evaluation pipeline observes a trajectory and turns that observation into evidence.
+Prior CUA work already audits benchmark construction, protocol shortcuts, last-frame judges, and wrong FAIL verdicts.
+This paper asks a narrower question: what happens \emph{inside} a frozen evaluator, after evidence has been collected and before a final verdict is issued?
+In a locked MyPCBench trajectory-to-evidence transformation, 39 of 59 rows with recoverable gold were missed, including 13 cases in which gold had already entered the extractor's \texttt{found} set and was then discarded.
+A pre-specified permissive aggregation repair released eight additional correct matches together with eighteen incorrect matches; composing all repairs was worse than leaving the extractor frozen (10 vs.\ 20 recovered rows).
+Constructing an explicit last-text observation protocol then left two-sided correspondence unidentifiable in a sample of 30 HIT and 0~MISS.
+We do not propose a replacement reliability metric, and we do not estimate deployed CUA reliability.
+In this frozen setting, an evaluation report should make observation, evidence, abstention, and identifiability explicit before a number is read as a reliability claim.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-A computer-use-agent (CUA) reliability score is an evaluation output, not a direct observation of the episode.
-That fact is established background, not this paper's contribution.
+A computer-use-agent reliability score is the output of an evaluation pipeline, not a direct observation of the episode.
+That fact is established background~\citep{dong2026misscore,kane2013validating,messick1995validity}.
 Leaderboards compress trajectories into binary outcomes or scalars~\citep{jang2026mypcbench,xie2024osworld,zhou2024webarena}.
-The scalar is produced by a pipeline
-\begin{equation}
-\tau \;\longrightarrow\; I \;\longrightarrow\; P \;\longrightarrow\; E \;\longrightarrow\; Y \;\longrightarrow\; S
-\label{eq:pipe}
-\end{equation}
-(Figure~\ref{fig:gap}): a declared observation channel $I$, a parser $P$, an evidence classification $E$, a correspondence decision $Y$, and a reported score or selection $S$.
-Dong et al.\ already treat a CUA score as the output of such a pipeline and show that public FAIL verdicts can be wrong~\citep{dong2026misscore}.
-Validity theory already treats scores as interpretations and uses that require supporting argument~\citep{kane1992argument,kane2013validating,messick1995validity}.
+The scalar is produced by a declared observation channel $I$, a parser $P$, an evidence classification $E$, a correspondence decision $Y$, and a reported score or selection $S$ (Figure~\ref{fig:gap}).
 
-Existing work has documented evaluator error, protocol shortcuts, last-frame observation loss, and construct-validity failures in benchmarks~\citep{dong2026misscore,shao2026protocolvalidity,xue2025illusion,rosset2026verifiers,bean2025measuring}.
-The remaining question is narrower.
-What happens when the evaluation \emph{instrument} itself is frozen and treated as the experimental object---not the agent, and not the published verdict?
-
-We show four things in one frozen CUA evaluation setting.
-Recoverable typed evidence can be discarded after the extractor has already collected it.
-Making that extractor more permissive need not restore the intended measurement: in this instrument a plurality repair released more wrong matches than correct ones.
-Constructing an observation-grounded last-text measurement then exposes further boundaries: completion without determining evidence, interface compliance without two-sided identifiability, and competence without negative variation.
-A reliability number should therefore be accompanied by an explicit evidential basis---observation channel, evidence rule, abstention, non-leakage, and identifiability---before it is interpreted as a reliability claim.
-
-We do not claim a first measurement framework for agents, a first demonstration that scores are constructed, or that existing CUA benchmarks are invalid.
-We do not propose a replacement reliability metric.
-The object of evaluation changes from ``which agent scores highest'' to ``what this frozen protocol can actually justify.''
-
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-  font=\scriptsize,
-  box/.style={draw, rounded corners=1pt, align=center, inner sep=3.2pt, minimum width=3.35cm},
+  font=\small,
+  box/.style={draw, rounded corners=1pt, align=center, inner sep=2.6pt,
+              minimum height=8.4mm, minimum width=2.02cm},
   arr/.style={-{Latex}, thick},
-  dasharr/.style={-{Latex}, thick, dashed},
-  note/.style={font=\scriptsize, align=left, text width=4.5cm}
+  lab/.style={font=\scriptsize, align=center, text width=2.02cm}
 ]
-\node[box] (world) {World / task};
-\node[box, below=3.6mm of world] (tau) {Agent trajectory $\tau$};
-\node[box, below left=7mm and 11mm of tau] (obs) {Observable in $\tau$};
-\node[box, below right=7mm and 11mm of tau] (hid) {Unobserved state};
-\node[box, below=3.6mm of obs] (I) {Observation $I$};
-\node[box, below=3.6mm of I] (P) {Parser $P$};
-\node[box, below=3.6mm of P] (E) {Evidence $E$};
-\node[box, below=3.6mm of E] (Y) {Correspondence $Y$};
-\node[box, below=3.6mm of Y] (S) {Score / decision $S$};
-\draw[arr] (world) -- (tau);
-\draw[arr] (tau) -- (obs);
-\draw[dasharr] (tau) -- (hid);
-\draw[arr] (obs) -- (I);
+\node[box] (tau) {trajectory $\tau$};
+\node[box, right=4.8mm of tau] (I) {observation $I$};
+\node[box, right=4.8mm of I] (P) {parser $P$};
+\node[box, right=4.8mm of P] (E) {evidence $E$};
+\node[box, right=4.8mm of E] (Y) {corr.\ $Y$};
+\node[box, right=4.8mm of Y] (S) {score $S$};
+\draw[arr] (tau) -- (I);
 \draw[arr] (I) -- (P);
 \draw[arr] (P) -- (E);
 \draw[arr] (E) -- (Y);
 \draw[arr] (Y) -- (S);
-\draw[dasharr] (hid.south) |- ++(0,-6mm) -| (E.east);
-\node[note, right=3mm of S] {\textbf{Organizing categories}\\[2pt]
-Outcome: $S$ $\leftrightarrow$ world correspondence\\
-Observation: $\tau$-evidence $\leftrightarrow$ $I$\\
-Justification: recovered $E$ $\leftrightarrow$ claim\\[2pt]
-\emph{Analytic labels, not new laws.}};
+\node[lab, below=2.8mm of I] {P4: last-text\\(no fallback)};
+\node[lab, below=2.8mm of P] {P3: discard\\after \texttt{found}};
 \end{tikzpicture}
-\caption{A reliability score is constructed along $\tau\to I\to P\to E\to Y\to S$. Unobserved world state may be the intended measurand; it is not automatically in $I$. The three gaps are organizing categories for the evidence below, not a claim that this paper discovered three fundamental laws of measurement.}
+\caption{A reliability score is constructed along $\tau\to I\to P\to E\to Y\to S$.
+The empirical core (Section~\ref{sec:s3}) is discard \emph{after} gold has entered the parser's accumulator.
+The constructive sequence (Section~\ref{sec:p4}) makes $I$ explicit and records where two-sided correspondence remains unidentifiable.
+Three analytic labels---outcome, observation, justification---organize that evidence; they are not proposed as new laws of measurement.}
 \label{fig:gap}
 \end{figure}
+
+Existing work has already shown that those pipelines can fail.
+Dong et al.\ treat a CUA score as a pipeline output and find that public FAIL verdicts can be wrong~\citep{dong2026misscore}.
+Shao et al.\ show that agent-benchmark scores support capability claims only when the protocol keeps the intended capability necessary for success~\citep{shao2026protocolvalidity}.
+Xue et al.\ and Rosset et al.\ document last-frame and overloaded-trajectory observation loss in visual web judging~\citep{xue2025illusion,rosset2026verifiers}.
+Bean et al.\ give an operational construct-validity checklist for LLM benchmarks~\citep{bean2025measuring}.
+
+The remaining question is narrower.
+What happens when the evaluation \emph{instrument} itself is frozen and treated as the experimental object---not the agent, and not the published verdict?
+In particular, what happens \emph{inside} a frozen observation-to-evidence transformation, after evidence has been collected and before a final PASS/FAIL is issued?
+
+In this frozen MyPCBench extractor, determining gold was present in the trajectory and had already entered the intermediate \texttt{found} set, but fail-closed aggregation discarded it before the correspondence decision.
+Of 59 rows with recoverable gold, 39 were missed; 13 of those 39 misses are this post-collection discard.
+A pre-specified permissive aggregation repair then released eight additional correct matches together with eighteen incorrect matches.
+Permissiveness did not restore the intended measurement.
+
+We then asked what happens if observation and identifiability are made explicit rather than left implicit in an existing extractor.
+Under a declared last-text channel with no screenshot or tool-trace fallback, completion need not yield determining evidence, interface compliance need not identify a two-sided estimand, and a competent sample of 30 HIT and 0~MISS left two-sided correspondence unidentifiable under the pre-locked rule.
+
+This is an instrument-level audit of a frozen CUA evaluator, with a constructive check on what an explicit observation protocol can still fail to identify.
+It is not a general theory of CUA reliability, not a replacement metric, and not a claim that existing public benchmarks are invalid.
 
 \section{Background and related work}
 \label{sec:rw}
@@ -123,12 +117,10 @@ Justification: recovered $E$ $\leftrightarrow$ claim\\[2pt]
 
 Desktop and web CUAs are scored in OSWorld, WebArena, VisualWebArena, and MyPCBench~\citep{xie2024osworld,zhou2024webarena,koh2024visualwebarena,jang2026mypcbench}.
 WebArena-Verified re-audits web tasks toward deterministic, offline evaluators~\citep{hattami2025webarena}.
-Tool-using agents are scored by database-state match and multi-trial reliability~\citep{yao2025taubench}.
-AppWorld grades interactive coding by state-based unit tests, including collateral damage~\citep{trivedi2024appworld}.
-LLM-as-judge protocols and their prompt sensitivity are documented for chat evaluation~\citep{zheng2023judging,bellibatlu2026judgesense}.
+Tool-using and interactive-coding agents are scored by state match, multi-trial reliability, and collateral-damage tests~\citep{yao2025taubench,trivedi2024appworld}.
 
-Shao et al.\ show that agent-benchmark scores support capability claims only when the protocol keeps the intended capability necessary for success; they audit 2{,}385 traces across 15 benchmarks for exposure, exploitation, and score inflation~\citep{shao2026protocolvalidity}.
-That is protocol validity in the sense of shortcuts and invalid scoring paths.
+Shao et al.\ audit 2{,}385 traces across 15 benchmarks for exposure, exploitation, and score inflation~\citep{shao2026protocolvalidity}.
+That is protocol validity: shortcuts and invalid scoring paths.
 This paper does not rest on the claim that ``scores justify claims,'' which Shao already makes.
 It asks a different grain: once a protocol is frozen, what evidence does its observation channel recover, and can that evidence identify the correspondence claim one wanted to make?
 
@@ -138,21 +130,18 @@ It asks a different grain: once a protocol is frozen, what evidence does its obs
 We do not invent validity theory.
 Messick treats validity as scientific inquiry into score meaning and use~\citep{messick1995validity}.
 Cronbach and Meehl locate construct validity in the network of inferences around a test~\citep{cronbach1955construct}.
-Kane's argument-based approach is the principle we rely on: it is the proposed interpretations and uses of scores that are validated, not the scores themselves; more ambitious claims require more support; validating an interpretation does not automatically validate a use~\citep{kane1992argument,kane2013validating}.
-Jacobs and Wallach import measurement modeling into computational systems: unobservable constructs are operationalized, and harms follow from mismatches between construct and operationalization~\citep{jacobs2021measurement}.
-Raji et al.\ and Bowman and Dahl diagnose construct-validity and benchmarking failures when a finite task is treated as a general capability measure~\citep{raji2021everything,bowman2021fix}.
-Bean et al.\ review 445 LLM benchmarks and give an operational construct-validity checklist~\citep{bean2025measuring}.
+Kane's argument-based approach is the principle we rely on: it is the proposed interpretations and uses of scores that are validated, not the scores themselves~\citep{kane1992argument,kane2013validating}.
+Jacobs and Wallach import measurement modeling into computational systems~\citep{jacobs2021measurement}.
+Raji et al., Bowman and Dahl, and Bean et al.\ diagnose construct-validity and benchmarking failures when a finite task is treated as a general capability measure~\citep{raji2021everything,bowman2021fix,bean2025measuring}.
 
 What this paper adds is not a new validity framework.
-It is a CUA-specific operationalization at the trajectory--observation--evidence grain, under a \emph{frozen} observation protocol, with an empirical isolation of post-collection discard, a signed repair experiment, explicit abstention as missing correspondence, and a constructive demonstration that a two-sided claim can remain unidentifiable under competent execution.
-Notation for that operationalization is bookkeeping, not novelty.
+It is an instrument-level audit at the trajectory--observation--evidence grain, under a frozen protocol, with an isolation of post-collection discard and a signed repair experiment.
 
 \subsection{Evaluator and observation audits}
 \label{sec:rw-audit}
 
 Dong et al.\ is the closest CUA paper and must be confronted directly~\citep{dong2026misscore}.
 They state that a score is the output of a pipeline in which tasks can be stale, trajectories can omit decisive visual evidence, evaluators can reject valid alternatives, and aggregate reports can hide the cause of failure.
-They organize reliability across task construction, trajectory observation, scoring, and reporting.
 They then retrospectively audit 150 public \emph{failure-scored} trajectories from five benchmarks and find that 15.3\% of FAIL verdicts are wrong (10.7\% evaluator false negatives; 4.7\% broken tasks), with a further 3.3\% unclear from the released evidence.
 That is a verdict audit: is the published FAIL correct?
 
@@ -164,14 +153,12 @@ They do not freeze a last-text typed extractor and measure discard after gold ha
 WeaveBench reports that outcome-only grading overestimates pass rate relative to a trajectory-aware judge~\citep{li2026weavebench}.
 L\`u et al.\ make automatic trajectory judges themselves the object of evaluation~\citep{lu2025agentrewardbench}.
 Cao et al.\ document procedure-aware ``corrupt success''; Advani documents false success as confident closure without the implied outcome~\citep{cao2026corruptsuccess,advani2026falsesuccess}.
-Turk shows, in clinical LLM/agent evaluation, that a coverage score and a purpose-built tracking score can rank models differently under paired interventions~\citep{turk2026counterfactualclinical}.
 
-\subsection{Positioning of this work}
+\subsection{Positioning}
 \label{sec:rw-pos}
 
-This is not ``just benchmark auditing,'' but the distinction is not unprecedented in spirit.
 Dong audits \emph{verdicts} on public traces.
-We audit a \emph{frozen transformation} $I\to P\to E$ on trajectories we already hold, then try to \emph{construct} an observation-grounded measurement and record where construction stops.
+We audit a \emph{frozen transformation} $I\to P\to E$ on trajectories we already hold, then construct an observation-grounded measurement and record where construction stops.
 
 \begin{quote}
 Dong: retrospective verdict audit over public CUA traces, focused on whether released FAIL verdicts are correct.\\[4pt]
@@ -181,79 +168,340 @@ This paper: treats the evaluation instrument as the experimental object, freezes
 Shao's axis is exposure $\to$ exploitation $\to$ misleading shortcuts.
 Ours is observation $\to$ evidence $\to$ correspondence, including measurement loss after evidence has become available.
 Neither axis subsumes the other.
-We do not claim that treating evaluation as measurement is new; we claim a concrete instrument-level result in a frozen CUA setting.
 
-\section{Evaluation as an observation-to-claim pipeline}
+\section{The instrument as the object of analysis}
 \label{sec:measurement}
 
-Equation~\eqref{eq:pipe} is the object of analysis, not a newly discovered law.
-$I$ is the declared observation channel (in the constructive studies: last assistant text, never screenshots or tool traces as a silent fallback).
+Equation~\eqref{eq:pipe} is the object of analysis, not a newly discovered law:
+\begin{equation}
+\tau \;\longrightarrow\; I \;\longrightarrow\; P \;\longrightarrow\; E \;\longrightarrow\; Y \;\longrightarrow\; S.
+\label{eq:pipe}
+\end{equation}
+$I$ is the declared observation channel.
+In the constructive studies of Section~\ref{sec:p4}, $I$ is last assistant text, never screenshots or tool traces as a silent fallback.
+That channel is a declared severe protocol, not a claim that last-text is canonical for CUA evaluation.
 $P$ recovers at most one unique candidate span, or none.
 $E$ is DETERMINING iff that span parses as specification-kind $k$, not iff it equals $\mathrm{value}(L)$.
 $Y$ is HIT/MISS only when $E$ is DETERMINING and $L$ is independent of this episode's answer.
+ABSTAIN is missing correspondence measurement, not task failure.
 $S$ is any scalar or selection computed from $Y$, or from a coarser rubric that never exposes $Y$.
 
-Three analytic categories organize the evidence.
-They are not proposed as a new ontology, and they overlap Dong's construction / observation / scoring / reporting stages~\citep{dong2026misscore}.
-We use them because they match the grain of this programme:
+Three analytic categories organize the evidence below.
+They are not a new ontology, and they overlap Dong's construction / observation / scoring / reporting stages~\citep{dong2026misscore}:
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
 \item \textbf{Outcome gap:} $S$ need not correspond to independently measured world tracking.
 \item \textbf{Observation gap:} evidence in $\tau$ need not enter $I$ or survive $P$.
 \item \textbf{Justification gap:} recovered evidence need not identify the reliability claim one wanted to make (including two-sided correspondence).
 \end{itemize}
-Where ``measurement gap'' would be read as a contribution of measurement theory, we mean only this local evaluation-measurement gap: a mismatch among score, observation, and justified claim under a declared protocol.
+We use the labels because they match the grain of the audit.
+Where ``measurement gap'' would be read as a contribution of measurement theory, we mean only this local mismatch among score, observation, and justified claim under a declared protocol.
 
-Two distinctions are load-bearing and are interpretive principles, not novel theorems.
-
-\paragraph{Justification is not negation.}
-\[
-\neg \Just(C\mid \tau,I) \;\neq\; \mathrm{False}(C).
-\]
-If the pipeline cannot recover the evidence a claim requires, the claim is unjustified \emph{from this measurement}.
-That is not a demonstration that the agent failed, cheated, or ``made no claim.''
-The inequality is the ordinary consequence of separating evidential justification from truth.
-
-\paragraph{What is in the trajectory is not what the instrument sees.}
-Write $\mathrm{Observable}_{\tau}(\tau)$ for evidence present in communication, and $\mathrm{Observable}_{I}(\tau)$ for what the frozen interface extracts.
-These sets need not coincide.
-A typed fragment that exists in $\tau$ but is not recovered by $I/P$ is \emph{measurement loss}, not absence of a claim.
-
-We write
+As formal bookkeeping, write
 \begin{equation}
 \mathcal{M}(\tau,\mathcal{I})
 =\{\,C:\ \text{the evidence $C$ requires is recoverable under $I$ and the inference is non-circular}\,\}
 \label{eq:M}
 \end{equation}
-as notation for the set of claims justified under a declared observation protocol.
-It is not a reliability metric $R(\tau)$, not a validity theorem, and not an empirical implementation (none was run).
+for the set of reliability claims justified under a declared observation protocol.
+$\mathrm{Observable}_{\tau}(\tau)$ need not equal $\mathrm{Observable}_{I}(\tau)$: a typed fragment can exist in the trajectory and still be missed by the instrument.
+\[
+\neg \Just(C\mid \tau,I) \;\neq\; \mathrm{False}(C).
+\]
+If the pipeline cannot recover the evidence a claim requires, the claim is unjustified \emph{from this measurement}; that is not a demonstration that the agent failed.
+$\mathcal{M}$ is not a reliability metric, not a new validity theory, not a theorem of reliability, and not empirically validated.
+Typed correspondence---$Y=\mathrm{HIT}$ implies a kind-parse matching $L$---is a specification-level implication of the declared HIT rule under no-leakage maps, not a proof.
 
-\section{Study 1: Score--outcome dissociation}
-\label{sec:s1}
+Table~\ref{tab:map} is the evidence map.
+There is one core empirical result.
 
-Can movement or stability of an evaluation score be interpreted as corresponding change in agent--world behavior?
+\begin{table}[H]
+\centering
+\caption{Evidence map. Populations are not added. This is not a prevalence table.}
+\label{tab:map}
+\small
+\begin{tabular}{@{}llp{0.58\columnwidth}@{}}
+\toprule
+Role & Source & Licensed reading \\
+\midrule
+Core & P3 & Post-collection discard (M1a) and signed repair non-dominance in one frozen extractor \\
+Secondary & P4 & Constructive observation/identifiability boundaries, especially Form$\neq$two-sided ID and a HIT-only sample \\
+Supporting & P1, P2 & Score movement/stability need not track the world; evaluation can change the evidential basis of a comparison \\
+Formal & $\mathcal{M}(\tau,\mathcal{I})$ & Bookkeeping for claims justified under a declared $I$ \\
+Consequence & Table~\ref{tab:slots} & Eight reporting questions; not a validated standard \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-This study is an existence / dissociation demonstration, not a prevalence estimate.
-We hold instruction, interface, and judge fixed, and apply a locked intervention to a pre-registered determining set in a seeded MyPCBench guest~\citep{jang2026mypcbench}.
+\subsection{Supporting evidence: score and eligibility dissociation}
+\label{sec:support}
+
+Before inspecting the extractor, two supporting checks on the same MyPCBench family show why looking inside the instrument is worthwhile.
+They are existence and eligibility demonstrations, not prevalence estimates, and they are not the contribution.
+Detailed counts, intervals, and figures are in Appendix~\ref{app:s1} and Appendix~\ref{app:s2}.
+
+Study~1 holds instruction, interface, and judge fixed and applies a locked intervention to a pre-registered determining set in a seeded MyPCBench guest~\citep{jang2026mypcbench}.
 Tracking is a typed match of the final answer against guest gold, with no judge in the loop.
-Score sensitivity is exact equality $S_{\mathrm{CF}}=S_{\mathrm{Base}}$ versus any nonzero delta.
-A pair is Type~A if tracking holds and the score is invariant; score-sensitive if tracking holds and the score moves; Type~B if tracking is incomplete while the score is high and unchanged.
-A pair is valid only if both legs terminate canonically.
-Execution failures are absent observations, not tracking misses.
+Among 24 valid pairs (both legs terminate canonically; 35 of 92 legs are execution failures, coded as absent observations rather than tracking misses), the reported score can remain unchanged across materially different tracking outcomes, and can vary without a corresponding change in tracking.
+A stable score does not certify tracking; a moving score does not certify a tracking failure.
 
+Study~2 asks whether evaluation and selection can change the evidential basis of a comparison.
+Three agents each ran a pre-registered schedule of 57 legs.
+Valid-pair support is $|\A|=9$, $8$, and $1$.
+The confirmatory selection test required three ranked agents and is therefore not evaluated---a stated outcome of the plan, not a failed experiment.
+Binary track $Y=0$ on all 18 valid pairs, so $S^{0}$ cannot be calibrated to $P(Y=1)$ on this universe.
+We do not rank 57 tasks, and we do not treat $|\A|$ as a rate of selection bias.
+
+These checks locate an outcome/eligibility mismatch.
+They do not say where information leaves the pipeline.
+That is the core empirical question.
+
+\section{Evidence loss inside a frozen extractor}
+\label{sec:s3}
+
+This section is the empirical core.
+We freeze the evaluator and inspect the maps that turn a trajectory into a reported value.
+The contribution is not that missing evidence matters in general---Dong, Xue, and Rosset already document observation and evaluator failures~\citep{dong2026misscore,xue2025illusion,rosset2026verifiers}.
+The contribution is isolating a mechanism \emph{inside a frozen trajectory-to-evidence transformation} and testing whether permissive repair restores the intended measurement.
+
+The unit is a row: one component of the determining set on one leg (134 rows over 57 legs).
+A row is R1-positive if the gold value is literally present in the agent's answer ($n=59$: 20 MATCH + 39 RECALL\_MISS).
+The remaining 61 rows are ABSENT.
+Rates below are conditional on these audited sets.
+They are not a false-negative rate of the agent, not an evaluator-disagreement rate, and not a screenshot-omission rate.
+
+The frozen instrument recovers 20 of 59 R1-positive rows (sensitivity $0.339$) and misses 39 (Table~\ref{tab:causes}).
+
+\begin{table}[H]
+\centering
+\caption{Cause of the 39 recall misses. Meanings are locked. Frozen extractor \texttt{3242c30}.}
+\label{tab:causes}
+\small
+\begin{tabular}{lrl}
+\toprule
+Cause & $n$ & Meaning \\
+\midrule
+M1a & 13 & gold entered \texttt{found} and was discarded \\
+M1b &  7 & candidates disagree; gold is not among them \\
+M2  &  9 & no label hit anywhere in the answer \\
+M3  &  5 & label hit; gold outside every $\pm$window \\
+M4  &  5 & instrument reported a non-gold value \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Post-collection discard.}
+In this frozen extractor, we isolate a post-collection discard mechanism: determining gold was present in the trajectory and had entered the intermediate \texttt{found} set, but was removed by fail-closed aggregation before the final correspondence decision.
+That location is not visible to a verdict-level audit that only observes final PASS/FAIL judgments.
+
+In 13 of 39 misses the extractor had already accumulated the gold value and fail-closed aggregation discarded it.
+In 7 of those 13, gold was a strict majority of the accumulated candidates.
+This is not agent failure: the gold string was in the answer and in the accumulator.
+It is not generic missing data: the observation existed at an intermediate instrument state.
+It is not last-frame screenshot omission: the channel is text.
+It is not ordinary judge error: no LLM judge sits in this extractor.
+M1 is not exclusive to misses (25 of 61 ABSENT rows are also M1); M1a is the cause that names recoverable-but-discarded evidence.
+No single-cause story is licensed.
+A pre-registered secondary prediction that misses would concentrate on injected-world tasks \emph{failed} (confidence intervals overlap; we do not replace it with a reversal).
+
+\paragraph{Permissive repair is not guaranteed to restore the measurement.}
+Four layer interventions were specified before the run.
+R-AGG (plurality) targets M1a; R-SCOPE, R-CMP, and R-CHAN target other miss classes; ALL composes them.
+No configuration is offered as a replacement instrument.
+Table~\ref{tab:repairs} reports the signed outcome that bears on the contribution; the full six-configuration diagnostic is in Appendix~\ref{app:s3}.
+
+\begin{table}[H]
+\centering
+\caption{Signed repair outcome on the frozen extractor. Sensitivity is over 59 R1-positive rows. Full configurations: Appendix~\ref{app:s3}.}
+\label{tab:repairs}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Config & Sens./59 & Signed change vs.\ frozen & MATCH destroyed /20 \\
+\midrule
+FROZEN & 20 & --- & 0 \\
+R-AGG  & 28 & $+8$ correct, $+18$ wrong & 0 \\
+ALL    & 10 & worse than frozen & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the pre-specified permissive aggregation repair, 8 additional correct matches were released together with 18 incorrect matches.
+R-AGG is the only intervention that raises sensitivity ($20\to 28$); it does so by releasing 26 abstentions.
+Recovering more evidence is not equivalent to recovering the intended measurement.
+The result is not a general theorem about parsers; it shows that permissiveness did not restore the intended measurement in this frozen instrument.
+Composing all repairs was worse than leaving the extractor frozen (10 vs.\ 20).
+A later-layer comparison repair cannot recover an upstream miss (R-CMP is bit-identical to FROZEN; Appendix~\ref{app:s3}).
+
+The licensed claim is instrument-specific.
+We do not estimate how often M1a occurs in other CUA evaluators, and we do not ship R-AGG as a method.
+
+\section{Constructive boundaries of observation-grounded evaluation}
+\label{sec:p4}
+
+Section~\ref{sec:s3} shows that an existing instrument can lose evidence \emph{after} collection.
+This section asks what happens if we explicitly construct an observation-grounded protocol rather than auditing an inherited extractor.
+
+P4 is not four failed metrics, not a leaderboard, not a replacement reliability metric, and not an evaluation of Flash's reliability.
+It is one constructive sequence showing successive boundaries: empty observation, then interface compliance without two-sided identifiability, then dense HIT-only observation without two-sided variation (Table~\ref{tab:p4seq}).
+The channel remains last assistant text, with no screenshot or tool-trace fallback.
+Execution status is never HIT/MISS.
+ABSTAIN is missing correspondence measurement, not task failure.
+
+\begin{table}[H]
+\centering
+\caption{Constructive boundaries under a declared last-text channel. Not a ranking of agents and not four failed metrics.}
+\label{tab:p4seq}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\columnwidth}
+                   >{\raggedright\arraybackslash}p{0.34\columnwidth}
+                   >{\raggedright\arraybackslash}p{0.28\columnwidth}@{}}
+\toprule
+Boundary & Locked observation & Licensed reading \\
+\midrule
+Determining $E$ absent from declared $I$ & 40/40 \texttt{DONE}; 30 ABSTAIN; Flash Cov.\ $0.1667$ & Completion $\neq$ evidence in $I$ \\
+Form $\neq$ two-sided ID & Form $0.9333$; H3 N/E & Interface $\neq$ two-sided estimand \\
+HIT-only sample, locked rule & 30 HIT / 0 MISS; $I_{CC}=0$; G2 10/10 & Two-sided CC unidentified here \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evidence can be absent from the declared channel}
+\label{sec:p4bc}
+
+P4-B scores last-text HIT/MISS/ABSTAIN on 40 confirmatory episodes ($N_B=20$ clusters $\times$ two models).
+All 40 legs terminated \texttt{DONE}.
+The instrument returned HIT~5, MISS~5, ABSTAIN~30.
+Every abstention is \texttt{no\_anchor}: no instruction-anchor substring on a newline-terminated line of last text.
+The instrument did not then mine screenshots, tools, or intermediate turns.
+
+P4-C scores unstructured last text against independent gold (metric v1).
+Flash confirmatory $N_C=30$: HIT~3, MISS~2, ABSTAIN~25; coverage $0.1667$.
+Coverage fails its pre-specified gate ($\ge 0.5$).
+
+These two stages are one lesson.
+Natural agents need not communicate determining evidence through an undeclared last-text channel, and terminal completion is not observation-grounded measurement success.
+The result is not that last-text is the right CUA channel, and not that the agent is incompetent.
+It is that if the declared channel does not contain determining evidence, the instrument must abstain rather than silently fall back.
+
+\subsection{Interface compliance does not imply two-sided identifiability}
+\label{sec:p4c2}
+
+Metric v2 requires a declared \texttt{CLAIM:} line---an interface constraint, not itself evidence.
+Flash $N=30$: HIT~26, MISS~2, ABSTAIN~1, unscored~1; Form $0.9333$ (gate pass).
+Ordinary MISS exists (two clusters).
+The C2-intended discrimination floor is NOT\_EVALUABLE (8 eligible $<10$; miss rate $0$ on that slice).
+Interface compliance can pass while two-sided correspondence remains unevaluable.
+Form is not validity.
+
+\subsection{A competent sample can still lack negative variation}
+\label{sec:p4d}
+
+The question was observability of two-sided correspondence without a MISS quota.
+Flash $N=30$: HIT~30, MISS~0, ABSTAIN~0; Form $1.0000$; $I_{CC}=0$ under the locked rule ($I_{CC}=1$ iff at least 8 HIT and 8 MISS).
+Plus-competence held (G2: 10/10 HIT).
+Minus and plus-minus slices: 10/10 HIT each.
+Classification: W1---challenge weak / correspondence remains unobservable.
+The failing gate is G3.
+
+Under the pre-locked rule, this sample did not contain enough negative observations to identify the two-sided estimand.
+$I_{CC}=0$ is a protocol-and-sample observability result.
+It is not a finding that competence causes unidentifiability, not a finding that the agent is unreliable, and not a claim that Flash is perfectly reliable.
+The workstream is closed: distractors are not amped, the parser is not retuned, and a MISS factory is not introduced.
+
+\section{Discussion}
+\label{sec:discuss}
+
+\paragraph{What P3 establishes.}
+In this frozen extractor, evidence can be collected and then discarded.
+Gold entered \texttt{found} and fail-closed aggregation removed it before $Y$.
+A verdict-level audit that sees only PASS/FAIL cannot locate that step.
+
+\paragraph{Why repair is not enough.}
+Under the pre-specified permissive aggregation repair, eight additional correct matches were released together with eighteen incorrect matches.
+Composing all repairs was worse than the frozen extractor.
+Permissiveness is not, in this instrument, a measurement repair.
+
+\paragraph{What P4 adds.}
+Making observation explicit does not automatically make two-sided correspondence identifiable.
+A declared last-text channel can be empty of determining evidence; a passing Form score can leave the two-sided estimand unevaluable; a HIT-only sample can leave $I_{CC}=0$ under a rule that requires negative observations.
+P4 is subordinate to P3: it bounds what construction can still fail to identify, rather than offering a replacement score.
+
+\paragraph{What we do not establish.}
+We do not claim that CUA evaluators fail, that public benchmarks are invalid, that last-text is canonical, that Flash is reliable or unreliable, that $\mathcal{M}(\tau,\mathcal{I})$ is a validated theory, or that a new reliability metric has been produced.
+The object of evaluation, in this paper, is what a frozen protocol can justify---not which agent scores highest.
+
+\section{A practical reporting consequence}
+\label{sec:framework}
+
+Table~\ref{tab:slots} lists eight questions that follow from the analysis.
+These eight questions are a practical reporting consequence of the analysis, not a validated universal standard.
+They are not a new metric and not a theorem.
+
+\begin{table}[H]
+\centering
+\caption{Eight reporting questions for a CUA reliability number in a frozen evaluation setting.}
+\label{tab:slots}
+\small
+\begin{tabular}{|p{0.22\columnwidth}|p{0.70\columnwidth}|}
+\hline
+\textbf{1. Target} & Reliability of what system, on what task family, for what use? \\
+\hline
+\textbf{2. Measurand} & What independently defined state or outcome is correctness? Who locked $L$? \\
+\hline
+\textbf{3. Observation} & What part of $\tau$ is actually observed ($I$)? What is forbidden as silent fallback? \\
+\hline
+\textbf{4. Evidence} & What makes an observation DETERMINING? What is NONDETERMINING? \\
+\hline
+\textbf{5. Correspondence} & How is evidence matched to the measurand? Is the matcher allowed to see $\mathrm{value}(L)$? \\
+\hline
+\textbf{6. Abstention} & What happens when evidence is insufficient? Is ABSTAIN distinct from MISS and from execution failure? \\
+\hline
+\textbf{7. Non-leakage} & Can the procedure see the answer it is supposed to evaluate? \\
+\hline
+\textbf{8. Identifiability} & Does the sample contain enough positive \emph{and} negative variation to support the intended claim (one-sided vs.\ two-sided)? \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Limitations}
+\label{sec:limits}
+
+M1a is instrument-specific until transported; we did not transport it.
+Studies~1--3 share a MyPCBench family; populations are not added, and the result is not a multi-benchmark prevalence estimate.
+P4 is a constructed slate, not a public benchmark.
+Last-text $I$ is a declared severe observation channel, not a canonical CUA protocol; Xue and Rosset already show that visual last-frame judging is itself lossy~\citep{xue2025illusion,rosset2026verifiers}.
+P4-D is a protocol-and-sample identifiability result ($I_{CC}=0$ because the sample has 0~MISS under a rule that requires both sides), not a reliability estimate for Flash.
+$\mathcal{M}(\tau,\mathcal{I})$ is bookkeeping with no empirical implementation.
+The paper does not measure deployed CUA reliability or safety.
+
+We also audited public CUA artifacts for an independently specified evaluator exposing an intermediate evidence state at a grain suitable for testing post-collection discard.
+No corpus satisfied the frozen eligibility contract without changing the observation protocol or evaluator.
+We therefore do not claim transport of M1a beyond the frozen MyPCBench instrument.
+
+\section{Conclusion}
+\label{sec:conc}
+
+A frozen CUA evaluation instrument can discard collected gold after it has entered an intermediate evidence set.
+A pre-specified permissive repair can worsen correspondence, releasing more wrong matches than correct ones.
+Constructive observation protocols then expose identifiability limits: even an explicit channel can leave two-sided correspondence unidentified when the sample has no negative variation.
+Evaluation reports should therefore expose the evidential basis of a reliability claim---observation, evidence, abstention, and identifiability---before the number is interpreted.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\clearpage
+\appendix
+\section{Study 1 details}
+\label{app:s1}
+
+Study~1 is an existence / dissociation demonstration, not a prevalence estimate.
 The frozen schedule executed 46 of 50 intended cells (92 legs).
 35 legs are execution failures; 24 pairs are valid.
 Primary lanes are reported separately (Table~\ref{tab:s1}).
 A size ablation and an exploratory Flash lane exist and are not pooled.
-We do not headline a pooled invariance rate, and we do not treat 24 pairs as an estimate of how often scores fail to track the world.
+We do not headline a pooled invariance rate.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.82\textwidth]{gold_state_change.png}
-\caption{Study~1 protocol check: the intervention moves guest gold on the determining set. Tracking is coded from the final answer against that gold, never from $S$.}
-\label{fig:gold}
-\end{figure}
-
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Study~1 primary lanes (existence sample). Invariance is Type~A over tracking-valid pairs. Intervals are Clopper--Pearson 95\% and are wide. Source: Stage-4 snapshot \texttt{b7b4203}.}
 \label{tab:s1}
@@ -272,28 +520,25 @@ Qwen3.5-35B-A3B & 1 & 1 & 1 & 0 & 0 \\
 Claude: invariance $6/7=0.857$ ($[0.421,0.996]$).
 GPT-5.5: $3/7=0.429$ ($[0.099,0.816]$).
 Qwen3.5-35B-A3B: one valid pair, Type~A ($[0.025,1.000]$).
-The licensed claim is the phenomenon: in this sample the reported score can remain unchanged across materially different outcomes, and can vary without a corresponding change in tracking.
-A stable score does not certify tracking; a moving score does not certify a tracking failure.
 Paired world interventions follow a counterfactual design~\citep{pearl2009causality}; they are a method for this dissociation, not the paper's main contribution.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{score_pairs_primary.png}
 \caption{Study~1 primary lanes: paired base vs.\ counterfactual scores on valid pairs. Ablation and exploratory lanes are not pooled into Table~\ref{tab:s1}.}
 \label{fig:s1pairs}
 \end{figure}
 
-\section{Study 2: Selection and coverage}
-\label{sec:s2}
+\section{Study 2 details}
+\label{app:s2}
 
-Even when the evaluator is operationally well-defined, evaluation and selection can change the evidential basis of a reliability comparison.
-That is the locked heading of this study.
-It is not a claim that ``the evaluator changes the truth.''
+Locked heading: evaluation and selection can change the evidential basis of a reliability comparison.
+It is not a claim that the evaluator changes the truth.
 
 Three agents each ran a pre-registered schedule of 57 legs: GPT-5.5, Qwen3.8-Flash, and Claude Opus~4.6 (Table~\ref{tab:coverage}).
 The inclusion threshold $n_{\min}=3$ valid pairs to be ranked, and the rule that fewer than three ranked agents means the confirmatory selection test is \emph{not evaluated}, were committed before any outcome existed.
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Coverage under the frozen instrument. A valid pair requires both legs to terminate. Claude's mean $S^{0}$ is a single pair. Freeze: tag \texttt{paper2-frozen} on commit \texttt{39cc662}. Not a ranking of 57 tasks.}
 \label{tab:coverage}
@@ -310,12 +555,7 @@ Claude Opus 4.6 &  4 & 1 & 100  & 0 \\
 \end{table}
 
 Claude terminated on four legs across three tasks, so $|\A|=1$.
-The ranked roster is two agents, which is fewer than three, and the confirmatory selection test is therefore not evaluated---a stated outcome of the plan, not a failed experiment.
-We do not compare models on 57 tasks, and we do not treat $|\A|$ as a prevalence of selection bias.
-
-Binary track $Y=1$ requires every positive-weight component of the determining set to match on both legs.
-$Y=0$ on all 18 valid pairs.
-There is no positive class, so $S^{0}$ cannot be calibrated to $P(Y=1)$ on this universe.
+The ranked roster is two agents, which is fewer than three, and the confirmatory selection test is therefore not evaluated.
 
 On a four-task common support, labelled exploratory, a paired bootstrap (seed $20260904$, $B=5000$) gives Flash-minus-GPT $\Delta S^{0}=+46.5$ (95\% CI $[21.0,72.0]$) and $\Delta\STS=-0.042$ ($[-0.125,0.000]$).
 The reversal is strict on one task (\task{retrieval-f009}) and tied on three.
@@ -327,64 +567,18 @@ Excluded cells score lower on average (mean $S$ off $\A$: $46.4$, $44.9$, $26.1$
 What survives that average is sharp: 2, 2, and 1 excluded cells scored $\ge 90$ with no canonical \texttt{DONE}.
 A completion-conditioned protocol cannot express rubric-visible progress without closure.
 
-The role of the study is eligibility: a reliability comparison can become conditional on what the evaluation pipeline makes scorable.
+\section{Study 3 secondary diagnostics}
+\label{app:s3}
 
-\section{Study 3: Evidence loss and repair}
-\label{sec:s3}
+Table~\ref{tab:repairs-full} is the full layer-repair diagnostic (134 rows).
+R-SCOPE converts 14 of 20 already-correct rows into something else.
+R-CHAN destroys 7 MATCH rows.
+R-CMP is bit-identical to FROZEN.
 
-Studies~1 and~2 locate an outcome / eligibility gap.
-They do not say where information leaves the pipeline.
-This section is the empirical core.
-We freeze the evaluator and inspect the maps that turn a trajectory into a reported value.
-The contribution is not that missing evidence matters in general---Dong, Xue, and Rosset already document observation and evaluator failures~\citep{dong2026misscore,xue2025illusion,rosset2026verifiers}.
-The contribution is isolating a mechanism \emph{inside a frozen trajectory-to-evidence transformation} and testing whether permissive repair restores the intended measurement.
-
-The unit is a row: one component of the determining set on one leg (134 rows over 57 legs).
-A row is R1-positive if the gold value is literally present in the agent's answer ($n=59$: 20 MATCH + 39 RECALL\_MISS).
-The remaining 61 rows are ABSENT.
-Rates below are conditional on these audited sets.
-They are not a false-negative rate of the agent, not an evaluator-disagreement rate, and not a screenshot-omission rate.
-
-The frozen instrument recovers 20 of 59 R1-positive rows (sensitivity $0.339$) and misses 39 (Table~\ref{tab:causes}).
-
-\begin{table}[t]
+\begin{table}[H]
 \centering
-\caption{Cause of the 39 recall misses. Meanings are locked. Frozen extractor \texttt{3242c30}.}
-\label{tab:causes}
-\small
-\begin{tabular}{lrl}
-\toprule
-Cause & $n$ & Meaning \\
-\midrule
-M1a & 13 & gold entered \texttt{found} and was discarded \\
-M1b &  7 & candidates disagree; gold is not among them \\
-M2  &  9 & no label hit anywhere in the answer \\
-M3  &  5 & label hit; gold outside every $\pm$window \\
-M4  &  5 & instrument reported a non-gold value \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{M1a is post-collection discard.}
-In 13 of 39 misses the extractor had already accumulated the gold value and fail-closed aggregation discarded it.
-In 7 of those 13, gold was a strict majority of the accumulated candidates.
-This is not agent failure: the gold string was in the answer and in the accumulator.
-It is not generic missing data: the observation existed at an intermediate instrument state.
-It is not last-frame screenshot omission: the channel is text.
-It is not ordinary judge error: no LLM judge sits in this extractor.
-M1 is not exclusive to misses (25 of 61 ABSENT rows are also M1); M1a is the cause that names recoverable-but-discarded evidence.
-No single-cause story is licensed.
-A pre-registered secondary prediction that misses would concentrate on injected-world tasks \emph{failed} (confidence intervals overlap; we do not replace it with a reversal).
-
-\paragraph{Repairs test mechanisms, not a method.}
-Four layer interventions were specified before the run (Table~\ref{tab:repairs}): R-AGG (plurality; targets M1a), R-SCOPE (whole-answer window; targets M3), R-CMP (containment; targets entity M1b), and R-CHAN (delete markup; targets scaffolding).
-ALL composes them.
-No configuration is offered as a replacement instrument.
-
-\begin{table}[t]
-\centering
-\caption{Layer repairs as diagnostic interventions, 134 rows. Sensitivity is over 59 R1-positive rows. R-CMP is bit-identical to FROZEN.}
-\label{tab:repairs}
+\caption{Layer repairs as diagnostic interventions, 134 rows. Sensitivity is over 59 R1-positive rows.}
+\label{tab:repairs-full}
 \small
 \begin{tabular}{lrrrr}
 \toprule
@@ -400,18 +594,6 @@ ALL     & 10 &  79 & 45/55 & 16 \\
 \end{tabular}
 \end{table}
 
-No repair dominates.
-R-AGG is the only intervention that raises sensitivity ($20\to 28$).
-It releases 26 abstentions: $+8$ correct and $+18$ wrong.
-Recovering more evidence is not equivalent to recovering the intended measurement.
-R-SCOPE converts 14 of 20 already-correct rows into something else.
-R-CHAN destroys 7 MATCH rows.
-ALL is worse than the frozen extractor on sensitivity ($10$ vs.\ $20$).
-A later-layer comparison repair cannot recover an upstream miss (R-CMP is bit-identical to FROZEN).
-
-The licensed claim is not a theorem that parsers cannot be repaired.
-It is: permissive repair is not guaranteed to restore the intended measurement; in this instrument it released more wrong matches than correct ones, and composing all repairs was worse than leaving the extractor frozen.
-
 On the same four-task support as Study~2, R-CHAN inverts the sign of Flash-minus-GPT $\Delta\STS$ ($-0.0417\to +0.1667$) because GPT collapses ($0.250\to 0.042$) while Flash is unchanged.
 The effective number of independent task-clusters for the frozen $\Delta\STS$ is one.
 This is an existence demonstration, not a claim that rankings are unstable in general.
@@ -419,249 +601,5 @@ This is an existence demonstration, not a claim that rankings are unstable in ge
 A locked, corpus-independent reconstruction rule recovers 9 of 30 hand-written label components (G2 FAIL).
 Groundedness against the task definition is 100\% (G1).
 A pre-specified comparative-scale gate required 20 independent task clusters; 16 of 28 candidates survived a frozen feasibility probe, so that experiment was not opened.
-
-\section{Constructive measurement boundaries}
-\label{sec:p4}
-
-Having identified measurement loss on an existing instrument, we attempted to construct an observation-grounded measurement under controlled conditions.
-The channel is last assistant text.
-Execution status is never HIT/MISS.
-ABSTAIN is missing correspondence measurement, not task failure.
-The four stages below are a constructive sequence, not a leaderboard of failed metrics (Table~\ref{tab:p4seq}, Figure~\ref{fig:p4seq}).
-
-\begin{table}[t]
-\centering
-\caption{Constructive measurement boundaries. These are not four failed metrics and not a ranking of agents.}
-\label{tab:p4seq}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}p{0.10\columnwidth}p{0.23\columnwidth}p{0.30\columnwidth}p{0.30\columnwidth}@{}}
-\toprule
-Stage & What was constructed & What failed / stopped & Scientific boundary \\
-\midrule
-P4-B & Last-text HIT/MISS/ABSTAIN on 40 confirmatory episodes & 30/40 ABSTAIN (\texttt{no\_anchor}); E3/E4 not evaluable & Completion $\neq$ determining evidence in $I$ \\
-P4-C & Unstructured last-text metric v1 & Flash coverage $0.1667$ (gate fail) & Natural last-text can be sparse under successful execution \\
-P4-C2 & Declared \texttt{CLAIM:} interface (metric v2) & Form $0.9333$ PASS; H3 NOT\_EVALUABLE & Interface compliance $\neq$ two-sided identifiability \\
-P4-D & Controlled negative opportunities, no MISS quota & Flash 30 HIT / 0 MISS; $I_{CC}=0$ & Competence can coexist with insufficient negative variation \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-  font=\scriptsize,
-  box/.style={draw, rounded corners=1pt, align=center, inner sep=3pt, minimum width=2.55cm, text width=2.45cm},
-  arr/.style={-{Latex}, thick}
-]
-\node[box] (b) {P4-B\\completion without evidence};
-\node[box, right=4mm of b] (c) {P4-C\\low natural coverage};
-\node[box, right=4mm of c] (c2) {P4-C2\\Form without two-sided ID};
-\node[box, right=4mm of c2] (d) {P4-D\\competence without negatives};
-\draw[arr] (b) -- (c);
-\draw[arr] (c) -- (c2);
-\draw[arr] (c2) -- (d);
-\end{tikzpicture}
-\caption{Constructive sequence: observation boundary $\to$ coverage boundary $\to$ interface boundary $\to$ identifiability boundary.}
-\label{fig:p4seq}
-\end{figure}
-
-\subsection{P4-B: Completion without determining evidence}
-
-Confirmatory $N_B=20$ clusters $\times$ two models $=40$ episodes.
-All 40 legs terminated \texttt{DONE}.
-The instrument returned HIT 5, MISS 5, ABSTAIN 30.
-Every abstention is \texttt{no\_anchor}: no instruction-anchor substring on a newline-terminated line of last text.
-The instrument did not then mine screenshots, tools, or intermediate turns.
-False-HIT and invariance gates passed (0 false HIT).
-Natural success and failure correspondence could not be fully evaluated because prespecified eligibility floors were not met (E3: 4 eligible clusters $<5$; E4: 0 eligible).
-Status: positive-but-incomplete.
-Terminal completion is not observation-grounded measurement success.
-
-\subsection{P4-C: Natural last-text can be sparse}
-
-Metric v1 scores unstructured last text against independent gold.
-Flash confirmatory $N_C=30$: HIT 3, MISS 2, ABSTAIN 25; coverage $0.1667$; correspondence $0.6000$ on the covered subset; abstention $0.8333$.
-Coverage fails its gate ($\ge 0.5$).
-C1/C2 discrimination floors are not evaluable.
-Natural agents need not communicate determining evidence through an undeclared last-text channel.
-This is not a finding that the agent is incompetent.
-
-\subsection{P4-C2: Form without two-sided identifiability}
-
-Metric v2 requires a declared \texttt{CLAIM:} line (an interface constraint, not itself evidence).
-Flash $N=30$: HIT 26, MISS 2, ABSTAIN 1, unscored 1; Form $0.9333$ (gate pass); descriptive CC $0.9286$.
-Ordinary MISS exists (two clusters).
-The C2-intended discrimination floor is NOT\_EVALUABLE (8 eligible $<10$; miss rate $0$ on that slice).
-Interface compliance can pass while two-sided correspondence remains unevaluable.
-Form is not validity.
-
-\subsection{P4-D: Competence without negative variation}
-
-The question was observability of two-sided correspondence without a MISS quota.
-Flash $N=30$: HIT 30, MISS 0, ABSTAIN 0; Form $1.0000$; $I_{CC}=0$ under the locked rule ($I_{CC}=1$ iff at least 8 HIT and 8 MISS).
-Plus-competence held (G2: 10/10 HIT).
-Minus and plus-minus slices: 10/10 HIT each.
-Classification: W1---challenge weak / correspondence remains unobservable.
-First failing gate: G3.
-Even with controlled negative opportunities, this sample produced too few errors for the two-sided estimand to become identifiable.
-$I_{CC}=0$ is an observability result, not a finding that the agent is unreliable, and not a claim that Flash is ``100\% reliable.''
-The workstream is closed: distractors are not amped, the parser is not retuned, and a MISS factory is not introduced.
-
-\section{Claim justification as a formal boundary}
-\label{sec:p4m}
-
-P4-M is theory-closed and empirically unimplemented.
-It is a claim-justification formalization: notation for which reliability claims remain sayable under a declared observation protocol.
-It is not a new theory of reliability, not a validity theorem, not a replacement metric, and not proven by P4-D.
-
-The object is $\mathcal{M}(\tau,\mathcal{I})$ in Equation~\eqref{eq:M}.
-The important distinction remains
-\[
-\mathrm{Observable}_{\tau}(\tau) \;\neq\; \mathrm{Observable}_{I}(\tau).
-\]
-An evidence fragment can exist in the trajectory and still not be recovered by a frozen instrument.
-That is measurement loss (Study~3; P4-B abstention), not ``the agent made no claim.''
-\texttt{CLAIM:} syntax is an interface constraint on one particular $I$, not a definition of evidence.
-
-$E$ is kind-only: a span is DETERMINING if and only if it parses as $\mathrm{kind}(L)$ from the task specification.
-$38.35$ and $10.00$ can both be DETERMINING for money.
-``Finished successfully'' is NONDETERMINING; $Y$ is undefined.
-$E$ must not consume $\mathrm{value}(L)$.
-
-P4-D's 30/30 HIT is closed evidence of unidentifiable two-sided correspondence.
-It is not a proof of $\mathcal{M}$.
-
-\subsection{Typed correspondence: a narrow no-leakage property}
-\label{sec:sound}
-
-Under no-leakage assumptions (the maps $I,P,E$ do not take $\mathrm{value}(L)$ as input; $L$ is locked from the spec/world, not from the evidence span; the match $\leftrightarrow_k$ is the pre-declared match on $\mathrm{Val}_k$; spans that require world-dependent denotation never become DETERMINING via this $E$),
-\[
-Y=\mathrm{HIT} \;\Longrightarrow\; \mathrm{parse}_k(s)=v\in\mathrm{Val}_k \;\land\; v\leftrightarrow_k L.
-\]
-This is a specification-level implication of the defined HIT relation.
-It is not a new theorem, not a reliability theorem, not a validity theorem, and not empirical validation of P4-M.
-
-\paragraph{What is explicitly out of scope.}
-Natural-language denotation; general reliability; agent competence; deployment safety; causal validity of the score as a treatment effect; completeness of $\mathcal{M}$; that a declared interface recovers English; that P4-M is ``validated'' by P4-D.
-
-\section{Unified discussion}
-\label{sec:discuss}
-
-The studies are not four independent papers.
-Table~\ref{tab:core} is the fastest map of why they form one argument.
-Populations are not added.
-The three gaps remain analytic categories.
-
-\paragraph{Outcome gap (Studies~1--2; supporting).}
-Observed score $\not\equiv$ underlying tracking or world state (Study~1 Type~A/B on 24 valid pairs, existence only).
-Evaluation and selection further change the evidential basis of a comparison: coverage $|\A|=9,8,1$; confirmatory selection not evaluated; binary $Y=0$ on 18/18 valid pairs.
-
-\paragraph{Observation gap (Study~3, P4-B/C; primary + constructive).}
-Trajectory evidence $\not\subseteq$ evaluator observation.
-Study~3: 39/59 recoverable misses, 13 after gold had already been collected; R-AGG $+8$ correct / $-18$ wrong; ALL worse than frozen.
-P4-B: 40/40 \texttt{DONE}, 30 ABSTAIN.
-P4-C: unstructured last-text coverage $0.1667$.
-
-\paragraph{Justification gap (P4-C2/D; secondary).}
-Observable evidence $\not\Rightarrow$ an arbitrary reliability claim.
-P4-C2: Form $0.9333$ with two-sided discrimination unevaluable.
-P4-D: 30 HIT, 0 MISS, $I_{CC}=0$ under competence.
-$\mathcal{M}(\tau,\mathcal{I})$ names the justified set as notation; NONDETERMINING text leaves $Y$ undefined.
-
-\paragraph{What the evidence does and does not establish.}
-It establishes instrument-level measurement failure after evidence is available, non-dominance of permissive repair in this extractor, and identifiability failure for a two-sided estimand under a competent sample.
-It does not establish prevalence of M1a across CUA benchmarks, that last-text is the right observation channel for all CUA tasks, that public benchmarks are invalid, that Flash is unreliable, or that P4-M is empirically validated.
-
-\begin{table}[t]
-\centering
-\caption{Evidence for the central contribution. Populations are not added. This is not a prevalence table.}
-\label{tab:core}
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{0.11\columnwidth}p{0.17\columnwidth}p{0.17\columnwidth}p{0.24\columnwidth}p{0.22\columnwidth}@{}}
-\toprule
-Source & Question & Frozen protocol & Interpretation & Does \emph{not} establish \\
-\midrule
-P3 M1a & Can gold be discarded after collection? & Extractor \texttt{3242c30} & 13/39 misses: gold in \texttt{found}, then dropped (7/13 majority) & First such phenomenon; agent FN rate \\
-P3 R-AGG & Does permissive repair restore the measurement? & Pre-specified layer interventions & $+8$ correct / $+18$ wrong; ALL worse than frozen & Parsers cannot be repaired in general \\
-P4-B & Does \texttt{DONE} imply determining $E$? & Last-text $I$; no screenshot fallback & 40/40 \texttt{DONE}; 30 ABSTAIN & Agents failed the tasks \\
-P4-C & Is unstructured last-text dense? & Metric v1 & Flash coverage $0.1667$ & Flash is incompetent \\
-P4-C2 & Does Form identify two-sided CC? & Declared \texttt{CLAIM:} & Form $0.9333$; H3 N/E & Form is validity \\
-P4-D & Is two-sided CC identifiable under competence? & No MISS quota & 30 HIT / 0 MISS; $I_{CC}=0$; G2 10/10 & Flash is 100\% reliable; metric is broken \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{A practical reporting framework}
-\label{sec:framework}
-
-The eight slots below are a practical reporting checklist derived from the empirical and formal analysis.
-They are not a new metric, not a theorem, and not a validated universal standard.
-A benchmark author should be able to answer all eight before reporting a reliability number.
-
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item \textbf{Target.} Reliability of what system, on what task family, for what use?
-\item \textbf{Measurand.} What independently defined state or outcome is correctness? Who locked $L$?
-\item \textbf{Observation channel.} What part of $\tau$ is actually observed ($I$)? What is forbidden as silent fallback?
-\item \textbf{Evidence rule.} What makes an observation DETERMINING? What is NONDETERMINING?
-\item \textbf{Correspondence.} How is evidence matched to the measurand? Is the matcher allowed to see $\mathrm{value}(L)$?
-\item \textbf{Abstention.} What happens when evidence is insufficient? Is ABSTAIN distinct from MISS and from execution failure?
-\item \textbf{Non-leakage.} Can the procedure see the answer it is supposed to evaluate?
-\item \textbf{Identifiability.} Does the sample contain enough positive \emph{and} negative variation to support the intended claim (one-sided vs.\ two-sided)?
-\end{enumerate}
-
-How this programme fills the slots, without pretending each slot is a new experiment:
-target is correspondence to an independently defined determining set, not vendor rank;
-measurand is guest gold / specification $L$;
-channel is the audited MyPCBench extractor or frozen last assistant text;
-evidence is typed parse by $\mathrm{kind}(L)$;
-correspondence is $\leftrightarrow_k$ disjoint from the judge in Studies~1--2;
-abstention is ABSTAIN / execution failure as missing observation;
-non-leakage is the P4 gold/$I$ split, and Study~3's record of gold seen then discarded;
-identifiability is Study~2's unevaluated selection test, P4-C2 H3, and P4-D $I_{CC}=0$.
-
-\section{External transport boundary}
-\label{sec:ext}
-
-We audited candidate public CUA trajectory sources against a frozen eligibility table (independent source; per-episode trajectory; final assistant natural-language message as $I$; task spec; typed kind $k$; independent $L$; loss-versus-absence; offline replay; $N\ge 30$; outcome-blind sampling).
-No new agents, sites, docker, or parser were introduced.
-Phases 2--5 were not opened.
-
-WebArena-Verified, as publicly released, is a task+evaluator specification (812 tasks) plus two demo logs whose \texttt{agent\_response.json} is structured evaluator JSON, not a final assistant natural-language message.
-Official WebArena publishes task configs; published traces are Playwright/HTML/screenshot bundles, which the frozen $I$ forbids as the observation channel.
-Named Hugging Face dumps inspected at card level, including later-appearing OSWorld success trajectories with screenshots and accessibility trees, were not established as satisfying typed $k$, independent $L$, and last-text $I$ without an adapter.
-Using those dumps under the frozen contract would require a new parser/harness or a change of $I$, which the design forbids.
-
-We did not identify a public corpus satisfying this specific frozen last-text typed observation contract.
-That is not a claim that existing CUA benchmark artifacts are generally not measurement-ready, not a ranking of WebArena agents, and not a claim that those benchmarks are invalid for task success.
-Transport analysis (HIT/MISS cells) was not opened.
-This STOP is the result.
-
-\section{Limitations}
-\label{sec:limits}
-
-Typed candidate spaces only; natural-language denotation is out of scope.
-Last-text $I$ is a severe observation channel; Xue and Rosset show that visual last-frame judging is itself lossy, so this paper's channel is not proposed as canonical~\citep{xue2025illusion,rosset2026verifiers}.
-External transport currently stops at eligibility.
-The reporting checklist is not a replacement for task-success evaluation, not a deployment-safety case, and not a proof that existing benchmarks are wrong.
-We do not claim that all reliability metrics suffer equally, or that scores are universally invalid.
-Studies~1--3 share a MyPCBench instrument family; P4 uses a constructed slate---populations are not added.
-Study~3's ordering inversion has $n_{\mathrm{eff}}=1$.
-Study~1 and Study~2 are existence / eligibility demonstrations with small valid-pair counts and wide intervals.
-P4-M has no new empirical corpus.
-M1a is instrument-specific until transported; we did not transport it.
-Venue is unset.
-
-\section{Conclusion}
-\label{sec:conc}
-
-We treated a frozen CUA evaluation instrument as the experimental object.
-Recoverable typed evidence can be lost after it has already been collected; making the extractor more permissive did not restore the intended measurement in this instrument; and constructing an observation-grounded last-text protocol exposed completion without evidence, Form without two-sided identifiability, and competence without negative variation.
-The practical consequence is a reporting discipline, not a new score: state the observation channel, the evidence rule, abstention, non-leakage, and identifiability before interpreting a reliability number.
-The central question is not ``what is the reliability score?'' but ``what evidence does this frozen protocol observe, and what claim does that evidence justify?''
-
-\bibliographystyle{plainnat}
-\bibliography{refs}
 
 \end{document}
