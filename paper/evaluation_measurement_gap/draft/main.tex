@@ -2,23 +2,16 @@
 % Numbers: paper/evaluation_measurement_gap/EVIDENCE_MAP.md
 % Wording lock: CLAIM_LEDGER.md
 % Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
-\documentclass[11pt]{article}
+% Migrated to the official AAMAS 2027 template (aamas.cls, sigconf, anonymous) 2026-09-14.
+\documentclass[sigconf,anonymous]{aamas}
 
-\usepackage[margin=1.0in]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{microtype}
+%%% Packages not already provided by aamas.cls (which loads microtype, etoolbox,
+%%% booktabs, hyperref, graphicx, xcolor, geometry, caption, float, natbib, fontenc+libertine).
 \usepackage{amsmath,amssymb}
-\usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,fit,calc}
-\usepackage{hyperref}
 \usepackage{enumitem}
-\usepackage{caption}
-\usepackage{natbib}
 \usepackage{array}
-\usepackage{float}
 
 \graphicspath{{../../../out/stage4_counterfactual_analysis_final/}}
 
@@ -30,14 +23,42 @@
 \newcommand{\STS}{\mathrm{STS}}
 \newcommand{\Just}{\mathrm{Justifiable}}
 
+%%% AAMAS-2027 copyright block (do not change!)
+\makeatletter
+\gdef\@copyrightpermission{
+  \begin{minipage}{0.2\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{\includegraphics[width=0.90\textwidth]{by}}
+  \end{minipage}\hfill
+  \begin{minipage}{0.8\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{This work is licensed under a Creative Commons Attribution International 4.0 License.}
+  \end{minipage}
+  \vspace{5pt}
+}
+\makeatother
+
+\setcopyright{ifaamas}
+\acmConference[AAMAS 2027]{Proc.\@ of the 26th International Conference
+on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{}
+\acmISBN{}
+% TODO(vinh): fill in the OpenReview submission id once assigned.
+\acmSubmissionID{}
+\submissionType{Research Paper Track}
+
 \title{From Trajectories to Evidence:\\
 Auditing Observation Loss and Identifiability\\
 in Computer-Use Agent Evaluation}
-\author{Draft v0.5 --- authors unset --- venue unset}
-\date{13 September 2026}
 
-\begin{document}
-\maketitle
+% TODO(vinh): authors intentionally unset (draft convention). Anonymous mode
+% hides this from the typeset PDF regardless, but aamas.cls requires at least
+% one \author/\affiliation/\email block to compile. Fill in for camera-ready.
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Institution withheld for review}
+  \country{}}
+\email{}
 
 \begin{abstract}
 Computer-use-agent (CUA) reliability scores depend on how an evaluation pipeline observes a trajectory and turns that observation into evidence.
@@ -51,6 +72,10 @@ We do not propose a replacement reliability metric, and we do not estimate deplo
 In this frozen setting, an evaluation report should make observation, evidence, abstention, and identifiability explicit before a number is read as a reliability claim.
 \end{abstract}
 
+\begin{document}
+\maketitle
+
+
 \section{Introduction}
 \label{sec:intro}
 
@@ -59,7 +84,7 @@ That fact is established background~\citep{dong2026misscore,kane2013validating,m
 Leaderboards compress trajectories into binary outcomes or scalars~\citep{jang2026mypcbench,xie2024osworld,zhou2024webarena}.
 The scalar is produced by a declared observation channel $I$, a parser $P$, an evidence classification $E$, a correspondence decision $Y$, and a reported score or selection $S$ (Figure~\ref{fig:gap}).
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
   font=\small,
@@ -87,7 +112,7 @@ The empirical core (Section~\ref{sec:s3}) is discard \emph{after} gold has enter
 The constructive sequence (Section~\ref{sec:p4}) makes $I$ explicit and records where two-sided correspondence remains unidentifiable.
 Three analytic labels---outcome, observation, justification---organize that evidence; they are not proposed as new laws of measurement.}
 \label{fig:gap}
-\end{figure}
+\end{figure*}
 
 Existing work has already shown that those pipelines can fail.
 Dong et al.\ treat a CUA score as a pipeline output and find that public FAIL verdicts can be wrong~\citep{dong2026misscore}.
@@ -203,11 +228,13 @@ We use the labels because they match the grain of the audit.
 Where ``measurement gap'' would be read as a contribution of measurement theory, we mean only this local mismatch among score, observation, and justified claim under a declared protocol.
 
 As formal bookkeeping, write
-\begin{equation}
+\begin{multline}
 \mathcal{M}(\tau,\mathcal{I})
-=\{\,C:\ \text{the evidence $C$ requires is recoverable under $I$ and the inference is non-circular}\,\}
+=\{\,C:\ \text{the evidence $C$ requires}\\
+\text{is recoverable under $I$}\\
+\text{and the inference is non-circular}\,\}
 \label{eq:M}
-\end{equation}
+\end{multline}
 for the set of reliability claims justified under a declared observation protocol.
 $\mathrm{Observable}_{\tau}(\tau)$ need not equal $\mathrm{Observable}_{I}(\tau)$: a typed fragment can exist in the trajectory and still be missed by the instrument.
 \[
@@ -321,7 +348,8 @@ Table~\ref{tab:repairs} reports the signed outcome that bears on the contributio
 \centering
 \caption{Signed repair outcome on the frozen extractor. Sensitivity is over 59 R1-positive rows. Full configurations: Appendix~\ref{app:s3}.}
 \label{tab:repairs}
-\small
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrr}
 \toprule
 Config & Sens./59 & Signed change vs.\ frozen & MATCH destroyed /20 \\
@@ -502,7 +530,7 @@ A pre-specified permissive repair can worsen correspondence, releasing more wron
 Constructive observation protocols then expose identifiability limits: even an explicit channel can leave two-sided correspondence unidentified when the sample has no negative variation.
 Evaluation reports should therefore expose the evidential basis of a reliability claim---observation, evidence, abstention, and identifiability---before the number is interpreted.
 
-\bibliographystyle{plainnat}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
 
 \clearpage
@@ -540,7 +568,7 @@ Paired world interventions follow a counterfactual design~\citep{pearl2009causal
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{score_pairs_primary.png}
+\includegraphics[width=0.98\columnwidth]{score_pairs_primary.png}
 \caption{Study~1 primary lanes: paired base vs.\ counterfactual scores on valid pairs. Ablation and exploratory lanes are not pooled into Table~\ref{tab:s1}.}
 \label{fig:s1pairs}
 \end{figure}
@@ -595,7 +623,8 @@ R-CMP is bit-identical to FROZEN.
 \centering
 \caption{Layer repairs as diagnostic interventions, 134 rows. Sensitivity is over 59 R1-positive rows.}
 \label{tab:repairs-full}
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrr}
 \toprule
 Config & Sens./59 & Abst./134 & M4/reported & MATCH dest./20 \\
@@ -629,12 +658,12 @@ Earlier text means the gold string occurs in \texttt{action}/\texttt{response} f
 Denominator: 13 M1a rows, not 171 legs.
 Source: \texttt{paper/evaluation\_measurement\_gap/experiment\_m1a\_location/}.
 
-\begin{table}[H]
+\begin{table*}[t]
 \centering
 \caption{Thirteen M1a rows. $S{=}100$ counts use the 10 joinable rows only.}
 \label{tab:m1a-join}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
+\small
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lllcrrcc}
 \toprule
 Lane & Task & Leg & Component & $S$ & $Y$ & DONE & Earlier text \\
@@ -654,7 +683,7 @@ Claude & \task{counterfactual-f005} & G0 & gme\_shares & --- & --- & --- & yes \
 Flash & \task{aggregation-f020} & G1 & batbucks\_cash & --- & --- & --- & no \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{Admitted string/URL FAIL composition}
 \label{app:patha}
@@ -664,7 +693,7 @@ Not an AgentRewardBench-wide audit, not an admission-set prevalence, and not a r
 AssistantBench is I-emptiness only and is not pooled into 126/299.
 HIT/MISS against gold is not reported here.
 
-\begin{table}[H]
+\begin{table*}[t]
 \centering
 \caption{Released oracle FAIL on ELIGIBLE episodes, split by whether locked last-answer/last-URL $I$ is empty. Determining FAIL means a candidate was present and did not match (WA/VWA) or, for AssistantBench, that a last \texttt{send\_msg\_to\_user} existed (gold not opened).}
 \label{tab:patha-fail}
@@ -679,7 +708,7 @@ WA$+$VWA (licensed) & 126 & 173 & 299 \\
 AssistantBench (emptiness only) & 62 & --- & 115 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 As a sensitivity join only (not correspondence gold): among the 299 released FAIL, AgentRewardBench human \texttt{trajectory\_success} is Successful on 4/126 empty-$I$ trajectories and on 50/173 mismatch trajectories (318 of 366 ELIGIBLE WA/VWA episodes have a single annotator).
 Empty-$I$ FAIL is not the hidden-success pocket; human-labeled success, when it occurs among FAIL, concentrates on candidate-then-mismatch---the setting already studied as rule-based under-reporting~\citep{lu2025agentrewardbench,dong2026misscore}.
