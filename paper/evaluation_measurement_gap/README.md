@@ -20,7 +20,7 @@ Working title:
 | `FIGURE_TABLE_INVENTORY.md` | Figures/tables |
 | `FINAL_HOSTILE_REVIEW.md` | Submission-gate audit that required V4+V5 |
 | `FINAL_STRUCTURAL_REVISION_REPORT.md` | This revision's gate |
-| `draft/main.tex` | v0.4 manuscript |
+| `draft/main.tex` | v0.5 manuscript |
 | `draft/refs.bib` | Verified bibliography |
 | `draft/main.pdf` | Compiled draft |
 | `POST_REVISION_REVIEW.md` | v0.3 self-review (superseded) |
@@ -35,7 +35,7 @@ cd paper/evaluation_measurement_gap/draft
 pdflatex main && bibtex main && pdflatex main && pdflatex main
 ```
 
-v0.4 target is a sharp methods/evaluation paper. Do not add experiments to fill space.
+v0.5 target is a sharp methods/evaluation paper. Do not add experiments to fill space.
 
 ## Hard writing locks
 
