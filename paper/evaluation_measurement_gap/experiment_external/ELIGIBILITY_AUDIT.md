@@ -190,4 +190,8 @@ Primary sources inspected: official GitHub evaluator files, released result sche
 
 **ELIGIBLE count: 0.**
 
+2026-09-13 re-scan of novelty-search leads plus later CUA benches:
+`PUBLIC_CORPUS_SCAN.md`. Still **0** new ELIGIBLE. Does not reopen this
+file's per-candidate tables.
+
 Hard STOP conditions 1–12 are not jointly satisfied by any candidate. Closest architectural matches (WebJudge threshold+MAX_IMAGE; UV top-K) fail independent gold at the grain of R, and/or fail released observability of R.

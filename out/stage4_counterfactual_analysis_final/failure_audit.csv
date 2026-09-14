@@ -1,0 +1,70 @@
+model,tier,task,condition,dir,n_steps,last_action,failure_type,why_excluded
+Claude,primary,counterfactual-f004,base,results/stage4-counterfactual-f004/base,80,"pyautogui.click(660, 618)",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+GPT,primary,preference_inference-f018,base,results/stage4-openai-preference_inference-f018/base,19,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+GPT,primary,preference_inference-f018,cf,results/stage4-openai-preference_inference-f018/cf,16,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,aggregation-f003,cf,results/stage4-qwen35a3b-aggregation-f003/cf,26,FAIL,AGENT_FAIL,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,preference_inference-f018,cf,results/stage4-qwen35a3b-preference_inference-f018/cf,29,PREDICT_CRASH,SCREENSHOT_DECODE_CRASH,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,counterfactual-f004,base,results/stage4-qwen35a3b-counterfactual-f004/base,85,WAIT,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,counterfactual-f004,cf,results/stage4-qwen35a3b-counterfactual-f004/cf,91,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+GPT,primary,aggregation-f018,cf,results/phaseb-openai-aggregation-f018/cf,71,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f003,base,results/phaseb-qwen35a3b-retrieval-f003/base,80,"pyautogui.click(88, 93)",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f003,cf,results/phaseb-qwen35a3b-retrieval-f003/cf,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f016,cf,results/phaseb-qwen35a3b-retrieval-f016/cf,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f029,base,results/phaseb-qwen35a3b-retrieval-f029/base,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f029,cf,results/phaseb-qwen35a3b-retrieval-f029/cf,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f030,base,results/phaseb-qwen35a3b-retrieval-f030/base,59,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,retrieval-f030,cf,results/phaseb-qwen35a3b-retrieval-f030/cf,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,aggregation-f018,base,results/phaseb-qwen35a3b-aggregation-f018/base,80,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,aggregation-f018,cf,results/phaseb-qwen35a3b-aggregation-f018/cf,22,FAIL,AGENT_FAIL,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,preference_inference-f004,base,results/phaseb-qwen35a3b-preference_inference-f004/base,14,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-35B-A3B,primary,preference_inference-f004,cf,results/phaseb-qwen35a3b-preference_inference-f004/cf,93,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,retrieval-f003,base,results/phaseb-qwen359b-retrieval-f003/base,151,"pyautogui.scroll(-3, x=984, y=636)",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,retrieval-f029,base,results/phaseb-qwen359b-retrieval-f029/base,80,"import base64, time, pyautogui
+_text = base64.b64decode('Y2F0IH4vRG9jdW1lbnRzL1RheF8yMDI1L3cyX3N1bW1hcnkudHh0').decode('utf-8')
+try:
+    import pyperclip
+    pyperclip.copy(_text)
+    time.sleep(0.1)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.1)
+except Exception:
+    _text = _text.replace('\r\n', '\n').replace('\r', '\n')
+    for _line_index, _line in enumerate(_text.split('\n')):
+        for _part_index, _part in enumerate(_line.split('\t')):
+            if _part:
+                pyautogui.typewrite(_part)
+            if _part_index < len(_line.split('\t')) - 1:
+                pyautogui.press('tab')
+        if _line_index < len(_text.split('\n')) - 1:
+            pyautogui.press('enter')",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,retrieval-f029,cf,results/phaseb-qwen359b-retrieval-f029/cf,54,PREDICT_CRASH,SCREENSHOT_DECODE_CRASH,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,retrieval-f030,base,results/phaseb-qwen359b-retrieval-f030/base,80,"import base64, time, pyautogui
+_text = base64.b64decode('aHR0cDovL2xvY2FsaG9zdDozMDE1').decode('utf-8')
+try:
+    import pyperclip
+    pyperclip.copy(_text)
+    time.sleep(0.1)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.1)
+except Exception:
+    _text = _text.replace('\r\n', '\n').replace('\r', '\n')
+    for _line_index, _line in enumerate(_text.split('\n')):
+        for _part_index, _part in enumerate(_line.split('\t')):
+            if _part:
+                pyautogui.typewrite(_part)
+            if _part_index < len(_line.split('\t')) - 1:
+                pyautogui.press('tab')
+        if _line_index < len(_text.split('\n')) - 1:
+            pyautogui.press('enter')",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,retrieval-f030,cf,results/phaseb-qwen359b-retrieval-f030/cf,13,FAIL,AGENT_FAIL,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,aggregation-f018,cf,results/phaseb-qwen359b-aggregation-f018/cf,80,"pyautogui.press(""return"")",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,preference_inference-f004,base,results/phaseb-qwen359b-preference_inference-f004/base,5,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.5-9B,size_ablation,preference_inference-f004,cf,results/phaseb-qwen359b-preference_inference-f004/cf,3,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,retrieval-f003,cf,results/phaseb-qwen38flash-retrieval-f003/cf,81,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,retrieval-f016,base,results/phaseb-qwen38flash-retrieval-f016/base,12,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,retrieval-f030,base,results/phaseb-qwen38flash-retrieval-f030/base,5,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,retrieval-f030,cf,results/phaseb-qwen38flash-retrieval-f030/cf,2,EMPTY_XML,EMPTY_XML,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,aggregation-f018,base,results/phaseb-qwen38flash-aggregation-f018/base,81,"pyautogui.click(518, 221)",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,aggregation-f018,cf,results/phaseb-qwen38flash-aggregation-f018/cf,80,TOOL_CALL,STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,preference_inference-f004,base,results/phaseb-qwen38flash-preference_inference-f004/base,54,FAIL,AGENT_FAIL,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes
+Qwen3.8-Flash,exploratory,preference_inference-f004,cf,results/phaseb-qwen38flash-preference_inference-f004/cf,81,"pyautogui.hotkey(""ctrl"", ""a"")",STEP_LIMIT_NO_DONE,not DONE (last traj.jsonl action != 'DONE'); result.txt/writer status/score are not substitutes

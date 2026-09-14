@@ -1,0 +1,25 @@
+# Terminology audit
+
+For every candidate term, we searched directly (not from memory) and classify as ESTABLISHED (multiple independent papers use it consistently), ONE-OFF (used by one paper/group, not adopted elsewhere), or NOT FOUND (no real, on-topic usage located).
+
+| Term | Verdict | Source | Year | Field | Definition | How close to our phenomenon |
+|---|---|---|---|---|---|---|
+| "false success" | ONE-OFF | Advani, "From Confident Closing to Silent Failure," arXiv:2606.09863 | 2026 | Tool-use agents | Agent asserts task completion when environment state shows it did not | Same general shape as Type B (score/self-report says success, ground truth disagrees); detected via retrospective audit of existing trajectories, not paired state intervention |
+| "silent failure" | ONE-OFF / not coherent | Same paper (title phrase); also appears in unrelated marketing/blog content with no shared technical definition | 2026 | Tool-use agents | Failure the agent does not surface or flag | Loosely analogous vocabulary; no paired-intervention design behind it |
+| "corrupt success" | ONE-OFF | Cao, Driouich, Thomas, "Beyond Task Completion...," arXiv:2603.03116 | 2026 | Tool-use agents (tau-bench) | Task reward=1.0 co-occurring with procedural/policy/data-faithfulness violations | Same "success is not what it seems" spirit; detected via single-trajectory consistency checks, not by re-running under an intervened environment |
+| "deceptive success" | NOT FOUND | — | — | — | — | — |
+| "accidental success" | NOT FOUND | — | — | — | — | — |
+| "evaluator blindness" / "judge blindness" | NOT FOUND | — | — | — | — | Searches returned only generic LLM-as-judge bias/reliability literature, no coined term |
+| "rubric insensitivity" / "score blindness" / "metric blindness" | NOT FOUND | — | — | — | — | — |
+| "state grounding" | ONE-OFF, different meaning | StateAct, arXiv:2607.22798 | 2026 | Computer-use agents | Using program/application state as an observation modality (vs. screenshots) for the agent itself | Different phenomenon entirely — about what the agent perceives, not about score sensitivity to state change |
+| "world-state tracking" / "environment-state consistency" | NOT FOUND as fixed terms | — | — | — | Used descriptively in places (e.g. AppWorld's collateral-damage checks) but not as a named, adopted term | — |
+| "evidence-grounded evaluation" / "evidence coverage" | Loosely used, not a fixed term | Gao & Zhou, arXiv:2605.10448 (Evidence Pass/Fail/Unknown) | 2026 | Interactive agents | Whether a claimed state change is actually supported by retained evidence | Evaluator-side concern, close in spirit, but post-hoc audit not paired intervention |
+| "counterfactual audit" | NOT FOUND as a fixed adopted term | Individual papers use "counterfactual" and "auditing" separately (Luo & Peng's AcquaBench title uses "auditing"; Turk uses "counterfactual evaluation") | — | — | — | No single recurring phrase found; free to coin |
+| "policy invariance" (for judges) | ONE-OFF, methodologically adjacent | Weng, Feng, Xie, arXiv:2605.06161 | 2026 | LLM-as-judge (safety) | Perturbing rubric/policy text (not environment state) and checking whether judge verdicts move appropriately vs. spuriously | Closest methodological cousin on the "perturb and check judge sensitivity" idea, but intervenes on policy text, not environment state, and has no agent-tracking axis |
+| "state-score dissociation" / "state-score mismatch" / "outcome-state mismatch" / "outcome-evidence mismatch" | NOT FOUND | — | — | — | — | — |
+| "capability-evaluation gap" / "tracking-evaluation gap" / "measurement dissociation" | NOT FOUND | — | — | — | — | — |
+| "construct validity" (applied to LLM benchmarks) | ESTABLISHED (as a general framework, imported from psychometrics) | Bean et al., arXiv:2511.04703; Freiesleben & Zezulka, arXiv:2510.23191 | 2025 | LLM benchmark methodology | General framework for whether a benchmark measures the construct it claims to | Conceptual umbrella Paper 1's finding sits under, but neither source paper does a paired state-intervention experiment |
+
+## Conclusion
+
+No established, cross-adopted term exists for Paper 1's specific phenomenon (an agent's answer tracking a counterfactual state change while a held-fixed external score stays flat, or failing to track while the score stays high). The two nearest coinages ("false success," "corrupt success") are each single-paper terms detected via retrospective trajectory auditing, not the paired-intervention design Paper 1 uses, and using either term without qualification risks conflation with those specific papers' different definitions. Recommend Paper 1 either coin a new term explicitly scoped to the paired-intervention design (e.g., something built from "score invariance" / "state-score separation," defined precisely on first use) or avoid a single catchy term altogether and rely on the completion / tracking / score-sensitivity three-way vocabulary already used throughout the draft, which is not claimed as established terminology anywhere and does not collide with any existing paper's coinage.

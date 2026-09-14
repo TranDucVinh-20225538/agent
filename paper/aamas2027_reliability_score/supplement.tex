@@ -1,0 +1,86 @@
+%%% Supplementary material for the AAMAS 2027 submission.
+%%% Reviewers are not required to read this file. Main paper is self-contained.
+\documentclass[sigconf,anonymous,review]{acmart}
+
+\setcopyright{none}
+\acmConference[AAMAS '27]{Proc.\ of the 26th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{May 3--7, 2027}{Hanoi, Vietnam}
+
+\usepackage{booktabs}
+
+\newcommand{\task}[1]{\texttt{#1}}
+\newcommand{\STS}{\mathrm{STS}}
+
+\title{Supplementary Material:\\What Does a Computer-Use Agent Reliability Score Actually Measure?}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Protocol tables and expansions omitted from the eight-page main text.
+Nothing here is a new experiment or a new estimand.
+The main paper does not rely on this file.
+\end{abstract}
+
+\section{Study 2 per-task common support}
+
+\begin{table}[h]
+\centering
+\caption{Per-task values on $\mathcal{A}^{\cap}$. $\Delta$ is Flash minus GPT-5.5.}
+\label{tab:pertask}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Task & $S^{0}$ GPT & $S^{0}$ Flash & $\STS$ GPT & $\STS$ Flash & $\Delta S^{0}$ & $\Delta\STS$ \\
+\midrule
+\task{counterfactual-f010}        & 83 & 100 & 0.000 & 0.000 & $+17$ & $0.000$ \\
+\task{preference\_inference-f014} &  0 &  84 & 0.000 & 0.000 & $+84$ & $0.000$ \\
+\task{retrieval-f002}             & 75 & 100 & 0.500 & 0.500 & $+25$ & $0.000$ \\
+\task{retrieval-f009}             & 40 & 100 & 0.500 & 0.333 & $+60$ & $-0.167$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Study 3 ordering under repairs}
+
+\begin{table}[h]
+\centering
+\caption{Flash-minus-GPT $\Delta\STS$ on the four-task support. FROZEN is the baseline, not a finding. R-CHAN inversion is the existence demonstration in the main text ($n_{\mathrm{eff}}=1$).}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Config & STS GPT & STS Flash & $\Delta\STS$ & Outcome \\
+\midrule
+FROZEN  & 0.2500 & 0.2083 & $-0.0417$ & baseline \\
+R-AGG   & 0.3333 & 0.3125 & $-0.0208$ & narrowed mean \\
+R-SCOPE & 0.2083 & 0.1875 & $-0.0208$ & narrowed mean \\
+R-CMP   & 0.2500 & 0.2083 & $-0.0417$ & unchanged \\
+R-CHAN  & 0.0417 & 0.2083 & $+0.1667$ & inverted \\
+ALL     & 0.0417 & 0.2708 & $+0.2292$ & inverted \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+R-AGG's mean gap shrinks while per-task disagreement grows: nonzero $\Delta\STS$ tasks go $1\to 2$, and the two moves cancel (\task{counterfactual-f010} $+0.250$, \task{retrieval-f009} $-0.333$).
+
+\section{Reconstruction (G2)}
+
+Locked rule $R$, G1 groundedness $30/30$, G2 calibration $9/30$.
+MATCH $20\to 13$, RECALL\_MISS $39\to 46$, ABSENT $61$ unmoved.
+$R$ is not revised. The sealed corpus was not opened.
+
+\section{Comparative cohort gate}
+
+Pre-specified threshold: $n\ge 20$ independent task clusters, same construct, frozen evaluator, decided before the first trajectory.
+Slate: 28 new family tasks (not the C7 support, not preference, not sealed).
+Probe: inject/guest feasibility only; no agent, no STS.
+Wave A $9/12$, Wave B $7/16$, $n=16<20$.
+FAIL. Comparative branch closed. Not a scientific headline.
+
+\section{What this supplement is not}
+
+Not a place to pool $24+57+134$.
+Not a ranking.
+Not a recommended repair.
+Not a G2 rescue.
+
+\end{document}

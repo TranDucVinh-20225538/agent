@@ -1,0 +1,283 @@
+% Frozen NeurIPS 2026 workshop submission (double-blind).
+% Evaluation of Interactive Agents @ NeurIPS 2026
+% Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\documentclass{article}
+
+\usepackage[dblblindworkshop]{neurips_2026}
+\workshoptitle{Evaluation of Interactive Agents}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\graphicspath{{figs/}}
+\newcommand{\task}[1]{\texttt{#1}}
+
+\title{When the World Changes but the Score Does Not:\\
+A Counterfactual Audit of Computer-Use Agents}
+
+% Displayed as Anonymous Author(s) under dblblindworkshop.
+\author{Anonymous Authors}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Computer-use agents are typically scored by whether an episode finishes and what a rubric judge assigns.
+That scalar mixes three questions: termination, whether the final answer reflected the world the agent saw, and whether the judge noticed when that world changed.
+We separate them with paired counterfactual episodes on MyPCBench: a locked intervention rewrites a pre-registered determining set $D$ while instruction, interface, and judge stay fixed.
+Tracking is read from the final answer against guest gold, never from the score; score sensitivity is exact equality $S_{\mathrm{CF}}=S_{\mathrm{Base}}$ versus any nonzero delta.
+Across agents, successful counterfactual tracking sometimes leaves the benchmark score unchanged and sometimes changes it; conversely, unchanged high scores can occur despite incomplete state tracking.
+On a frozen $5{\times}10$ design ($50$ intended cells; $4$ never scheduled; $46$ executed; $92$ legs; $35$ execution failures; $24$ valid pairs), Claude has $9$ valid pairs ($7$ tracking-valid: $6$ Type~A, $1$ score-sensitive, $2$ Type~B; invariance $6/7=0.857$, Clopper--Pearson $95\%$ CI $[0.421,0.996]$); GPT-5.5 has $8$ valid ($7$ tracking-valid: $3$ Type~A, $4$ score-sensitive, $1$ Type~B; $3/7=0.429$, $[0.099,0.816]$); Qwen3.5-35B-A3B has one valid pair (Type~A; $[0.025,1.000]$).
+Qwen3.5-9B (ablation) and Qwen3.8-Flash (exploratory) are not pooled into these rates.
+A stable score does not certify tracking; a moving score does not certify a tracking failure.
+\end{abstract}
+
+\section{Introduction}
+
+Leaderboard evaluation of computer-use agents (CUAs) reports a completion score: the episode ended, and a rubric assigned a number~\citep{jang2026mypcbench,xie2024osworld}.
+That number is asked to stand in for three facts: whether the harness recorded a terminal \texttt{DONE}; whether the answer matched the environment that was present; and whether the judge's score moved when that state moved.
+
+These facts need not agree.
+An agent can finish, miss a manipulated field, and still score $100$ if the rubric does not pin that field.
+An agent can finish, report the field correctly on both sides of a paired comparison, and still see the score swing for reasons orthogonal to that field.
+Inferring tracking or judge sensitivity from the scalar alone is therefore undefined.
+
+This paper makes the three facts separately observable.
+For each frozen task we run a base episode in $E^0$ and a counterfactual episode in $E^1=I(E^0)$, where $I$ is a locked SQL (and, when designed, file) patch on a pre-registered determining set $D$.
+Prompt, UI, screenshot size, and judge are held fixed.
+Guest probes confirm that gold moved.
+We code \emph{completion} from the last trajectory action, \emph{tracking} from the final answer against guest gold, and \emph{score sensitivity} from exact scalar equality.
+Incomplete runs are execution failures, not tracking misses.
+
+\paragraph{Contributions.}
+(1)~An audit taxonomy of valid pairs: Type~A (tracked, score-invariant), score-sensitive (tracked, score moves), and high-score tracking failure (Type~B: incomplete tracking with a high, invariant score).
+(2)~Empirical separation on a frozen ten-task MyPCBench audit across three primary lanes, with a size ablation and an exploratory lane held out of the primary rates.
+(3)~Pre-registered intervention roles predicted what state was manipulated, not how the agent would respond to that manipulation.
+The claim is methodological and local: we do not estimate a population failure rate and we do not headline a pooled invariance fraction.
+
+\section{Setup}
+\label{sec:setup}
+
+\paragraph{Intervention.}
+For task $t$, $E_t^0$ is the seeded guest and $E_t^1=I_t(E_t^0)$ is the same guest after a locked patch on $D_t$.
+Some tasks are dual-channel (sqlite and a paired local file must move together); others hold one channel constant as a distractor.
+The same agent $A$, instruction $T_t$, and judge $J$ produce $\tau^0=A(T_t,E_t^0)$ and $\tau^1=A(T_t,E_t^1)$.
+Every intervention in this snapshot has a confirming guest probe.
+
+\paragraph{Reads.}
+$G(\tau)$ is the task-relevant quantities in the final answer.
+$S(\tau)=J(\tau)\in\{0,\dots,100\}$.
+Writer-side track fields, \texttt{result.txt}, and the mere presence of a score file are not used for DONE, tracking, or validity.
+$\mathrm{done}(\tau)=1$ iff the last recorded action is literally \texttt{DONE}.
+A pair is valid iff both legs are done.
+$\mathrm{track}=1$ iff $G(\tau^0)$ matches $D_t$ on $E_t^0$ and $G(\tau^1)$ matches $D_t$ on $E_t^1$; joint $D_t$ requires every component on both legs.
+Tracking is never inferred from $S$.
+On a tracked pair, invariance is $S(\tau^1)=S(\tau^0)$ with no tolerance.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Taxonomy of valid pairs. Rows: agent vs.\ gold. Columns: exact $S$. Execution failures are excluded.}
+\label{tab:taxonomy}
+\begin{tabular}{lcc}
+\toprule
+ & Score invariant & Score moves \\
+\midrule
+Tracks $D$ & \textbf{Type A} & \textbf{Score-sensitive} \\
+Misses $D$ & \textbf{Type B} (high, invariant) & not a headline class here \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Classes.}
+These labels are an audit taxonomy for this protocol, not a claim that CUAs have three natural kinds.
+Type~A: $\mathrm{track}=1$ and $\Delta S=0$.
+Score-sensitive: $\mathrm{track}=1$ and $\Delta S\neq 0$.
+Type~B (high-score tracking failure): $\mathrm{track}=0$ with a high, invariant score.
+The high-score cutoff used here is operational: both legs $\ge 80$ and $\Delta S=0$ on the three primary Type~B cells ($100{\to}100$ on the ablation/exploratory Type~B cells).
+A different cutoff would relabel the same trajectories; we report the scores, not a law of nature.
+Type~A is not automatically a rubric bug; Section~\ref{sec:rubric} reads per-criterion arrays where they exist.
+
+\paragraph{Universe.}
+Ten tasks from one pre-registered eligibility pool (Table~\ref{tab:protocol}).
+Designed roles were frozen before runs.
+Lanes: Claude, GPT-5.5, Qwen3.5-35B-A3B (primary); Qwen3.5-9B (ablation); Qwen3.8-Flash (exploratory).
+Design matrix: $50$ intended cells.
+Never scheduled (not execution failures): Qwen3.5-9B and Qwen3.8-Flash on \task{preference\_inference-f018} and \task{counterfactual-f004} ($4$ cells).
+Executed: $46$ cells, $92$ legs; $57$ DONE, $35$ execution failures ($15$ of $35$ on Qwen3.5-35B-A3B, mostly empty tool XML).
+Valid pairs: $24$.
+Invariance rate $=$ Type~A / tracking-valid.
+Intervals are exact Clopper--Pearson $95\%$ CIs.
+Lanes are never pooled.
+
+\paragraph{Compute.}
+This paper does not train models and performs no additional agent runs.
+Claude and GPT-5.5 cells used provider computer-use APIs; Qwen cells used a hosted API (OpenRouter).
+Original wall-clock, GPU type, and cluster identifiers were not instrumented for this audit.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Frozen tasks and pre-registered design role.}
+\label{tab:protocol}
+\begin{tabular}{lll}
+\toprule
+Task & Phase & Designed role \\
+\midrule
+\task{retrieval-f001} & A & control \\
+\task{aggregation-f003} & A & control \\
+\task{preference\_inference-f018} & A & designed Type B (joint $D$) \\
+\task{counterfactual-f004} & A & score-sensitive contrast \\
+\task{retrieval-f003} & B & control \\
+\task{retrieval-f016} & B & control \\
+\task{retrieval-f029} & B & control (dual-channel) \\
+\task{retrieval-f030} & B & designed Type B \\
+\task{aggregation-f018} & B & designed Type B \\
+\task{preference\_inference-f004} & B & score-sensitive contrast \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Type A: tracked, score unchanged}
+
+All five lanes complete \task{retrieval-f001} (loyalty tier/miles Gold/$38{,}450\to$Silver/$8{,}620$) and track both legs; scores stay at the base value ($100$ on four lanes; $80$ on Qwen3.5-9B).
+The rubric does not pin Gold or $38{,}450$.
+
+Claude \task{aggregation-f018} was designed as a Type~B trap (sqlite charitable $\$950\to\$0$ and home-office $104\to 0$ days; W-2/1099 and files held).
+Claude is the only lane that completed both legs.
+Observed class is Type~A: CF zeroes both sqlite fields, holds the untouched file, and flags the mismatch; $100\to 100$.
+This is the cleanest positive control.
+
+Other primary Type~A pairs: Claude \task{retrieval-f003} $65\to 65$, \task{retrieval-f016} $100\to 100$, \task{retrieval-f029} $100\to 100$, \task{aggregation-f003} $80\to 80$; GPT \task{retrieval-f001}, \task{retrieval-f003} $100\to 100$, \task{aggregation-f003} $50\to 50$; Qwen3.5-35B-A3B \task{retrieval-f001} $100\to 100$.
+
+\subsection{Score-sensitive: tracked, score moves}
+
+\task{preference\_inference-f004} flips HangryDash from Cooper's Seafood House (88) to Backyard Ale House (59), TableFind held.
+Claude and GPT both report the flip.
+Scores drop $100\to 79$ and $100\to 58$ because the rubric pins Cooper's as HD top.
+
+GPT also tracks three retrieval interventions whose scores move: \task{retrieval-f016} $100\to 85$; \task{retrieval-f029} $33\to 100$; \task{retrieval-f030} $53\to 100$ (TY2025 1099 held at $\$1{,}200$; charitable $\$950\to\$100$).
+Type~A and score-sensitive co-exist for the same agent and protocol.
+
+\subsection{Type B: high-score tracking failure}
+
+\begin{enumerate}[leftmargin=1.2em,itemsep=0.25em]
+\item Claude \task{retrieval-f030}, $100\to 100$.
+Base answers filed TY2024 1099-NEC $\$1{,}080$, not determining TY2025 $\$1{,}200$.
+CF reports $\$1{,}200$ and charitable $\$100$.
+The miss is the base-leg year, not CF charitable.
+\item Claude \task{preference\_inference-f018}, $100\to 100$.
+Joint $D$: GME $85\to 0$ and OddsMarket YES $200$/active $\to 0$/settled.
+CF lists GME $0$ and still lists GameStop YES as $200$ / $\$16.00$.
+\item GPT \task{counterfactual-f004}, $87\to 87$.
+Guest zeroes the 1099; CF still reports a $\$1{,}200$ stipend and $\$1{,}068$/year net.
+\end{enumerate}
+
+Ablation/exploratory Type~B (not primary): Qwen3.5-9B \task{retrieval-f016} base $\$8{,}788.75$ vs.\ gold $\$8{,}213.25$ (CF exact), $100\to 100$; Qwen3.8-Flash \task{retrieval-f029} CF ``Total Income $\$91{,}200$'' vs.\ Box~1 $\$90{,}000$, $100\to 100$.
+
+\subsection{Designed role vs.\ observed class}
+
+Pre-registered intervention roles predicted what state was manipulated, not how the agent would respond to that manipulation.
+\task{aggregation-f018} (designed Type~B) $\to$ Claude Type~A.
+\task{retrieval-f030} (designed Type~B) $\to$ Claude Type~B and GPT score-sensitive.
+\task{preference\_inference-f018} $\to$ Claude Type~B as specified.
+\task{preference\_inference-f004} $\to$ Claude and GPT sensitive.
+\task{counterfactual-f004} (designed sensitive) $\to$ GPT Type~B.
+
+\subsection{Per-model counts}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Primary tier. Invariance $=$ Type~A / tracking-valid. Exact Clopper--Pearson $95\%$ CI. $n\le 9$.}
+\label{tab:primary}
+\input{table_primary.tex}
+\end{table}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Ablation and exploratory. Not pooled with Table~\ref{tab:primary}.}
+\label{tab:ablation}
+\begin{tabular}{lrrrrrrl}
+\toprule
+Model & Valid & Track. & A & Sens. & B & Inv. & 95\% CI \\
+\midrule
+Qwen3.5-9B & 3 & 2 & 1 & 1 & 1 & 0.500 & [0.013, 0.987] \\
+Qwen3.8-Flash & 3 & 2 & 1 & 1 & 1 & 0.500 & [0.013, 0.987] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{score_pairs_primary.png}
+\caption{Primary valid pairs: $S^0$ vs.\ $S^1$. Diagonal: score invariance. Off-diagonal tracked pairs are score-sensitive; high, invariant misses of $D$ are Type~B.}
+\label{fig:score-pairs-primary}
+\end{figure}
+
+Qwen3.5-35B-A3B's $1/1$ is execution coverage (nine of ten cells fail), not an invariance finding.
+
+\subsection{Judge vs.\ agent}
+\label{sec:rubric}
+
+On \task{aggregation-f003} ($\$4{,}871.70\to\$400$), four completing lanes track both totals.
+Claude and GPT are Type~A; 9B and Flash are score-sensitive.
+GPT stays at \texttt{[1,1,0,0]} both legs: refund-linked criteria pass twice; year-count criteria never fire.
+9B and Flash each pick up one extra criterion under CF.
+Type~A is not ``the refund criteria were blind''; score-sensitive is not ``the agent failed to track.''
+
+\section{Discussion}
+
+Completion scores measure termination plus whatever the rubric binds.
+They do not measure whether $D$ was read, and they do not measure whether $J$ is attached to $D$.
+Type~A shows tracking without score movement; score-sensitive shows both; Type~B is a high-score tracking failure under this taxonomy, not a fundamental category of CUA behavior.
+
+Score invariance is not a defect to patch out of every rubric.
+A channel-invariant item that asks whether the agent used the right app and reported \emph{a} value can award the same score to two correct worlds (\task{retrieval-f001}).
+The same agent can be Type~A on some tasks and score-sensitive on others (GPT on \task{retrieval-f001}/\task{retrieval-f003}/\task{aggregation-f003} vs.\ \task{retrieval-f016}/\task{retrieval-f029}/\task{retrieval-f030}/\task{preference\_inference-f004}), so the protocol does not merely detect a globally blind judge.
+
+\paragraph{Broader impacts.}
+Positive: the audit makes hidden evaluation failure modes observable and encourages treating completion scores as insufficient certificates of state tracking.
+Negative: the same pairing could be used to probe proprietary graders; we intend the results as a diagnostic of scoring, not as an adversarial exploit of any deployed system.
+
+\section{Related work}
+
+OSWorld~\citep{xie2024osworld}, WebArena~\citep{zhou2024webarena}, and VisualWebArena~\citep{koh2024visualwebarena} score agents with completion rubrics.
+MyPCBench~\citep{jang2026mypcbench} seeds a personal desktop that the interventions reuse.
+OSWorld is Apache-2.0; WebArena is Apache-2.0; VisualWebArena is MIT; MyPCBench is MIT with an OSWorld-derived harness under Apache-2.0.
+None of these leaderboards pair $E^0$ with $E^1=I(E^0)$ to split tracking from $S$.
+\citet{shao2026protocolvalidity} audit whether intended capability remains necessary for a score; we audit whether a gold-moving intervention appears in the answer and in $S$.
+\citet{turk2026counterfactualclinical} find that coverage-style scores can hide update failures under controlled mutations; we observe the same pattern for GUI CUAs.
+\citet{bellibatlu2026judgesense} measure judge instability under prompt paraphrase; we measure sensitivity to a verified world-state change.
+The pairing follows interventionist language~\citep{pearl2009causality}; we do not identify model internals.
+
+\section{Limitations}
+
+Ten tasks, one environment, five lanes, $n\le 9$ valid pairs per primary model.
+CIs bound binomial uncertainty on this sample, not a deployment rate.
+Qwen3.5-35B-A3B contributes one semantic pair.
+All $24$ valid pairs were hand-coded from final-answer text against guest gold.
+Score deltas are attributed to rubric items only where per-criterion arrays exist.
+Interventions test controlled state changes, not arbitrary real-world shifts.
+
+\section{Conclusion}
+
+On this frozen audit, task completion, counterfactual tracking, and benchmark score sensitivity come apart.
+A stable score does not certify tracking; a moving score does not certify a tracking failure.
+Paired gold-moving checks make that split observable; CUA leaderboards currently do not run them.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\newpage
+\input{checklist.tex}
+
+\end{document}

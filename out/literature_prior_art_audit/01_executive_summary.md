@@ -1,0 +1,45 @@
+# Executive Summary — Prior-Art / Novelty Audit for Paper 1
+
+Snapshot: search conducted 2026-08-30, five parallel literature sweeps (priority-named papers, CUA benchmark landscape, metamorphic/counterfactual testing, reward-hacking/Goodhart/benchmark-validity, false-success/judge-reliability terminology) plus two papers personally re-verified by direct fetch of full paper text. See `02_search_strategy.md` for method, `03/04_prior_art_matrix` for the full comparison table, `08_direct_prior_art.md` for the two papers that matter most.
+
+## Answers to the 10 required questions
+
+**1. Has this exact phenomenon already been named?**
+No. No paper found uses a stable, cross-adopted term for "an agent's answer can track a counterfactual state change while a held-fixed benchmark score stays flat, and can fail to track it while the score stays high." The two nearest coinages — "false success" (Advani, arXiv:2606.09863) and "corrupt success" (Cao, Driouich & Thomas, arXiv:2603.03116) — are each single-paper terms, not adopted by a second independent group, and neither is defined via a paired environment-state intervention; both detect the gap by auditing existing trajectories after the fact.
+
+**2. What are the 5 closest papers?**
+1. Turk, "Counterfactual Evaluation Reveals Hidden Capability Profiles in Clinical LLMs and Agents," arXiv:2605.30590 (May 2026) — closest by methodology, wrong domain (clinical LLM/agent QA, not CUA).
+2. Dong et al., "How Benchmarks Mis-Score Computer-Use Agents," arXiv:2607.28367 (Jul 2026) — closest by domain (CUA), different method (retrospective trajectory audit, not paired intervention).
+3. Lù et al., "AgentRewardBench," arXiv:2504.08942 (Apr 2025) — large expert-annotated judge-reliability audit for web agents; evaluator-side, no state intervention.
+4. Cao, Driouich & Thomas, "Beyond Task Completion... Corrupt Success... Procedure-Aware Evaluation," arXiv:2603.03116 (Mar 2026) — same "success ≠ what it seems" framing, single-trajectory procedural audit, no paired design.
+5. Luo & Peng, "Success Is Not Self-Explanatory: Auditing Success Provenance in Agent Evaluation" (AcquaBench), arXiv:2607.24054 (Jul 2026) — genuinely paired, fixed-instruction/UI/target design with reported score deltas; manipulates information availability (GOLD/SHAM), not environment world-state.
+
+**3. Is our exact experimental protocol already in the literature?**
+No paper found performs all of: (a) a frozen task, (b) a pre-specified determining-set intervention on environment/world state, (c) instruction/UI/rubric/judge held fixed, (d) a paired E0/E1 run of the same task, (e) ground-truth-verified state-tracking measured independently of the score, and (f) the *same* external score recomputed on both legs and differenced (S_CF − S_Base) per instance — for computer-use/GUI agents. Turk (2605.30590) does (a)–(e) for clinical case QA but not (f): confirmed by direct fetch of the paper's full text that its coverage metric (CMS) is computed only on baseline cases and compared to CSS via cross-model rank correlation (Spearman ρ=−0.49, n=6), never recomputed on the intervened arm as a per-instance delta.
+
+**4. What is genuinely novel?**
+See `09_novelty_assessment.md` for the full A–I breakdown. In short: the specific combination of (i) CUA/GUI environment-state intervention (not clinical case data, not information availability, not skill on/off), (ii) an independent third-party benchmark's own black-box score held under test rather than a bespoke sensitivity metric, (iii) that same score recomputed and differenced per-instance on both legs of a paired run, and (iv) the three-way Type A / score-sensitive / Type B taxonomy derived from that pairing, was not found anywhere in the literature searched.
+
+**5. What is NOT novel?**
+The general claim "a completion/coverage score can be blind to whether the underlying state actually changed" is not novel — it is the explicit finding of Turk (2605.30590) in clinical QA, and the general spirit of Dong et al. (2607.28367), AgentRewardBench, and the construct-validity survey (Bean et al., arXiv:2511.04703) in CUA/LLM evaluation broadly. The idea of holding instruction/interface fixed while intervening on state is not novel (Turk; Luo & Peng). The general idea that judges/evaluators can be insensitive or wrong is extensively documented (Online-Mind2Web/WebJudge, arXiv:2504.01382; AgentRewardBench; Dong et al.).
+
+**6. Is "state-score dissociation" an established term?**
+No. Searched directly; no paper found using this or a synonymous fixed term ("state-score mismatch," "outcome-state mismatch," "tracking-evaluation gap," "measurement dissociation"). Free to coin.
+
+**7. Is "counterfactual audit" already established?**
+No fixed, cross-adopted term found under this name for agent/benchmark evaluation. Individual papers use "counterfactual" + "evaluation"/"intervention" language (Turk; Luo & Peng's AcquaBench uses "auditing" in its title), but no single established phrase "counterfactual audit" recurs across independent groups.
+
+**8. Is metamorphic testing prior art for our intervention?**
+Partially, at the level of general design pattern, not at the level of the specific two-layer measurement. Classical metamorphic testing (Chen et al. 1998/2020; Segura et al. 2018 survey; CheckList's INV/DIR, Ribeiro et al. 2020) checks only whether an output obeys a known relation under a transformed input — a single-layer check. It does not, in any paper found, additionally test whether some SEPARATE, held-fixed external score is sensitive to that same transformation. Metamorphic/counterfactual testing is legitimate intellectual ancestry for Paper 1's E0→E1 design and should be cited as such, but it is not direct prior art for the specific score-sensitivity layer.
+
+**9. Does Paper 1 need reframing?**
+No reframing required on novelty grounds. Two changes are recommended: (a) Turk (2605.30590) and Dong et al. (2607.28367) must be discussed explicitly in Related Work, not just cited in a list — Paper 1's own `references.bib` already includes `turk2026counterfactualclinical`, so the citation exists; it needs a dedicated differentiating paragraph (see `11_recommended_related_work.md`). (b) Avoid any claim of being "the first" to observe score-blindness to state change — that general claim is already established (by Turk, in a different domain); Paper 1's claim should be scoped to the CUA/GUI setting and the specific three-way separable-constructs argument.
+
+**10. What should Paper 2 NOT do because someone already did it?**
+Do not build a bespoke, non-comparative "sensitivity score" that folds tracking-correctness and score-computation into one number the way Turk's CSS does — Paper 1/2's distinguishing design choice (treating an existing benchmark's own score as a black box under test, and computing its delta on the same paired instance) is the more defensible position and should be kept, not abandoned in favor of a CSS-style bespoke metric. Do not reinvent judge-reliability auditing generally (AgentRewardBench, Dong et al., Online-Mind2Web/WebJudge, RuVerBench already cover retrospective judge-accuracy auditing well) — Paper 2's contribution should be the paired-intervention protocol and metrics (STS, Alignment 2×2), not a new pass at "are LLM judges accurate," which is already a saturated sub-literature. See `10_paper2_gap_analysis.md`.
+
+## NOVELTY VERDICT: **MODERATE-HIGH**
+
+Justification: no Level-3 direct prior art was found for the CUA/GUI domain under the exact paired-intervention protocol. One paper (Turk, 2605.30590) independently established the same general design pattern and the same qualitative finding (a coverage-style score can be blind to a real, tracked-or-untracked state transition) in a different domain (clinical LLM/agent decision support), and on the single most load-bearing technical point — whether the same external score is recomputed on both legs of a pair and differenced per-instance — it does NOT do what Paper 1 does (confirmed by direct fetch: CMS is baseline-only, compared to CSS by aggregate cross-model rank correlation, not per-case ΔCMS). This keeps the verdict from being LOW, but the fact that the general phenomenon and general design pattern is already published (even off-domain) keeps it from being HIGH/unqualified. The three-way Type A/score-sensitive/Type B taxonomy applied to an existing third-party benchmark's own score, for computer-use agents specifically, appears to be a genuine, checkable gap in the literature as of this search.
+
+**Recommendation: KEEP CURRENT FRAMING**, with two concrete edits: (1) add an explicit differentiating paragraph on Turk (2605.30590) and Dong et al. (2607.28367) to Related Work (see `11_recommended_related_work.md`); (2) remove or hedge any language that could be read as "first to show scores can be blind to state" — scope the novelty claim to CUA/GUI + the specific 3-way construct separation + reusing an existing benchmark's own score as the object under test.

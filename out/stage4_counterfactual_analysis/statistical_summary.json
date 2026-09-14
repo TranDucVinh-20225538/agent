@@ -1,39 +1,418 @@
 {
-  "primary": {
-    "valid_pairs": 5,
-    "tracking_valid": 5,
-    "score_invariant": 5,
-    "score_sensitive": 0,
-    "dissociation_events": 5,
-    "invariance_rate": 1.0,
+  "git_head": "b7b4203",
+  "denominator_policy": {
+    "valid_pair": "both DONE + CF guest inject not failed",
+    "tracking_valid": "valid_pair and every coded D item tracked on both legs",
+    "invariance_rate": "score_invariant / tracking_valid  (P(\u0394S=0 | tracked D))",
+    "type_b": "valid_pair, incomplete tracking, both scores >= 80 and \u0394S=0",
+    "execution_excluded_from_semantic": true,
+    "pooled_primary": "descriptive union only; not a common-rate estimator"
+  },
+  "primary_descriptive_union": {
+    "valid_paired_cells": 18,
+    "tracking_valid": 15,
+    "score_invariant": 10,
+    "score_sensitive": 5,
+    "type_b": 3,
+    "invariance_rate": 0.6666666666666666,
     "clopper_pearson_95ci": [
-      0.4781762498950185,
-      1.0
+      0.38380373254115396,
+      0.8817588966331193
+    ],
+    "type_b_over_valid": 0.16666666666666666,
+    "pairs": [
+      [
+        "claude",
+        "retrieval-f001",
+        100,
+        100
+      ],
+      [
+        "claude",
+        "retrieval-f003",
+        65,
+        65
+      ],
+      [
+        "claude",
+        "retrieval-f016",
+        100,
+        100
+      ],
+      [
+        "claude",
+        "retrieval-f029",
+        100,
+        100
+      ],
+      [
+        "claude",
+        "aggregation-f003",
+        80,
+        80
+      ],
+      [
+        "claude",
+        "aggregation-f018",
+        100,
+        100
+      ],
+      [
+        "openai",
+        "retrieval-f001",
+        100,
+        100
+      ],
+      [
+        "openai",
+        "retrieval-f003",
+        100,
+        100
+      ],
+      [
+        "openai",
+        "aggregation-f003",
+        50,
+        50
+      ],
+      [
+        "qwen35a3b",
+        "retrieval-f001",
+        100,
+        100
+      ]
+    ],
+    "sensitive_pairs": [
+      [
+        "claude",
+        "preference_inference-f004",
+        100,
+        79
+      ],
+      [
+        "openai",
+        "retrieval-f016",
+        100,
+        85
+      ],
+      [
+        "openai",
+        "retrieval-f029",
+        33,
+        100
+      ],
+      [
+        "openai",
+        "retrieval-f030",
+        53,
+        100
+      ],
+      [
+        "openai",
+        "preference_inference-f004",
+        100,
+        58
+      ]
+    ],
+    "type_b_pairs": [
+      [
+        "claude",
+        "retrieval-f030",
+        100,
+        100
+      ],
+      [
+        "claude",
+        "preference_inference-f018",
+        100,
+        100
+      ],
+      [
+        "openai",
+        "counterfactual-f004",
+        87,
+        87
+      ]
     ]
   },
-  "size_ablation": {
-    "valid_pairs": 2,
+  "by_model": {
+    "claude": {
+      "valid_paired_cells": 9,
+      "tracking_valid": 7,
+      "score_invariant": 6,
+      "score_sensitive": 1,
+      "type_b": 2,
+      "invariance_rate": 0.8571428571428571,
+      "clopper_pearson_95ci": [
+        0.4212768029568048,
+        0.9963897031380995
+      ],
+      "type_b_over_valid": 0.2222222222222222,
+      "pairs": [
+        [
+          "claude",
+          "retrieval-f001",
+          100,
+          100
+        ],
+        [
+          "claude",
+          "retrieval-f003",
+          65,
+          65
+        ],
+        [
+          "claude",
+          "retrieval-f016",
+          100,
+          100
+        ],
+        [
+          "claude",
+          "retrieval-f029",
+          100,
+          100
+        ],
+        [
+          "claude",
+          "aggregation-f003",
+          80,
+          80
+        ],
+        [
+          "claude",
+          "aggregation-f018",
+          100,
+          100
+        ]
+      ],
+      "sensitive_pairs": [
+        [
+          "claude",
+          "preference_inference-f004",
+          100,
+          79
+        ]
+      ],
+      "type_b_pairs": [
+        [
+          "claude",
+          "retrieval-f030",
+          100,
+          100
+        ],
+        [
+          "claude",
+          "preference_inference-f018",
+          100,
+          100
+        ]
+      ]
+    },
+    "openai": {
+      "valid_paired_cells": 8,
+      "tracking_valid": 7,
+      "score_invariant": 3,
+      "score_sensitive": 4,
+      "type_b": 1,
+      "invariance_rate": 0.42857142857142855,
+      "clopper_pearson_95ci": [
+        0.09898827844250788,
+        0.8159484323599169
+      ],
+      "type_b_over_valid": 0.125,
+      "pairs": [
+        [
+          "openai",
+          "retrieval-f001",
+          100,
+          100
+        ],
+        [
+          "openai",
+          "retrieval-f003",
+          100,
+          100
+        ],
+        [
+          "openai",
+          "aggregation-f003",
+          50,
+          50
+        ]
+      ],
+      "sensitive_pairs": [
+        [
+          "openai",
+          "retrieval-f016",
+          100,
+          85
+        ],
+        [
+          "openai",
+          "retrieval-f029",
+          33,
+          100
+        ],
+        [
+          "openai",
+          "retrieval-f030",
+          53,
+          100
+        ],
+        [
+          "openai",
+          "preference_inference-f004",
+          100,
+          58
+        ]
+      ],
+      "type_b_pairs": [
+        [
+          "openai",
+          "counterfactual-f004",
+          87,
+          87
+        ]
+      ]
+    },
+    "qwen35a3b": {
+      "valid_paired_cells": 1,
+      "tracking_valid": 1,
+      "score_invariant": 1,
+      "score_sensitive": 0,
+      "type_b": 0,
+      "invariance_rate": 1.0,
+      "clopper_pearson_95ci": [
+        0.025,
+        1.0
+      ],
+      "type_b_over_valid": 0.0,
+      "pairs": [
+        [
+          "qwen35a3b",
+          "retrieval-f001",
+          100,
+          100
+        ]
+      ],
+      "sensitive_pairs": [],
+      "type_b_pairs": []
+    }
+  },
+  "execution_coverage": {
+    "claude": {
+      "done_trajectories": 19,
+      "expected_trajectories": 20,
+      "present_traj": 20,
+      "valid_pairs": 9,
+      "expected_pairs": 10
+    },
+    "openai": {
+      "done_trajectories": 17,
+      "expected_trajectories": 20,
+      "present_traj": 20,
+      "valid_pairs": 8,
+      "expected_pairs": 10
+    },
+    "qwen35a3b": {
+      "done_trajectories": 5,
+      "expected_trajectories": 20,
+      "present_traj": 20,
+      "valid_pairs": 1,
+      "expected_pairs": 10
+    },
+    "qwen359b": {
+      "done_trajectories": 8,
+      "expected_trajectories": 20,
+      "present_traj": 16,
+      "valid_pairs": 3,
+      "expected_pairs": 10,
+      "lane": "ablation_9b"
+    },
+    "qwen38flash": {
+      "done_trajectories": 8,
+      "expected_trajectories": 20,
+      "present_traj": 16,
+      "valid_pairs": 3,
+      "expected_pairs": 10,
+      "lane": "exploratory_flash"
+    }
+  },
+  "ablation_qwen359b": {
+    "label": "qwen359b_ablation",
+    "valid_paired_cells": 3,
     "tracking_valid": 2,
     "score_invariant": 1,
     "score_sensitive": 1,
-    "dissociation_events": 1,
+    "type_b": 1,
     "invariance_rate": 0.5,
     "clopper_pearson_95ci": [
       0.01257911709342505,
       0.9874208829065749
+    ],
+    "type_b_over_valid": 0.3333333333333333,
+    "pairs": [
+      [
+        "qwen359b",
+        "retrieval-f001",
+        80,
+        80
+      ]
+    ],
+    "sensitive_pairs": [
+      [
+        "qwen359b",
+        "aggregation-f003",
+        50,
+        80
+      ]
+    ],
+    "type_b_pairs": [
+      [
+        "qwen359b",
+        "retrieval-f016",
+        100,
+        100
+      ]
     ]
   },
-  "exploratory": {
-    "valid_pairs": 2,
+  "exploratory_qwen38flash": {
+    "label": "qwen38flash_exploratory",
+    "valid_paired_cells": 3,
     "tracking_valid": 2,
     "score_invariant": 1,
     "score_sensitive": 1,
-    "dissociation_events": 1,
+    "type_b": 1,
     "invariance_rate": 0.5,
     "clopper_pearson_95ci": [
       0.01257911709342505,
       0.9874208829065749
+    ],
+    "type_b_over_valid": 0.3333333333333333,
+    "pairs": [
+      [
+        "qwen38flash",
+        "retrieval-f001",
+        100,
+        100
+      ]
+    ],
+    "sensitive_pairs": [
+      [
+        "qwen38flash",
+        "aggregation-f003",
+        80,
+        100
+      ]
+    ],
+    "type_b_pairs": [
+      [
+        "qwen38flash",
+        "retrieval-f029",
+        100,
+        100
+      ]
     ]
-  },
-  "sanity_flags": []
+  }
 }

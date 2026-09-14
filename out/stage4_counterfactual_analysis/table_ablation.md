@@ -1,8 +1,16 @@
-# Size ablation (Qwen3.5-9B)
+# Size ablation (Qwen3.5-9B) — not primary
 
-Not pooled into primary P1.
+Do not pool into primary. HEAD `b7b4203`. Phase-B 9B dirs present.
 
-| Agent/model | Task | Base gold | CF gold | Base score | CF score | Tracking | Valid pair | Dissociation | Interpretation |
-|---|---|---|---|---|---|---|---|---|---|
-| Qwen3.5-9B | aggregation-f003 | n_filed=2 combined=4871.70 | n_filed=2 combined=400.00 | 50 | 80 | yes | yes | no | Tracked the state change; conventional score moved (score-sensitive). |
-| Qwen3.5-9B | retrieval-f001 | Gold Voyager / 38450 | Silver Voyager / 8620 | 80 | 80 | yes | yes | yes | Tracked the state change; conventional score unchanged (dissociation). |
+| model | task | valid | tracking | scores | Δ | class |
+|---|---|---|---|---|---|---|
+| qwen359b | retrieval-f001 | True | True | 80→80 | 0 | Type A |
+| qwen359b | retrieval-f003 | False | None | 65→65 | None | execution_failure |
+| qwen359b | retrieval-f016 | True | False | 100→100 | 0 | Type B |
+| qwen359b | retrieval-f029 | False | None | 0→33 | None | execution_failure |
+| qwen359b | retrieval-f030 | False | None | 0→0 | None | execution_failure |
+| qwen359b | aggregation-f003 | True | True | 50→80 | 30 | score-sensitive |
+| qwen359b | aggregation-f018 | False | None | 0→0 | None | execution_failure |
+| qwen359b | preference_inference-f004 | False | None | 0→0 | None | execution_failure |
+| qwen359b | preference_inference-f018 | False | None | — | None | execution_failure |
+| qwen359b | counterfactual-f004 | False | None | — | None | execution_failure |

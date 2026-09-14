@@ -1,4 +1,4 @@
-# Figure / table inventory (v0.4)
+# Figure / table inventory (v0.5)
 
 Only existing rasters plus TikZ from locked counts. No new data.
 
@@ -24,6 +24,7 @@ Only existing rasters plus TikZ from locked counts. No new data.
 |---|---|
 | `tab:map` | Evidence hierarchy (core / secondary / supporting) |
 | `tab:causes` | P3 M1a–M4 |
+| `tab:m1a-s100` | Compact M1a × locked S (7/10; 9/9 Y=0) |
 | `tab:repairs` | Compact FROZEN / R-AGG / ALL |
 | `tab:p4seq` | Three constructive boundaries |
 | `tab:slots` | Eight reporting questions |
@@ -35,6 +36,8 @@ Only existing rasters plus TikZ from locked counts. No new data.
 | `tab:s1` | S1 Type A/B existence sample + CIs in prose |
 | `tab:coverage` | S2 DONE, \|A\|, S⁰, STS |
 | `tab:repairs-full` | Six-configuration repair diagnostic |
+| `tab:m1a-join` | 13 M1a rows × locked S/Y/earlier text |
+| `tab:patha-fail` | Path A FAIL composition: empty \(I\) vs mismatch; AssistantBench emptiness not pooled |
 
 ## Do not create
 

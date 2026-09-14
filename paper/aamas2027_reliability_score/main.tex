@@ -1,0 +1,502 @@
+%%% AAMAS 2027 main-track draft (GAAI). Anonymous review.
+%%% Swap in the official AAMAS wrapper class if/when it is posted.
+%%% Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\documentclass[sigconf,anonymous,review]{acmart}
+
+\setcopyright{none}
+\acmConference[AAMAS '27]{Proc.\ of the 26th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{May 3--7, 2027}{Hanoi, Vietnam}
+\acmYear{2027}
+\copyrightyear{2027}
+
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\newcommand{\task}[1]{\texttt{#1}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Acap}{\mathcal{A}^{\cap}}
+\newcommand{\STS}{\mathrm{STS}}
+
+\title{What Does a Computer-Use Agent Reliability Score Actually Measure?}
+
+\begin{document}
+\begin{abstract}
+A computer-use agent reliability score is treated as if it observed whether the agent did the task.
+It does not.
+The score is a constructed measurement: a pipeline that maps a trajectory into evidence, a decision, and a number.
+We audit one frozen instrument on MyPCBench with three complementary studies, not three independent experiments.
+Study~1 shows that the number need not track the world the agent saw: across 24 valid counterfactual pairs the score can stay put when tracking holds, and can move when tracking does not.
+Study~2 shows that the same number, used as a selection instrument, is coverage-limited and degenerate: three agents each ran 57 legs; valid pairs numbered 9, 8, and 1; binary tracking was 0 on every valid pair; the confirmatory selection test was, by its own rule, not evaluated.
+On the remaining four-task common support the score and a graded tracking layer disagree, but the disagreement is carried by one task.
+Study~3 opens the evaluator.
+Of 59 observations in which recoverable evidence was present, the frozen instrument missed 39; 13 of those misses were fail-closed aggregation discarding a gold value it had already collected.
+Layer-specific repairs do not dominate: recovering more evidence is not recovering the intended measurement, and a channel intervention inverts an ordering statistic by destroying one lane while leaving the other unchanged ($n_{\mathrm{eff}}=1$).
+A locked, corpus-independent reconstruction rule recovers 9 of 30 hand-written label components.
+Reliability is not read off the score.
+It is constructed, and correspondence can fail at identifiable stages.
+\end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10010147.10010178.10010199</concept_id>
+<concept_desc>Computing methodologies~Intelligent agents</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002944.10011122.10002945</concept_id>
+<concept_desc>General and reference~Evaluation</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Computing methodologies~Intelligent agents}
+\ccsdesc[500]{General and reference~Evaluation}
+
+\keywords{computer-use agents, reliability, evaluation, measurement validity}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+Leaderboards for computer-use agents (CUAs) report a completion-conditioned score: the episode ended, and a rubric assigned a number~\citep{jang2026mypcbench,xie2024osworld,zhou2024webarena}.
+Selecting an agent from that number treats the score as an observation of reliability.
+The treatment is undefined.
+A score is a \emph{constructed measurement}~\citep{cronbach1955construct,messick1995validity}: a sequence of transformations that map a trajectory into candidate evidence, a decision, and a reported value.
+Validity is a property of those transformations, not of the scalar they emit.
+
+This paper asks one question: \emph{what does a CUA reliability score actually measure?}
+We answer it on one frozen instrument, with three complementary studies that open the same measurement system at three resolutions (Figure~\ref{fig:pipeline}).
+They are not three independent experiments: the benchmark family, the paired counterfactual protocol, and the model roster overlap.
+We do not add sample sizes across studies.
+
+Study~1 asks whether the score tracks the world the agent saw.
+Paired counterfactual episodes hold the instruction, interface, and judge fixed while a locked intervention rewrites a pre-registered determining set.
+The score can remain unchanged across materially different outcomes, and can vary without a corresponding change in tracking.
+
+Study~2 asks whether the score at least performs the selection job it is used for.
+After a coverage-first inclusion rule, only four task clusters support a pairwise comparison; binary tracking is identically zero on the valid-pair universe; the confirmatory selection test is not evaluated.
+
+Study~3 asks where correspondence is lost.
+Recoverable evidence is frequently missed; fail-closed aggregation discards gold it has already collected; layer-specific repairs have signed, non-monotonic effects; and the hand-written specification is not reconstructed by a locked grounded rule.
+
+\paragraph{Contributions.}
+(1)~A pipeline decomposition of CUA reliability evaluation, with world correspondence as the validity check rather than an extra score.
+(2)~A motivating dissociation between score and outcome (Study~1) and a functional audit of the score as a selection instrument (Study~2).
+(3)~A diagnosis of the evaluator: evidence loss, aggregation discard, non-monotonic repairs, an existence demonstration that a layer intervention can move a comparative statistic, and a failed reconstruction of the frozen specification (Study~3).
+
+The intended audience is the community that builds and scores interactive agents.
+If a reliability number is used to pick a CUA, to retire a CUA, or to claim that an agent ``did the task,'' then the maps that produce the number are part of the scientific claim.
+An audit of those maps is an agent-evaluation result, not a complaint about one vendor judge.
+
+We do not claim that CUA benchmarks are unreliable, that a repair should be shipped, or that rankings are unstable in general.
+A pre-specified comparative-scale gate required 20 independent task clusters; 16 of 28 candidates survived a frozen feasibility probe, so that experiment was not opened.
+
+\section{Reliability as a measurement pipeline}
+\label{sec:pipeline}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize,
+  box/.style={draw, rounded corners=1pt, align=center, inner sep=3pt, minimum width=2.55cm},
+  arr/.style={-{Latex}, thick},
+  note/.style={font=\scriptsize, align=left, text width=2.35cm}
+]
+\node[box] (traj) {Trajectory / world};
+\node[box, below=5mm of traj] (ev) {Candidate evidence};
+\node[box, below=5mm of ev] (dec) {Decision / aggregation};
+\node[box, below=5mm of dec] (sc) {Reliability score};
+\node[box, below=5mm of sc] (rk) {Ranking / triage};
+\draw[arr] (traj) -- (ev);
+\draw[arr] (ev) -- (dec);
+\draw[arr] (dec) -- (sc);
+\draw[arr] (sc) -- (rk);
+\node[note, right=3mm of traj] {Study~1: does the score\\track the outcome?};
+\node[note, right=3mm of ev] {Study~3: is recoverable\\evidence collected?};
+\node[note, right=3mm of dec] {Study~3: is it discarded,\\scoped, or compared away?};
+\node[note, right=3mm of sc] {Study~2: does the number\\select as intended?};
+\end{tikzpicture}
+\caption{The score is constructed. Studies are lenses on the same pipeline, not consecutive experiments. World correspondence is the validity check, not a stage.}
+\Description{Five stacked boxes from trajectory to ranking, with Study 1, 2, and 3 annotated as lenses on different stages.}
+\label{fig:pipeline}
+\end{figure}
+
+A CUA episode produces a trajectory $\tau$ in a guest world $E$.
+A reliability instrument $J$ does not observe reliability.
+It applies a sequence of maps:
+\[
+\tau \;\mapsto\; \text{candidates} \;\mapsto\; \text{reported value} \;\mapsto\; S(\tau) \;\mapsto\; \text{selection}.
+\]
+Correspondence can fail at any map.
+Study~1 tests the composite $S(\tau)$ against the world.
+Study~2 tests $S$ as a selection instrument against a tracking construct that never consults $J$.
+Study~3 inspects the intermediate maps of $J$ itself.
+
+\paragraph{Shared protocol.}
+All three studies use MyPCBench~\citep{jang2026mypcbench}, a seeded personal desktop, and a paired counterfactual design~\citep{pearl2009causality}.
+For task $t$, $E_t^{0}$ is the seeded guest and $E_t^{1}=I_t(E_t^{0})$ applies a locked patch to a pre-registered determining set $D_t$.
+Instruction, interface, screenshot size, and judge stay fixed; guest probes confirm that gold moved.
+A pair is \emph{valid} only if both legs terminate canonically.
+Completion is read from the last recorded action by a fail-closed classifier that does not consult the judge, so closure and score are disjoint channels.
+Execution failures are absent observations, not tracking misses.
+
+\paragraph{Frozen instrument.}
+Study~3 treats the existing evaluator as an object to be audited, not improved.
+Labels, windows, aggregation, and comparison rules are held at a recorded commit.
+Repairs in Study~3 are diagnostic interventions on one layer at a time; they are not a proposed replacement metric.
+
+\section{Study 1: Score--outcome dissociation}
+\label{sec:study1}
+
+Does a reliability score necessarily track a change in the underlying outcome?
+
+On each valid pair we read three facts separately.
+\emph{Tracking} is a typed match of the final answer against guest gold on $D$, with no judge in the loop.
+\emph{Score sensitivity} is exact equality $S_{\mathrm{CF}}=S_{\mathrm{Base}}$ versus any nonzero delta.
+A pair is Type~A if tracking holds and the score is invariant; score-sensitive if tracking holds and the score moves; Type~B if tracking is incomplete while the score is high and unchanged.
+
+The design is a frozen $5{\times}10$ schedule (50 intended cells; 4 never scheduled; 46 executed; 92 legs; 35 execution failures; 24 valid pairs).
+Primary lanes are Claude, GPT-5.5, and Qwen3.5-35B-A3B.
+A size ablation and an exploratory Flash lane are not pooled into the rates below.
+
+Claude contributes 9 valid pairs, of which 7 are tracking-valid: 6 Type~A, 1 score-sensitive, 2 Type~B; invariance $6/7=0.857$ (Clopper--Pearson 95\% CI $[0.421,0.996]$).
+GPT-5.5 contributes 8 valid, 7 tracking-valid: 3 Type~A, 4 score-sensitive, 1 Type~B; $3/7=0.429$ ($[0.099,0.816]$).
+Qwen3.5-35B-A3B contributes one valid pair, Type~A ($[0.025,1.000]$).
+
+\begin{table}[t]
+\centering
+\caption{Study~1 primary lanes. Invariance is Type~A over tracking-valid pairs. Intervals are Clopper--Pearson 95\%.}
+\label{tab:s1}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Lane & Valid & Track-valid & Type~A & Sens.\ & Type~B \\
+\midrule
+Claude          & 9 & 7 & 6 & 1 & 2 \\
+GPT-5.5         & 8 & 7 & 3 & 4 & 1 \\
+Qwen3.5-35B-A3B & 1 & 1 & 1 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tracking is coded from the final answer, never from $S$.
+Incomplete runs are execution failures.
+Intervals are wide (Claude $[0.421,0.996]$; GPT $[0.099,0.816]$; Qwen $[0.025,1.000]$).
+We do not headline a pooled invariance rate, and we do not add these pairs to Study~2's 18 valid pairs.
+A designed ``trap'' label does not determine the observed class: the same intervention can be a clean Type~A on one agent and a split on another.
+
+The claim is the phenomenon: the reported score can remain unchanged across materially different outcomes, and can vary without a corresponding change in tracking.
+A stable score does not certify tracking; a moving score does not certify a tracking failure.
+That is why the score should be audited.
+It is not yet an account of where correspondence is lost.
+
+\section{Study 2: Measurement and selection audit}
+\label{sec:study2}
+
+If the score does not fully reflect the trajectory, does it at least do the job people use it for---selecting among agents?
+
+Three agents each ran a pre-registered schedule of 57 legs under one instrument: GPT-5.5, Qwen3.8-Flash, and Claude Opus~4.6.
+Tasks, interventions, seed, step budget, the inclusion threshold $n_{\min}=3$ valid pairs to be ranked, and the rule that fewer than three ranked agents means the confirmatory selection test is \emph{not evaluated} were committed before any outcome existed.
+A fourth lane was excluded before execution for instrument and transport mismatch and is not in Table~\ref{tab:coverage}.
+All three reported lanes used the same generic XML tool protocol.
+That is not the vendors' native computer-use stack: comparability is within this roster and instrument only.
+
+\begin{table}[t]
+\centering
+\caption{Coverage under the frozen instrument. A valid pair requires both legs to terminate. $|\A|$ is a lower bound: the terminal classifier is fail-closed. Claude's mean $S^{0}$ is a single pair.}
+\label{tab:coverage}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Agent & DONE/57 & $|\A|$ & mean $S^{0}$ & mean $\STS$ \\
+\midrule
+GPT-5.5         & 32 & 9 & 69.3 & 0.130 \\
+Qwen3.8-Flash   & 29 & 8 & 95.8 & 0.229 \\
+Claude Opus 4.6 &  4 & 1 & 100  & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Coverage is the first result.}
+Claude terminated on four legs across three tasks, so $|\A|=1$ of 19 possible pairs.
+Under $n_{\min}=3$ it is reported and not ranked.
+The ranked roster is two agents, which is fewer than three, and the confirmatory selection test is therefore not evaluated---a stated outcome of the plan, not a failed experiment.
+We do not compare models on 57 tasks.
+After the coverage-first rule, four task clusters support the remaining pairwise comparison.
+
+The measurement procedure itself constrains which comparisons can be made.
+Claude's mean $S^{0}=100$ on $\A$ is a coverage artefact: it is the one task the agent solved and closed.
+
+\paragraph{The intended tracking construct is degenerate.}
+Binary track $Y=1$ requires every positive-weight component of $D$ to match on both legs.
+$Y=0$ on all 18 valid pairs.
+There is no positive class, so $S^{0}$ cannot be calibrated to $P(Y=1)$.
+Graded $\STS$---typed extraction from the final answer against guest gold, frozen before any aggregate was computed, no judge in the loop---sits near its floor (Table~\ref{tab:coverage}).
+A later gap of a few hundredths is a gap between residuals, not between a reliable agent and an unreliable one.
+
+\paragraph{Exploratory two-layer comparison.}
+The plan permits one form of two-agent comparison: signed differences on the common support, labelled exploratory.
+$\Acap$ has four tasks.
+Differences are Flash minus GPT-5.5.
+A paired bootstrap over tasks (seed $20260904$, $B=5000$) gives $\Delta S^{0}=+46.5$
+(95\% CI $[21.0,72.0]$) and $\Delta\STS=-0.042$ (95\% CI $[-0.125,0.000]$):
+$\arg\max S^{0}$ is Flash and $\arg\max\STS$ is GPT-5.5.
+
+\begin{table}[t]
+\centering
+\caption{Common support. Rows are \task{counterfactual-f010}, \task{preference\_inference-f014}, \task{retrieval-f002}, \task{retrieval-f009}. $\Delta$: Flash$-$GPT.}
+\label{tab:pertask}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Task & $S^{0}$ G/F & $\STS$ G/F & $\Delta S^{0}$ & $\Delta\STS$ \\
+\midrule
+\task{cf-f010}     & 83/100 & 0/0     & $+17$ & $0$ \\
+\task{pref-f014}   & 0/84   & 0/0     & $+84$ & $0$ \\
+\task{retr-f002}   & 75/100 & 0.50/0.50 & $+25$ & $0$ \\
+\task{retr-f009}   & 40/100 & 0.50/0.33 & $+60$ & $-0.167$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The reversal is strict on one task and tied on three (Table~\ref{tab:pertask}).
+Removing \task{retr-f009} makes the $\STS$ comparison a tie.
+A leave-one-pair-out check reports the same single-task concentration and is not a second confirmation.
+On these pairs $\STS$ takes only the values $\{0,1/3,1/2\}$.
+The disagreement sits at the resolution limit of the tracking layer.
+
+Restricting to $\Acap$ drops GPT-5.5's mean $S^{0}$ from $69.3$ on its own nine pairs to $49.5$, while Flash is unchanged ($95.8\to 96.0$).
+On each agent's own $\A$, Flash is higher on both layers ($\STS$ $0.229$ vs.\ $0.130$).
+Which agent ``wins'' depends on the layer and on which tasks each agent finished.
+Neither denominator was chosen after seeing which looked better.
+
+Conditioning on termination also changes what the score can see.
+Excluded cells score \emph{lower} on average (mean $S$ off $\A$: $46.4$, $44.9$, $26.1$ against $69.3$, $95.8$, $100$ on $\A$), so the filter is conservative for calibration rather than flattering.
+What survives that average is sharp: 2, 2, and 1 excluded cells scored $\ge 90$ with no canonical \texttt{DONE}.
+Because termination never consults the judge, these are rubric-visible progress without closure, not scoring accidents.
+A completion-conditioned protocol cannot express them.
+A parser canonicalisation enumerated from one agent's dialect is more forgiving of that agent: treating those rescues as rejections moves Flash from $|\A|=8$ to $7$ and leaves the other lanes unchanged.
+Reported $|\A|$ are lower bounds for that reason as well.
+
+\section{Study 3: Diagnosing evidence loss}
+\label{sec:study3}
+
+Studies~1 and~2 show that correspondence can fail.
+They do not say where.
+We freeze the evaluator and inspect the maps that turn a trajectory into a reported value.
+
+The unit is a row: one component of $D$ on one leg.
+The development archive contributes 134 rows over 57 legs.
+A row is \emph{R1-positive} if the gold value is literally present in the agent's answer ($n=59$: 20 MATCH + 39 RECALL\_MISS).
+The remaining 61 rows are ABSENT: gold is not in the text.
+All rates below are conditional on these audited sets.
+They are not a false-negative rate of the agent or of the benchmark.
+
+\paragraph{Recall loss.}
+The frozen instrument recovers 20 of 59 R1-positive rows (sensitivity $0.339$).
+It misses 39.
+That is the headline of this study: recoverable information can be lost before scoring, so a score can fail to correspond to what happened.
+
+\begin{table}[t]
+\centering
+\caption{Cause of the 39 recall misses. Meanings are locked; M2 is not a scope failure.}
+\label{tab:causes}
+\small
+\begin{tabular}{lrl}
+\toprule
+Cause & $n$ & Meaning \\
+\midrule
+M1a & 13 & gold entered \texttt{found} and was discarded \\
+M1b &  7 & candidates disagree; gold is not among them \\
+M2  &  9 & no label hit anywhere in the answer \\
+M3  &  5 & label hit; gold outside every $\pm$window \\
+M4  &  5 & instrument reported a non-gold value \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize,
+  box/.style={draw, rounded corners=1pt, align=center, inner sep=2.5pt},
+  arr/.style={-{Latex}}
+]
+\node[box] (r1) {59 R1-positive};
+\node[box, below left=8mm and 2mm of r1] (m) {20 MATCH};
+\node[box, below right=8mm and 2mm of r1] (miss) {39 RECALL\_MISS};
+\draw[arr] (r1) -- (m);
+\draw[arr] (r1) -- (miss);
+\node[box, below=5mm of miss] (split) {M1a 13 \quad M1b 7 \quad M2 9 \quad M3 5 \quad M4 5};
+\draw[arr] (miss) -- (split);
+\node[box, below=5mm of split, text width=0.92\columnwidth] (rep)
+  {R-AGG: $20\to 28$ sens., $+8$ correct / $+18$ wrong.\\
+   R-CHAN: $\Delta\STS$ $-0.042\to +0.167$; Flash unchanged, GPT $0.250\to 0.042$.};
+\draw[arr] (split) -- (rep);
+\end{tikzpicture}
+\caption{Study~3 hero: recoverable evidence is often missed; one mechanism is aggregation discard; repairs are signed.}
+\Description{Flow from 59 R1-positive observations to 20 matches and 39 misses, then a cause split and two repair effects.}
+\label{fig:hero}
+\end{figure}
+
+The 39 misses are not one mechanism (Table~\ref{tab:causes}, Figure~\ref{fig:hero}).
+The strongest specific finding is M1a: in 13 of 39 misses the extractor had already accumulated the gold value and fail-closed aggregation discarded it.
+In 7 of those 13, gold was a strict majority of the accumulated candidates.
+M1 is not exclusive to misses (25 of 61 ABSENT rows are also M1); M1a is the cause that names recoverable-but-discarded evidence.
+
+\begin{table}[t]
+\centering
+\caption{Layer repairs as diagnostic interventions, 134 rows. Sensitivity is over 59 R1-positive rows. R-CMP is bit-identical to FROZEN.}
+\label{tab:repairs}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Config & Sens./59 & Abst./134 & M4/reported & MATCH dest./20 \\
+\midrule
+FROZEN  & 20 &  89 & 25/45 &  0 \\
+R-AGG   & 28 &  63 & 43/71 &  0 \\
+R-SCOPE & 13 &  56 & 65/78 & 14 \\
+R-CMP   & 20 &  89 & 25/45 &  0 \\
+R-CHAN  & 15 & 104 & 15/30 &  7 \\
+ALL     & 10 &  79 & 45/55 & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Repairs test mechanisms, not a method.}
+Four layer interventions were specified before the run: R-AGG (plurality over accumulated candidates; targets M1a), R-SCOPE (whole-answer window; targets M3), R-CMP (containment comparison; targets entity M1b), and R-CHAN (delete markup spans; targets scaffolding).
+ALL composes them.
+No configuration is offered as a replacement instrument.
+
+No repair dominates (Table~\ref{tab:repairs}).
+R-AGG is the only intervention that raises sensitivity ($20\to 28$).
+It releases 26 abstentions: $+8$ correct and $+18$ wrong.
+Most of the new errors are ABSENT rows on which gold is not in the text at all---the instrument now commits where it previously stayed silent.
+Recovering more evidence is not equivalent to recovering the intended measurement.
+
+R-SCOPE converts 14 of 20 already-correct rows into something else: raising observation recall \emph{lowers} measurement correctness (confident-wrong $0.833$).
+R-CHAN destroys 7 MATCH rows, mostly by deleting unterminated markup to the end of the text---a harm direction the fixtures already named.
+ALL is worse than every component on sensitivity.
+The four interventions do not vote.
+They diagnose different maps, and the maps do not move the measurement in one direction.
+R-CMP is bit-identical to FROZEN on every quantity: the comparison layer cannot reach an abstention, and the entity failures in this archive are abstentions.
+A later-layer comparison repair cannot recover an upstream miss.
+
+\paragraph{Signed effects on a comparative statistic.}
+On the same four-task support as Study~2, Flash-minus-GPT graded $\Delta\STS$ is $-0.0417$ under FROZEN.
+R-AGG narrows the mean gap to $-0.0208$ while per-task disagreement grows (the two nonzero tasks move in opposite directions and partly cancel).
+R-CHAN inverts the sign: $\Delta\STS=+0.1667$, $\arg\max$ moves to Flash.
+Under R-CHAN, Flash is bit-identical to FROZEN on every task; GPT collapses from $0.250$ to $0.042$.
+The ordering moved because the channel intervention removed one lane's evidence, not because the other lane measured better.
+ALL is that destruction plus a Flash gain from the other repairs ($\Delta=+0.2292$).
+
+This is an existence demonstration.
+The effective number of independent task-clusters for the frozen $\Delta\STS$ is one (\task{retr-f009}).
+We make no claim about the prevalence of ranking instability.
+Downstream agreement with the rubric score is not evidence of measurement validity: R-CHAN agrees with $S^{0}$ by destroying GPT.
+
+\paragraph{Specification portability.}
+Separately, we ask whether the frozen instrument's hand-written label table can be reconstructed by a corpus-independent, task-grounded rule $R$, locked before validation.
+Groundedness against the task definition is 100\% (G1).
+Calibration fidelity against the frozen table is 9/30 (G2 FAIL).
+MATCH rows fall $20\to 13$; ABSENT is unmoved.
+We did not ask whether $R$ was better.
+We asked whether a pre-specified grounded rule could reconstruct the existing instrument.
+It could not.
+The 9/30 and the 39/59 are different estimands; they are not pooled.
+
+A pre-specified comparative cohort gate required $\ge 20$ independent task clusters under the same construct and frozen evaluator.
+A frozen feasibility probe---no agent, no tracking---passed 16 of 28 candidates (Wave~A 9/12, Wave~B 7/16).
+The comparative experiment was not opened.
+
+\section{Unified findings}
+\label{sec:unified}
+
+\begin{table}[t]
+\centering
+\caption{One constructed measurement, five correspondence checks. Populations are not added.}
+\label{tab:unified}
+\small
+\begin{tabular}{p{0.22\columnwidth}p{0.28\columnwidth}p{0.38\columnwidth}}
+\toprule
+Stage & Intended correspondence & Observed failure \\
+\midrule
+Trajectory $\to$ score & Score tracks outcome & Study~1: Type~A/B dissociation \\
+Evidence $\to$ selection & Score supports intended selection & Study~2: coverage; $Y{=}0$ on 18/18 \\
+Trajectory $\to$ evidence & Recoverable evidence survives & Study~3: 39/59 misses \\
+Evidence $\to$ score & A layer fix preserves meaning & Study~3: $+8$ correct / $+18$ wrong; no dominance \\
+Specification $\to$ instrument & Frozen labels are reconstructible & Study~3: 9/30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:unified} is the paper.
+The score is not a direct observation of agent reliability.
+It is produced by transformations, and each transformation can introduce a correspondence failure.
+Study~1 detects the failure at the composite.
+Study~2 shows that the intended selection construct is coverage-limited and, in its binary form, degenerate.
+Study~3 locates losses inside the evaluator and shows that intervening on a layer can move both row-level decisions and, on the available support, a comparative statistic---without thereby validating the intervention.
+
+The three studies share an instrument family and overlapping models.
+That is the design: one measurement system, three resolutions.
+It is not three corroborating experiments.
+
+For agent evaluation the implication is operational.
+A CUA leaderboard that reports only $S$ cannot distinguish a world-faithful agent from a well-scoring one (Study~1), cannot say which agents were even eligible to be compared (Study~2), and cannot say whether the number was produced by discarding evidence the agent already wrote (Study~3).
+The next instrument should expose those maps: a fail-closed termination channel disjoint from the judge; a tracking construct that does not consult the judge; an extractor frozen before aggregates exist; and a reconstruction test for any hand-written label table.
+None of those requirements is a new benchmark.
+They are conditions under which a reliability score can be interpreted as a measurement of the intended construct.
+
+\section{Related work}
+\label{sec:rw}
+
+CUA benchmarks score completion~\citep{xie2024osworld,zhou2024webarena,koh2024visualwebarena,jang2026mypcbench}.
+The intended reading is that a high number means the agent did the task in the world it was given.
+That reading is a construct-validity claim~\citep{cronbach1955construct,messick1995validity}: the score is offered as a measurement of reliability, not as a record that a rubric fired.
+We take the claim literally and test the maps that produce the number.
+
+Three nearby lines do not replace that test.
+Protocol-validity work asks whether the intended capability remains necessary for a score~\citep{shao2026protocolvalidity}.
+Counterfactual clinical evaluation shows that coverage-style scores can hide update failures under controlled mutations~\citep{turk2026counterfactualclinical}.
+Judge-sensitivity benchmarks vary the prompt and hold the world fixed~\citep{bellibatlu2026judgesense}.
+We hold the judge fixed and vary the world (Study~1), the analysis support (Study~2), and the internal maps of the instrument (Study~3).
+The paired design uses interventionist language~\citep{pearl2009causality}; we identify no model internals.
+
+The difference that matters for agent evaluation is the unit.
+Prior CUA leaderboards report a score per episode.
+We report a score against a world that was moved on purpose, a selection decision against a tracking construct that never consults the judge, and an evaluator against the evidence that was already in the answer.
+Those are three resolutions of one measurement, not three new benchmarks.
+
+\section{Limitations}
+\label{sec:limits}
+
+One benchmark, one frozen instrument, a shared generic tool protocol rather than vendor-native computer-use stacks.
+Study~1's invariance intervals are wide; Study~2's confirmatory test was not evaluated; binary tracking has no positive instance; the exploratory reversal and the R-CHAN inversion rest on the same four-task support and the same single effective cluster.
+Repairs were a pre-specified family, not a search.
+$R$ is one locked rule family; 9/30 is not a verdict on all hand-written instruments.
+Per-step guest state was not retained.
+We estimate no population rate.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+A CUA reliability score is a constructed measurement.
+On this instrument, the number can come apart from the world, fail as a selection device, lose recoverable evidence, respond non-monotonically to layer interventions, and resist grounded reconstruction.
+The constructive implication is for the next measurement: name the transformations, freeze them, and test correspondence at each map---rather than reading reliability off the scalar they emit.
+
+\begin{acks}
+Omitted for anonymous review.
+\end{acks}
+
+\section*{AI use}
+Generative tools were used to draft and copy-edit prose against a frozen claim-to-evidence lock.
+No tool chose a hypothesis, a gate, a repair, or a number.
+Every statistic was checked against the recorded analysis artefacts.
+The authors take responsibility for the text.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

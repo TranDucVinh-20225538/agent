@@ -1,4 +1,4 @@
-# Paper evidence map (v0.4)
+# Paper evidence map (v0.5)
 
 **Date:** 2026-09-13  
 **Rule:** every number in the draft must appear in `QUANTITATIVE_CLAIM_AUDIT.md` with a source. If it is not there, it is not in the paper.
@@ -20,9 +20,12 @@ SECONDARY (main §5)
         C2: Form 0.9333; H3 NOT_EVALUABLE
         D: 30 HIT / 0 MISS; I_CC=0
 
-SUPPORTING (main §3.1; details Appendix A–B)
+SUPPORTING (Appendix A–B only)
     P1  score ≉ outcome (24 valid pairs; existence)
     P2  evaluation/selection change evidential basis (|A|=9/8/1; Y=0 on 18/18)
+
+SUPPORTING (main Discussion + Appendix E)
+    Path A  released FAIL mixes empty I and mismatch (126 vs 173); not unjustified FAIL
 
 FORMALIZATION (one paragraph in §3; not a contribution)
     P4-M  M(τ,I) notation; justification ≠ truth
@@ -40,7 +43,11 @@ Shared empirical family for P1–P3: MyPCBench + paired counterfactual protocol.
 | Material | Location |
 |---|---|
 | P3 causes table; compact FROZEN / R-AGG / ALL | main |
+| Compact M1a × S join (7/10 S=100; 9/9 Y=0) | main §4, `tab:m1a-s100` |
 | Full six-configuration repair table; C7 \(n_{\mathrm{eff}}=1\); G2 9/30; 16/28 gate | Appendix C |
+| M1a 13-row join | Appendix D |
+| Path A FAIL split (126 vs 173; WA/VWA; AssistantBench 62/115) | Discussion + Appendix E |
+| Path A human sensitivity (4/126 vs 50/173 Successful among FAIL) | Appendix E only |
 | P1 Type A/B table, CIs, scatter | Appendix A |
 | P2 coverage table, 4-task bootstrap, retrieval-f009 | Appendix B |
 | Eight-slot checklist | main, one table |
@@ -140,3 +147,21 @@ Object \(\mathcal{M}(\tau,\mathcal{I})\). THEORY CLOSED. Empirical implementatio
 | Cross-instrument M1a | STOP-NO-CORPUS; ELIGIBLE N=0; E2 not counted | `8680588` |
 
 Not a result section. Not transport. Not a claim that public benchmarks are invalid.
+
+---
+
+## Path A — public last-answer/URL FAIL composition (supporting)
+
+Not a second CORE. Not M1a transport. Not Dong.
+
+| Field | Locked value | Source |
+|---|---|---|
+| Admission | 498 string/URL (+ AssistantBench emptiness) / 804 STOP; not a prevalence | `I_LOCK.md` |
+| Universe | WA+VWA string/url ELIGIBLE FAIL \(n=299\) | `RESULT.md` |
+| Licensed split | 126 empty \(I\) vs 173 candidate-then-mismatch | same |
+| WA / VWA | 52/145 vs 93; 74/154 vs 80 | same |
+| AssistantBench | 62/115 FAIL empty send_msg; not pooled | same |
+| Eight SUCCESS∩ABSTAIN | QC overlay only; not a finding; `webarena.723` QC_OPEN unexplained, closed | `out/qc_success_abstain.md` |
+| Status | **STOPPED.** Do not retune. Do not count another rate | `PROTOCOL.md` |
+
+Forbidden manuscript readings: unjustified FAIL; 42% FAIL wrong; ARB-wide / 498; pooling AssistantBench into 126/299.
