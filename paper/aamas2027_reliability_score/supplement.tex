@@ -105,6 +105,26 @@ ALL     & 0.0417 & 0.2708 & $+0.2292$ & inverted \\
 
 R-AGG's mean gap shrinks while per-task disagreement grows: nonzero $\Delta\STS$ tasks go $1\to 2$, and the two moves cancel (\task{counterfactual-f010} $+0.250$, \task{retrieval-f009} $-0.333$).
 
+\section{Signed-movement robustness (R-AGG)}
+
+$+8/-18$ is a census of the sealed 134-row corpus, not a superpopulation estimate.
+The unit is the task.
+Thirteen tasks contribute any of the 26 abstentions R-AGG releases; the paper's 61-task denominator is not padded here.
+Point counts match the lock: R-AGG sensitivity $20\to 28$, MATCH destroyed $=0$, 26 abstentions decompose as $+8$ correct / $+18$ wrong.
+
+Leave-one-task-out on those 13 tasks: $C\in[5,8]$, $W\in[10,18]$, $C-W\in[-12,-3]$.
+Every fold keeps $C>0$, $W>0$, and $C<W$ ($13/13$).
+No single task is necessary for the licensed imbalance.
+Largest shares: $3/8$ new-correct on \task{retrieval-f009}; $8/18$ new-wrong on \task{counterfactual-f013}.
+
+ALL is not jackknifed as $+10/-20$.
+FROZEN$\to$ALL does not uniquely reproduce that pair: 31 released abstentions become $+5$ match / $+26$ M4; MATCH destroyed $=16$ ($8\to$M4, $8\to$ABSTAIN); sensitivity $\Delta=-10$, M4 $\Delta=+20$, abstention $\Delta=-10$.
+Those are mechanical transitions, not a new estimand.
+
+Reproducing tree: commit \texttt{7b1f5073a06948d3b2fb3556f664668c7f011160}; extractor \texttt{3242c30}.
+Code and lockfiles are in the supplementary zip.
+No ranking, no CI, no replacement for the census.
+
 \section{Reconstruction (G2)}
 
 Locked rule $R$, G1 groundedness $30/30$, G2 calibration $9/30$.
