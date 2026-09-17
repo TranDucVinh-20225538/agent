@@ -1,0 +1,8 @@
+{
+  "condition": "aggregation-f037",
+  "id": "aggregation-f037",
+  "patch": [
+    "UPDATE emails SET from_email = from_email || '.cf-moved' WHERE id IN (SELECT id FROM emails WHERE user_email = :email AND from_email = (SELECT from_email FROM emails WHERE user_email = :email GROUP BY from_email ORDER BY count(*) DESC LIMIT 1) ORDER BY id LIMIT 80)"
+  ],
+  "file_patches": []
+}

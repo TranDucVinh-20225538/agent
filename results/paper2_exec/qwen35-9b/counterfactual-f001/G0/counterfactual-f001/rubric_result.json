@@ -1,0 +1,86 @@
+{
+  "score": 0,
+  "passed": false,
+  "reasoning": "per-step max-reduce over 2 of 2 steps",
+  "n_steps_total": 2,
+  "n_steps_scored": 2,
+  "concurrency": 4,
+  "model": "gpt-4o-mini",
+  "final_fraction": 0.0,
+  "per_rubric_max": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "per_step_scores": [
+    {
+      "step_num": 1,
+      "screenshot": "step_1_20260904@230521754955.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 2,
+      "screenshot": "step_2_20260904@230527751708.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "rubrics": [
+    {
+      "criterion": "Agent identifies Michael's live Dinoco Jamaica flight (flight number + confirmation as seeded in the airline app) and reads the cancel-modal generic policy copy (travel-credit vs original-payment per cabin class) from the trip-detail UI when describing cancellation impact (no requirement to quote dollar-precise refund fees, since those are not surfaced in the UI)",
+      "type": "llm_judge",
+      "weight": 0.157894
+    },
+    {
+      "criterion": "Agent identifies the Sandals Montego Bay Jamaica hotel reservation with its Cheskepdia booking total and explains its cancellation window within 72 hours of the flight",
+      "type": "llm_judge",
+      "weight": 0.157894
+    },
+    {
+      "criterion": "Agent computes total Jamaica cancellation exposure as the sum of the Dinoco flight cost basis and the Cheskepdia hotel total, and splits it into refundable-back vs non-refundable-eat buckets across flight, hotel, and cards using whatever policy text the UI surfaces (do not penalize the absence of dollar-precise refund fees, which the trip-detail UI does not expose). Where the live sources show more than one figure for the flight cost basis, any of them may be used provided the agent cites the message or screen the figure came from and then uses that figure consistently in its totals.",
+      "type": "llm_judge",
+      "weight": 0.157892
+    },
+    {
+      "criterion": "Enumerates calendar cleanup for events in the Jamaica trip window",
+      "type": "llm_judge",
+      "weight": 0.157894
+    },
+    {
+      "criterion": "Agent lists the HooliMail threads and recipients that need a Jamaica cancellation notice sent as part of the cleanup plan",
+      "type": "llm_judge",
+      "weight": 0.105264
+    },
+    {
+      "criterion": "Agent checks eTaxi for any airport ride tied to the Jamaica departure; if a ride is scheduled, includes it in the cancellation action plan; if none exists, explicitly notes the absence and flags that a replacement ride would need to be arranged",
+      "type": "llm_judge",
+      "weight": 0.105264
+    },
+    {
+      "criterion": "Produces an organized, ordered action plan ('do this in the next 72h')",
+      "type": "llm_judge",
+      "weight": 0.157898
+    }
+  ]
+}

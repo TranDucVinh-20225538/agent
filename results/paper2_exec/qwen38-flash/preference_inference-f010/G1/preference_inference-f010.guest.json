@@ -1,0 +1,37 @@
+{
+  "id": "preference_inference-f010",
+  "role": "paper2_tier3",
+  "db": "mail.sqlite",
+  "where": "guest",
+  "applied_at": "2026-09-05T11:02:14.602278+00:00",
+  "patch": [
+    "UPDATE emails SET date = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(replace(substr(date,1,19),'T',' '), '+3 days')) WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com'"
+  ],
+  "applied_sql": [
+    "UPDATE emails SET date = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(replace(substr(date,1,19),'T',' '), '+3 days')) WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com'"
+  ],
+  "extra_patches": [],
+  "file_patches": [],
+  "probe": "SELECT id, from_email, date FROM emails WHERE user_email = :email AND lower(from_email) = 'jim.halpert@dundermifflin.com' ORDER BY date, id LIMIT 10",
+  "probe_before": "[{\"id\":859,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-09-21T18:18:44Z\"},\n{\"id\":909,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-11-19T16:08:21Z\"},\n{\"id\":901,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-03T05:46:14Z\"},\n{\"id\":961,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-05T18:25:05Z\"},\n{\"id\":755,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-15T18:22:01Z\"},\n{\"id\":892,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-06T13:22:06Z\"},\n{\"id\":772,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-27T12:09:17Z\"},\n{\"id\":939,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-30T06:23:39Z\"},\n{\"id\":804,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-02-23T12:03:01Z\"},\n{\"id\":994,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-03-10T11:42:34Z\"}]",
+  "probe_after": "[{\"id\":859,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-09-24T18:18:44Z\"},\n{\"id\":909,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-11-22T16:08:21Z\"},\n{\"id\":901,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-06T05:46:14Z\"},\n{\"id\":961,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-08T18:25:05Z\"},\n{\"id\":755,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2024-12-18T18:22:01Z\"},\n{\"id\":892,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-09T13:22:06Z\"},\n{\"id\":772,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-01-30T12:09:17Z\"},\n{\"id\":939,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-02-02T06:23:39Z\"},\n{\"id\":804,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-02-26T12:03:01Z\"},\n{\"id\":994,\"from_email\":\"jim.halpert@dundermifflin.com\",\"date\":\"2025-03-13T11:42:34Z\"}]",
+  "extra_probes_before": [
+    {
+      "db": "mail.sqlite",
+      "sql": "SELECT id, date FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' ORDER BY date, id LIMIT 10",
+      "result": "[{\"id\":902,\"date\":\"2024-10-09T09:00:24Z\"},\n{\"id\":867,\"date\":\"2024-10-13T10:40:18Z\"},\n{\"id\":756,\"date\":\"2024-10-23T04:30:43Z\"},\n{\"id\":856,\"date\":\"2025-02-15T09:31:33Z\"},\n{\"id\":798,\"date\":\"2025-03-03T12:39:24Z\"},\n{\"id\":841,\"date\":\"2025-06-16T12:20:09Z\"},\n{\"id\":952,\"date\":\"2025-07-02T11:13:43Z\"},\n{\"id\":950,\"date\":\"2025-07-03T13:03:38Z\"},\n{\"id\":771,\"date\":\"2025-07-10T04:47:53Z\"},\n{\"id\":757,\"date\":\"2025-07-14T17:00:35Z\"}]"
+    }
+  ],
+  "extra_probes_after": [
+    {
+      "db": "mail.sqlite",
+      "sql": "SELECT id, date FROM emails WHERE user_email = :email AND lower(from_email) = 'toby.flenderson@dundermifflin.com' ORDER BY date, id LIMIT 10",
+      "result": "[{\"id\":902,\"date\":\"2024-10-09T09:00:24Z\"},\n{\"id\":867,\"date\":\"2024-10-13T10:40:18Z\"},\n{\"id\":756,\"date\":\"2024-10-23T04:30:43Z\"},\n{\"id\":856,\"date\":\"2025-02-15T09:31:33Z\"},\n{\"id\":798,\"date\":\"2025-03-03T12:39:24Z\"},\n{\"id\":841,\"date\":\"2025-06-16T12:20:09Z\"},\n{\"id\":952,\"date\":\"2025-07-02T11:13:43Z\"},\n{\"id\":950,\"date\":\"2025-07-03T13:03:38Z\"},\n{\"id\":771,\"date\":\"2025-07-10T04:47:53Z\"},\n{\"id\":757,\"date\":\"2025-07-14T17:00:35Z\"}]"
+    }
+  ],
+  "files_before": {},
+  "files_after": {},
+  "gold_moved": true,
+  "ok": true,
+  "fails": []
+}

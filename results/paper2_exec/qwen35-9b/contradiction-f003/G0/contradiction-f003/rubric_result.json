@@ -1,0 +1,94 @@
+{
+  "score": 0,
+  "passed": false,
+  "reasoning": "per-step max-reduce over 2 of 2 steps",
+  "n_steps_total": 2,
+  "n_steps_scored": 2,
+  "concurrency": 4,
+  "model": "gpt-4o-mini",
+  "final_fraction": 0.0,
+  "per_rubric_max": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "per_step_scores": [
+    {
+      "step_num": 1,
+      "screenshot": "step_1_20260904@154846581680.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 2,
+      "screenshot": "step_2_20260904@154852049836.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "rubrics": [
+    {
+      "criterion": "Agent reads the Dinoco profile's actual loyalty tier and mileage balance directly from Dinoco Airlines (and notes if it differs from Michael's Gold Voyager claim)",
+      "type": "llm_judge",
+      "weight": 0.12
+    },
+    {
+      "criterion": "Agent enumerates every Dinoco flight in the history with route details",
+      "type": "llm_judge",
+      "weight": 0.12
+    },
+    {
+      "criterion": "Agent cross-references Gringotts for Dinoco charges to corroborate flight history",
+      "type": "llm_judge",
+      "weight": 0.12
+    },
+    {
+      "criterion": "Agent searches HooliMail for Dinoco boarding-pass and itinerary artifacts to corroborate the flights Michael has actually booked; if HooliMail has no matching entries the agent says so. Surfacing boarding-pass files saved locally (e.g. in ~/Downloads) is acceptable extra corroboration but is not required, since the instruction names only Dinoco, Gringotts, and HooliMail.",
+      "type": "llm_judge",
+      "weight": 0.12
+    },
+    {
+      "criterion": "Agent computes miles-earned-from-actual-flights and compares to the profile balance",
+      "type": "llm_judge",
+      "weight": 0.12
+    },
+    {
+      "criterion": "Agent flags the Dinoco mileage discrepancy between profile balance and booked flights and explains whether the gap is realistic or inflated",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "Agent cites Dinoco Airlines flight history, Gringotts charges, and HooliMail itineraries as the sources reconciling Michael's booked flights with his profile balance",
+      "type": "llm_judge",
+      "weight": 0.1
+    },
+    {
+      "criterion": "Agent completes the walk-through of flights Michael has actually booked and reports whether the Dinoco profile's live mileage balance is realistic or inflated relative to the flights Michael has taken",
+      "type": "llm_judge",
+      "weight": 0.2
+    }
+  ]
+}

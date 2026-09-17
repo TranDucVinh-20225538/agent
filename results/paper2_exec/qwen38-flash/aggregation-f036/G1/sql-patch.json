@@ -1,0 +1,8 @@
+{
+  "condition": "aggregation-f036",
+  "id": "aggregation-f036",
+  "patch": [
+    "UPDATE transactions SET amount = amount * 1.4 WHERE id IN (SELECT t.id FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.user_email = :email AND t.amount < 0 AND (lower(t.description) LIKE '%scranton improv workshop%' OR lower(t.description) LIKE '%scranton improv academy%') AND strftime('%Y', t.date) = CAST(strftime('%Y','now','-1 year') AS TEXT))"
+  ],
+  "file_patches": []
+}

@@ -1,0 +1,22 @@
+{
+  "id": "counterfactual-f005",
+  "role": "paper2_tier1",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+  "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+  "extra_probes": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "result": "[{\"avg_cost\":42.1199999999999974}]"
+    },
+    {
+      "db": "vaultbank.sqlite",
+      "sql": "SELECT type, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%check%'",
+      "result": "[{\"type\":\"checking\",\"balance\":49880.3099999999903}]"
+    }
+  ],
+  "files": {}
+}

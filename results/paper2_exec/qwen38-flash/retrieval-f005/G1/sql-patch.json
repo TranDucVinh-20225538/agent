@@ -1,0 +1,8 @@
+{
+  "condition": "retrieval-f005",
+  "id": "retrieval-f005",
+  "patch": [
+    "UPDATE bill_pay SET amount = amount + 15 WHERE id = (SELECT id FROM bill_pay WHERE user_email = :email AND lower(ifnull(frequency,'')) LIKE '%month%' ORDER BY payee LIMIT 1)"
+  ],
+  "file_patches": []
+}

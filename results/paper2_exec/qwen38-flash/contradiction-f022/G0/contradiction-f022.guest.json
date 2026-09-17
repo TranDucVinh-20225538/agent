@@ -1,0 +1,17 @@
+{
+  "id": "contradiction-f022",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT ifnull(sum(amount),0) AS zelle_ytd FROM zelle_transfers WHERE user_email = :email AND lower(direction) LIKE '%sent%'",
+  "probe_before": "[{\"zelle_ytd\":34047.0400000000008}]",
+  "extra_probes": [
+    {
+      "db": "speedtax.sqlite",
+      "sql": "SELECT d.field_name, d.field_value FROM tax_data d JOIN tax_returns tr ON tr.id = d.return_id WHERE tr.user_email = :email AND d.field_name IN ('charitable_contributions','charitable_total')",
+      "result": "[{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_total\",\"field_value\":\"950\"},\n{\"field_name\":\"charitable_contributions\",\"field_value\":\"950\"}]"
+    }
+  ],
+  "files": {}
+}

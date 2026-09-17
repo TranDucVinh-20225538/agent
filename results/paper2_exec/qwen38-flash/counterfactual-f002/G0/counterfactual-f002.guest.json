@@ -1,0 +1,17 @@
+{
+  "id": "counterfactual-f002",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND (lower(type) LIKE '%check%' OR lower(type) LIKE '%sav%')",
+  "probe_before": "[{\"type\":\"checking\",\"name\":\"Gringotts Checking\",\"balance\":49880.3099999999903},\n{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+  "extra_probes": [
+    {
+      "db": "cheskepdia.sqlite",
+      "sql": "SELECT total_price, property_name FROM bookings WHERE user_email = :email AND lower(property_name) LIKE '%barbados%'",
+      "result": "[{\"total_price\":2250.0,\"property_name\":\"Sandals Royal Barbados\"}]"
+    }
+  ],
+  "files": {}
+}

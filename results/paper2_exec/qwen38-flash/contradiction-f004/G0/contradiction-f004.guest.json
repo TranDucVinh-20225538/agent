@@ -1,0 +1,22 @@
+{
+  "id": "contradiction-f004",
+  "role": "paper2_tier1",
+  "db": "batbucks.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT ticker, shares, avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+  "probe_before": "[{\"ticker\":\"GME\",\"shares\":85.0,\"avg_cost\":42.1199999999999974}]",
+  "extra_probes": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT avg_cost FROM holdings WHERE user_email = :email AND upper(ticker)='GME'",
+      "result": "[{\"avg_cost\":42.1199999999999974}]"
+    },
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT shares, status, market_ticker FROM positions WHERE user_email = :email AND (upper(market_ticker) LIKE '%GME%' OR lower(title) LIKE '%gamestop%')",
+      "result": "[{\"shares\":200,\"status\":\"active\",\"market_ticker\":\"WILL-GME-100-YEAREND\"}]"
+    }
+  ],
+  "files": {}
+}

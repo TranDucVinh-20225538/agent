@@ -1,0 +1,11 @@
+{
+  "id": "counterfactual-f003",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT balance, credit_limit, (ifnull(credit_limit,0)-balance) AS headroom FROM accounts WHERE user_email = :email AND lower(type) LIKE '%credit%' AND ifnull(credit_limit,0) > 0",
+  "probe_before": "[{\"balance\":-1351.0,\"credit_limit\":3000.0,\"headroom\":4351.0}]",
+  "extra_probes": [],
+  "files": {}
+}

@@ -1,0 +1,169 @@
+{
+  "score": 0,
+  "passed": false,
+  "reasoning": "per-step max-reduce over 9 of 9 steps",
+  "n_steps_total": 9,
+  "n_steps_scored": 9,
+  "concurrency": 4,
+  "model": "gpt-4o-mini",
+  "final_fraction": 0.0,
+  "per_rubric_max": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "per_step_scores": [
+    {
+      "step_num": 1,
+      "screenshot": "step_1_20260904@115354572049.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 2,
+      "screenshot": "step_2_20260904@115406202198.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 3,
+      "screenshot": "step_3_20260904@115419530840.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 4,
+      "screenshot": "step_4_20260904@115429728735.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 5,
+      "screenshot": "step_5_20260904@115447475929.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 6,
+      "screenshot": "step_6_20260904@115459881770.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 7,
+      "screenshot": "step_7_20260904@115520228384.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 8,
+      "screenshot": "step_8_20260904@115730795542.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    },
+    {
+      "step_num": 9,
+      "screenshot": "step_9_20260904@115741920765.png",
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "rubrics": [
+    {
+      "criterion": "Agent filters Gringotts to the seeded Scranton Improv class charges (outbound debits whose description matches 'Scranton Improv Workshop' or 'SCRANTON IMPROV ACADEMY' case-insensitively, i.e. where Scranton Improv is the payee/merchant \u2014 both description patterns must be included) dated within the last full calendar year (excludes the year before and the current year); excludes any inbound teaching-income credits AND excludes eTaxi/transportation debits where 'Scranton Improv' appears only as a venue address rather than the merchant",
+      "type": "llm_judge",
+      "weight": 0.2
+    },
+    {
+      "criterion": "Agent sums every seeded Scranton Improv outbound class debit as it appears in the ledger in the last full calendar year (matching 'Scranton Improv Workshop' or 'SCRANTON IMPROV ACADEMY' case-insensitively, where Scranton Improv is the payee/merchant \u2014 debits from both description patterns must be included in the sum) to an annual total computed from the actual seeded ledger charges (not a fabricated estimate); excludes any inbound teaching-income credits such as 'Scranton Improv Academy - 1099-NEC payment' or 'VENMO SCRANTON IMPROV ACADEMY', and excludes transportation/eTaxi debits where Scranton Improv is only the venue address, not the payee",
+      "type": "llm_judge",
+      "weight": 0.25
+    },
+    {
+      "criterion": "Agent reports the last-full-calendar-year transaction count alongside the annual dollar total",
+      "type": "llm_judge",
+      "weight": 0.15
+    },
+    {
+      "criterion": "Agent shows the individual Scranton Improv charge amounts as they appear in the ledger (whether they are the same unit amount or vary by session) and uses those values to explain the total",
+      "type": "llm_judge",
+      "weight": 0.15
+    },
+    {
+      "criterion": "Agent reports the total spend for the last full calendar year on Scranton Improv (no specific per-charge unit-cadence assertion required \u2014 flat per-session, biweekly, monthly, or mixed are all acceptable as long as the sum reconciles)",
+      "type": "llm_judge",
+      "weight": 0.15
+    },
+    {
+      "criterion": "Agent delivers the last-full-calendar-year total and supporting count in a single answer",
+      "type": "llm_judge",
+      "weight": 0.1
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "counterfactual-f013",
+  "role": "paper2_tier1",
+  "db": "vaultbank.sqlite",
+  "where": "guest",
+  "mode": "probe-only",
+  "probe": "SELECT type, name, balance FROM accounts WHERE user_email = :email AND lower(type) LIKE '%sav%'",
+  "probe_before": "[{\"type\":\"savings\",\"name\":\"Gringotts Savings\",\"balance\":16413.2799999999988}]",
+  "extra_probes": [
+    {
+      "db": "batbucks.sqlite",
+      "sql": "SELECT ifnull(sum(amount),0) AS divs FROM dividends WHERE user_email = :email",
+      "result": "[{\"divs\":64.8799999999999954}]"
+    },
+    {
+      "db": "oddsmarket.sqlite",
+      "sql": "SELECT balance FROM account WHERE user_email = :email",
+      "result": "[{\"balance\":320.0}]"
+    }
+  ],
+  "files": {}
+}
