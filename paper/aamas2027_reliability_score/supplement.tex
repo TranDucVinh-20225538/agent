@@ -1,50 +1,93 @@
 %%% Supplementary material for the AAMAS 2027 submission.
-%%% Reviewers are not required to read this file. Main paper is self-contained.
-\documentclass[sigconf,anonymous,review]{acmart}
+%%% Optional zip payload (≤25MB). Reviewers are not required to read this file.
+%%% Not an extended version of the main paper. Main paper is self-contained.
+%%% Official AAMAS 2027 class (aamas.cls).
+\PassOptionsToPackage{expansion=false}{microtype}
+\documentclass[sigconf,anonymous]{aamas}
+\microtypesetup{expansion=false,protrusion=false}
 
-\setcopyright{none}
-\acmConference[AAMAS '27]{Proc.\ of the 26th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{May 3--7, 2027}{Hanoi, Vietnam}
-
+\usepackage{amsmath}
 \usepackage{booktabs}
+
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black}
 
 \newcommand{\task}[1]{\texttt{#1}}
 \newcommand{\STS}{\mathrm{STS}}
 
+%%% AAMAS-2027 copyright block (do not change!)
+\makeatletter
+\gdef\@copyrightpermission{
+  \begin{minipage}{0.2\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{\includegraphics[width=0.90\textwidth]{by}}
+  \end{minipage}\hfill
+  \begin{minipage}{0.8\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{This work is licensed under a Creative Commons Attribution International 4.0 License.}
+  \end{minipage}
+  \vspace{5pt}
+}
+\makeatother
+
+\setcopyright{ifaamas}
+\acmConference[AAMAS 2027]{Proc.\@ of the 26th International Conference
+on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{}
+\acmISBN{}
+\acmSubmissionID{}
+\submissionType{Research Paper Track}
+
 \title{Supplementary Material:\\What Does a Computer-Use Agent Reliability Score Actually Measure?}
+
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Institution withheld for review}
+  \country{}}
+\email{}
+
+\begin{abstract}
+Optional supplementary material for the AAMAS 2027 main-track submission.
+Per the call, this file does not count against the eight-page main-text limit, reviewers need not consult it, and it is not an extended or corrected version of the paper.
+Protocol tables only. No new experiment, no new estimand, no pooled $n$.
+The main paper is self-contained.
+\end{abstract}
 
 \begin{document}
 \maketitle
 
-\begin{abstract}
-Protocol tables and expansions omitted from the eight-page main text.
-Nothing here is a new experiment or a new estimand.
-The main paper does not rely on this file.
-\end{abstract}
-
 \section{Study 2 per-task common support}
 
-\begin{table}[h]
+Numbers already used in the main text; this table is the per-task expansion of the exploratory four-task slice ($n_{\mathrm{eff}}{=}1$).
+It is not a ranking and is not the confirmatory selection test.
+
+\begin{table}[t]
 \centering
-\caption{Per-task values on $\mathcal{A}^{\cap}$. $\Delta$ is Flash minus GPT-5.5.}
+\caption{Per-task values on the four-task common support. $\Delta$ is Flash minus GPT-5.5. Task IDs as registered.}
 \label{tab:pertask}
-\small
+\scriptsize
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrrr}
 \toprule
-Task & $S^{0}$ GPT & $S^{0}$ Flash & $\STS$ GPT & $\STS$ Flash & $\Delta S^{0}$ & $\Delta\STS$ \\
+Task & $S^{0}$G & $S^{0}$F & $\STS$G & $\STS$F & $\Delta S^{0}$ & $\Delta\STS$ \\
 \midrule
-\task{counterfactual-f010}        & 83 & 100 & 0.000 & 0.000 & $+17$ & $0.000$ \\
-\task{preference\_inference-f014} &  0 &  84 & 0.000 & 0.000 & $+84$ & $0.000$ \\
-\task{retrieval-f002}             & 75 & 100 & 0.500 & 0.500 & $+25$ & $0.000$ \\
-\task{retrieval-f009}             & 40 & 100 & 0.500 & 0.333 & $+60$ & $-0.167$ \\
+\task{cf-f010}   & 83 & 100 & 0.000 & 0.000 & $+17$ & $0.000$ \\
+\task{pref-f014} &  0 &  84 & 0.000 & 0.000 & $+84$ & $0.000$ \\
+\task{retr-f002} & 75 & 100 & 0.500 & 0.500 & $+25$ & $0.000$ \\
+\task{retr-f009} & 40 & 100 & 0.500 & 0.333 & $+60$ & $-0.167$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Study 3 ordering under repairs}
 
+The main-text claims use R-AGG ($+8/-18$) and ALL ($+10/-20$) only.
+The rows below are the same locked counterfactuals on the four-task support; FROZEN is the baseline, not a finding.
+R-CHAN inversion is an existence demonstration ($n_{\mathrm{eff}}{=}1$), not a recommended scoring rule.
+
 \begin{table}[h]
 \centering
-\caption{Flash-minus-GPT $\Delta\STS$ on the four-task support. FROZEN is the baseline, not a finding. R-CHAN inversion is the existence demonstration in the main text ($n_{\mathrm{eff}}=1$).}
+\caption{Flash-minus-GPT $\Delta\STS$ on the four-task support.}
+\label{tab:repairs}
 \small
 \begin{tabular}{lrrrr}
 \toprule
@@ -67,6 +110,7 @@ R-AGG's mean gap shrinks while per-task disagreement grows: nonzero $\Delta\STS$
 Locked rule $R$, G1 groundedness $30/30$, G2 calibration $9/30$.
 MATCH $20\to 13$, RECALL\_MISS $39\to 46$, ABSENT $61$ unmoved.
 $R$ is not revised. The sealed corpus was not opened.
+G2 is not a result in the main paper.
 
 \section{Comparative cohort gate}
 
@@ -82,5 +126,6 @@ Not a place to pool $24+57+134$.
 Not a ranking.
 Not a recommended repair.
 Not a G2 rescue.
+Not an extended version of the main paper.
 
 \end{document}

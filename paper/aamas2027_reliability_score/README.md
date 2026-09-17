@@ -11,14 +11,16 @@ pdflatex supplement && bibtex supplement && pdflatex supplement && pdflatex supp
 ```
 
 `main.pdf` must be ≤ 8 pages of body (references may continue).
-Current compile: **5 pages total** (body through related work + references).
+Current compile: **6 pages total** (body through conclusion + references,
+which spill one entry onto a 6th page).
 That is legal and tight; it is not padded to 8. Room remains for protocol
 examples, not for new numbers.
 `supplement.pdf` is the optional 25 MB zip payload; reviewers need not read it.
 
-This draft uses `\documentclass[sigconf,anonymous,review]{acmart}`.
-If AAMAS 2027 posts a wrapper class (`acm/aamas`), swap it in without
-changing layout parameters.
+This draft uses the official AAMAS 2027 class,
+`\documentclass[sigconf,anonymous]{aamas}` (`aamas.cls`, with
+`ACM-Reference-Format.bst` and `by.pdf`/`by.eps` for the CC-BY badge,
+all present in this directory).
 
 ## Locked claims
 
